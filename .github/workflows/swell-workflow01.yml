@@ -25,7 +25,7 @@ jobs:
 
       - name: run-task-workflow
         run: |
-          /home/jardizzo/bin/nams_check.py github.actor swell
+          /home/jardizzo/bin/nams_check.py $github.actor swell
           source /etc/profile.d/modules.sh
           source config/modules
           ./task.py
