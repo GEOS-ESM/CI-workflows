@@ -27,5 +27,5 @@ jobs:
         run: |
           /home/jardizzo/bin/nams_check.py ${{ github.actor }} swell
           source /etc/profile.d/modules.sh
-          source config/modules
-          ./task.py
+          source /discover/nobackup/jardizzo/JediOpt/install_modules
+          pip install --prefix=/discover/nobackup/jardizzo/swell/install .
