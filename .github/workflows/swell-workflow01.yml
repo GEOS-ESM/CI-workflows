@@ -17,7 +17,7 @@ defaults:
     shell: bash
 
 jobs:
-  Run-code-build:
+  DiscoverCodeBuild:
     runs-on: self-hosted
     steps:
       - name: checkout
