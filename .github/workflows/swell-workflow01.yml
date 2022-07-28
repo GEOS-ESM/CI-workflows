@@ -17,13 +17,13 @@ defaults:
     shell: bash
 
 jobs:
-  Run-task-workflow:
+  Run-code-build:
     runs-on: self-hosted
     steps:
       - name: checkout
         uses: actions/checkout@v3
 
-      - name: run-task-workflow
+      - name: build
         run: |
           /home/jardizzo/bin/nams_check.py ${{ github.actor }} swell
           source /etc/profile.d/modules.sh
