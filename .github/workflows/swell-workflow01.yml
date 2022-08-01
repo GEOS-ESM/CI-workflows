@@ -16,6 +16,8 @@ defaults:
   run:
     shell: bash
 
+# /home/jardizzo/bin/nams_check.py ${{ github.event.label.name }} swell
+
 jobs:
   DiscoverCodeBuild:
     runs-on: self-hosted
@@ -26,7 +28,6 @@ jobs:
       - name: build
         run: |
           /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
-        # /home/jardizzo/bin/nams_check.py ${{ github.event.label.name }} swell
           source /etc/profile.d/modules.sh
           source /discover/nobackup/jardizzo/JediOpt/install_modules
           pip install --prefix=/discover/nobackup/jardizzo/swell/install .
