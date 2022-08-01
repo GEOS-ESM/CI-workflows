@@ -25,7 +25,8 @@ jobs:
 
       - name: build
         run: |
-          /home/jardizzo/bin/nams_check.py ${{ github.actor }} swell
+          /home/jardizzo/bin/nams_check.py ${{ github.trigger.actor }} swell
+          /home/jardizzo/bin/nams_check.py ${{ github.event.label.name }} swell
           source /etc/profile.d/modules.sh
           source /discover/nobackup/jardizzo/JediOpt/install_modules
           pip install --prefix=/discover/nobackup/jardizzo/swell/install .
