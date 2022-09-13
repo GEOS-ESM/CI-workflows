@@ -17,11 +17,16 @@ defaults:
     shell: bash
 
 jobs:
-  DiscoverCodeBuild:
+  swell-nightly:
     runs-on: self-hosted
     steps:
-      - name: checkout
+      - name: acquire-jedi-bundle
         uses: actions/checkout@v3
+        with:
+          repository: GEOS-ESM/jedi_bundle
+      - name: install-jedi-bundle
+        run: |
+          pip install --prefix install/jedi_bundle ./jedi_bundle
 
       - name: build
  #      run: |
