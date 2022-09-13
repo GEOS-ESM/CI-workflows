@@ -32,4 +32,4 @@ jobs:
  #        pip install --prefix=/discover/nobackup/jardizzo/swell/install .
           
         run: |
-          sbatch /discover/nobackup/jardizzo/test.j
+          srun /discover/nobackup/jardizzo/test.j
