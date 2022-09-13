@@ -26,15 +26,13 @@ jobs:
           repository: GEOS-ESM/jedi_bundle
       - name: install-jedi-bundle
         run: |
-          pip install --prefix install/jedi_bundle ./jedi_bundle
+          source /discover/nobackup/jardizzo/JediOpt/install_modules
+          pip install --prefix=install/jedi_bundle ./jedi_bundle
 
-      - name: build
+ #    - name: build
  #      run: |
  #        /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
  #        /home/jardizzo/bin/nams_check.py "${{ github.event.label.name }}" swell
  #        source /etc/profile.d/modules.sh
  #       source /discover/nobackup/jardizzo/JediOpt/install_modules
  #        pip install --prefix=/discover/nobackup/jardizzo/swell/install .
-          
-        run: |
-          srun /discover/nobackup/jardizzo/test.j
