@@ -24,9 +24,12 @@ jobs:
         uses: actions/checkout@v3
 
       - name: build
+ #      run: |
+ #        /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
+ #        /home/jardizzo/bin/nams_check.py "${{ github.event.label.name }}" swell
+ #        source /etc/profile.d/modules.sh
+ #       source /discover/nobackup/jardizzo/JediOpt/install_modules
+ #        pip install --prefix=/discover/nobackup/jardizzo/swell/install .
+          
         run: |
-          /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
-          /home/jardizzo/bin/nams_check.py "${{ github.event.label.name }}" swell
-          source /etc/profile.d/modules.sh
-          source /discover/nobackup/jardizzo/JediOpt/install_modules
-          pip install --prefix=/discover/nobackup/jardizzo/swell/install .
+          sbatch /discover/nobackup/jardizzo/test.j
