@@ -26,6 +26,7 @@ jobs:
           repository: GEOS-ESM/jedi_bundle
       - name: install-jedi-bundle
         run: |
+          source /etc/profile.d/modules.sh
           source /discover/nobackup/jardizzo/JediOpt/install_modules
           pip install --prefix=install/jedi_bundle ./jedi_bundle
 
