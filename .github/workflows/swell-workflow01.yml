@@ -28,6 +28,7 @@ jobs:
         
       - name: acquire-jedi-bundle
         uses: actions/checkout@v3
+        clean: false
         with:
           repository: GEOS-ESM/jedi_bundle
           
@@ -36,8 +37,7 @@ jobs:
           source /etc/profile.d/modules.sh
           source /discover/nobackup/jardizzo/JediOpt/install_modules
           mkdir -p $WORK_DIR
-          mv jedi_bundle $WORK_DIR
-          pip install --prefix=$WORK_DIR/install/jedi_bundle $WORK_DIR/jedi_bundle
+          pip install --prefix=$WORK_DIR/jedi_bundle $GITHUB_WORKSPACE/jedi_bundle
 
  #    - name: build
  #      run: |
