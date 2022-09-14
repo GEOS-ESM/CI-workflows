@@ -16,6 +16,9 @@ defaults:
   run:
     shell: bash
 
+env:
+  WORK_DIR: /discover/nobackup/jardizzo/runner
+
 jobs:
   swell-nightly:
     runs-on: self-hosted
@@ -24,12 +27,12 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: GEOS-ESM/jedi_bundle
-          path: my_jedi_bundle
+          path: $WORK_DIR/jedi_bundle
       - name: install-jedi-bundle
         run: |
           source /etc/profile.d/modules.sh
           source /discover/nobackup/jardizzo/JediOpt/install_modules
-          pip install --prefix=install/jedi_bundle ./jedi_bundle
+          pip install --prefix=$WORK_DIR/install/jedi_bundle $WORK_DIR/jedi_bundle
 
  #    - name: build
  #      run: |
