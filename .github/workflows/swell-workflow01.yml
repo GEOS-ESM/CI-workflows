@@ -17,7 +17,7 @@ defaults:
     shell: bash
 
 env:
-  WORK_DIR: /discover/nobackup/jardizzo/runner
+  WORK_DIR: /discover/nobackup/jardizzo/CI/swell/nightly
 
 jobs:
   swell-nightly:
@@ -35,7 +35,8 @@ jobs:
         run: |
           source /etc/profile.d/modules.sh
           source /discover/nobackup/jardizzo/JediOpt/install_modules
-          mv swell/swell/jedi_bundle $WORK_DIR
+          mkdir -p $WORK_DIR
+          mv jedi_bundle $WORK_DIR
           pip install --prefix=$WORK_DIR/install/jedi_bundle $WORK_DIR/jedi_bundle
 
  #    - name: build
