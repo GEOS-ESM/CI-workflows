@@ -23,15 +23,19 @@ jobs:
   swell-nightly:
     runs-on: self-hosted
     steps:
+      - name: acquire-swell
+        uses: actions/checkout@v3
+        
       - name: acquire-jedi-bundle
         uses: actions/checkout@v3
         with:
           repository: GEOS-ESM/jedi_bundle
-          path: ${{ env.WORK_DIR }}/jedi_bundle
+          
       - name: install-jedi-bundle
         run: |
           source /etc/profile.d/modules.sh
           source /discover/nobackup/jardizzo/JediOpt/install_modules
+          mv swell/swell/jedi_bundle $WORK_DIR
           pip install --prefix=$WORK_DIR/install/jedi_bundle $WORK_DIR/jedi_bundle
 
  #    - name: build
