@@ -21,16 +21,21 @@ env:
 
 jobs:
   swell-nightly:
+  
     runs-on: self-hosted
+    
     steps:
+    
       - name: acquire-swell
         uses: actions/checkout@v3
-        
+        with:
+          path: main
+
       - name: acquire-jedi-bundle
         uses: actions/checkout@v3
         with:
           repository: GEOS-ESM/jedi_bundle
-          clean: false
+          path: jedi_bundle
           
       - name: install-jedi-bundle
         run: |
