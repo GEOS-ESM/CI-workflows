@@ -28,9 +28,9 @@ jobs:
         
       - name: acquire-jedi-bundle
         uses: actions/checkout@v3
-        clean: false
         with:
           repository: GEOS-ESM/jedi_bundle
+          clean: false
           
       - name: install-jedi-bundle
         run: |
