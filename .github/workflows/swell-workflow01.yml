@@ -51,6 +51,10 @@ jobs:
           source /discover/nobackup/jardizzo/JediOpt/install_modules
           mkdir -p $WORK_DIR
           pip install --prefix=$WORK_DIR/jedi_bundle $GITHUB_WORKSPACE/jedi_bundle
+          
+      - name: build-jedi
+        run: |
+          /discover/nobackup/jardizzo/runtest.sh
 
  #    - name: build
  #      run: |
