@@ -29,13 +29,21 @@ jobs:
       - name: acquire-swell
         uses: actions/checkout@v3
         with:
-          path: main
+          repository: GEOS-ESM/swell
+          path: swell
 
       - name: acquire-jedi-bundle
         uses: actions/checkout@v3
         with:
           repository: GEOS-ESM/jedi_bundle
           path: jedi_bundle
+          
+      - name: install-swell
+        run: |
+          source /etc/profile.d/modules.sh
+          source /discover/nobackup/jardizzo/JediOpt/install_modules
+          mkdir -p $WORK_DIR
+          pip install --prefix=$WORK_DIR/swell $GITHUB_WORKSPACE/swell
           
       - name: install-jedi-bundle
         run: |
