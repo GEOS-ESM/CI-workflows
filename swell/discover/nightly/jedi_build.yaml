@@ -20,4 +20,4 @@ configure_options:
   path_to_build: /discover/nobackup/jardizzo/CI/swell/nightly/jedi_build/build-intel-release
   platform: discover
 make_options:
-  cores_to_use_for_make: 6
+  cores_to_use_for_make: 28
