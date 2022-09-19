@@ -18,6 +18,7 @@ defaults:
 
 env:
   CI_WORKSPACE: /discover/nobackup/jardizzo/CI/swell/nightly
+  CI_SOURCE: $CI_WORKSPACE/CI-workflow/swell/discover/nightly
 
 jobs:
   swell-nightly:
@@ -51,23 +52,26 @@ jobs:
           
       - name: install-CI-workflow
         run: |
-          source $CI_WORKSPACE/CI-workflow/swell/discover/nightly/modules.sh
+          source $CI_SOURCE/modules.sh
           mkdir -p $CI_WORKSPACE
           cp -r -p $GITHUB_WORKSPACE/CI-workflow $CI_WORKSPACE
           
       - name: install-swell
         run: |
-          source $CI_WORKSPACE/CI-workflow/swell/discover/nightly/modules.sh
+          source $CI_SOURCE/modules.sh
           mkdir -p $CI_WORKSPACE
           pip install --prefix=$CI_WORKSPACE/swell $GITHUB_WORKSPACE/swell
           
       - name: install-jedi-bundle
         run: |
-          source $CI_WORKSPACE/CI-workflow/swell/discover/nightly/modules.sh
+          source $CI_SOURCE/modules.sh
           mkdir -p $CI_WORKSPACE
           pip install --prefix=$CI_WORKSPACE/jedi_bundle $GITHUB_WORKSPACE/jedi_bundle
           
       - name: build-jedi
         run: |
-          source $CI_WORKSPACE/CI-workflow/swell/discover/nightly/modules.sh
-          $CI_WORKSPACE/CI-workflow/swell/discover/nightly/discover_run_build_jedi.sh
+          source $CI_SOURCE/modules.sh
+          cp -p $CI_SOURCE/jedi_build.yaml .
+          jedi_bundle clone configure jedi_build.yaml
+          cp -p $CI_SOURCE/jedi_build.yaml .
+          srun $CI_SOURCE/discover_build_jedi.sh
