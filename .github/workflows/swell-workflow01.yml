@@ -17,7 +17,7 @@ defaults:
     shell: bash
 
 env:
-  WORK_DIR: /discover/nobackup/jardizzo/CI/swell/nightly
+  CI_WORKSPACE: /discover/nobackup/jardizzo/CI/swell/nightly
 
 jobs:
   swell-nightly:
@@ -26,6 +26,17 @@ jobs:
     
     steps:
     
+      - name: validate-workflow
+        run: |
+          /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
+          /home/jardizzo/bin/nams_check.py "${{ github.event.label.name }}" swell
+          
+      - name: acquire-CI-workflow
+        uses: actions/checkout@v3
+        with:
+          repository: GEOS-ESM/CI-workflows-test
+          path: CI-workflow
+ 
       - name: acquire-swell
         uses: actions/checkout@v3
         with:
@@ -38,28 +49,25 @@ jobs:
           repository: GEOS-ESM/jedi_bundle
           path: jedi_bundle
           
+      - name: install-CI-workflow
+        run: |
+          source $CI_WORKSPACE/CI-workflow/swell/discover/nightly/modules.sh
+          mkdir -p $CI_WORKSPACE
+          cp -r -p $GITHUB_WORKSPACE/CI-workflow $CI_WORKSPACE
+          
       - name: install-swell
         run: |
-          source /etc/profile.d/modules.sh
-          source /discover/nobackup/jardizzo/JediOpt/install_modules
-          mkdir -p $WORK_DIR
-          pip install --prefix=$WORK_DIR/swell $GITHUB_WORKSPACE/swell
+          source $CI_WORKSPACE/CI-workflow/swell/discover/nightly/modules.sh
+          mkdir -p $CI_WORKSPACE
+          pip install --prefix=$CI_WORKSPACE/swell $GITHUB_WORKSPACE/swell
           
       - name: install-jedi-bundle
         run: |
-          source /etc/profile.d/modules.sh
-          source /discover/nobackup/jardizzo/JediOpt/install_modules
-          mkdir -p $WORK_DIR
-          pip install --prefix=$WORK_DIR/jedi_bundle $GITHUB_WORKSPACE/jedi_bundle
+          source $CI_WORKSPACE/CI-workflow/swell/discover/nightly/modules.sh
+          mkdir -p $CI_WORKSPACE
+          pip install --prefix=$CI_WORKSPACE/jedi_bundle $GITHUB_WORKSPACE/jedi_bundle
           
       - name: build-jedi
         run: |
-          /discover/nobackup/jardizzo/runtest.sh
-
- #    - name: build
- #      run: |
- #        /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
- #        /home/jardizzo/bin/nams_check.py "${{ github.event.label.name }}" swell
- #        source /etc/profile.d/modules.sh
- #       source /discover/nobackup/jardizzo/JediOpt/install_modules
- #        pip install --prefix=/discover/nobackup/jardizzo/swell/install .
+          source $CI_WORKSPACE/CI-workflow/swell/discover/nightly/modules.sh
+          $CI_WORKSPACE/CI-workflow/swell/discover/nightly/discover_run_build_jedi.sh
