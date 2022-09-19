@@ -52,7 +52,6 @@ jobs:
           
       - name: install-CI-workflow
         run: |
-          source $CI_SOURCE/modules.sh
           mkdir -p $CI_WORKSPACE
           cp -r -p $GITHUB_WORKSPACE/CI-workflow $CI_WORKSPACE
           
