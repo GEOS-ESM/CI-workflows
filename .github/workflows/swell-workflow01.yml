@@ -18,7 +18,7 @@ defaults:
 
 env:
   CI_WORKSPACE: /discover/nobackup/jardizzo/CI/swell/nightly
-  CI_SOURCE: ${{ CI_WORKSPACE }}/CI-workflow/swell/discover/nightly
+  CI_SOURCE: ${{ env.CI_WORKSPACE }}/CI-workflow/swell/discover/nightly
 
 jobs:
   swell-nightly:
