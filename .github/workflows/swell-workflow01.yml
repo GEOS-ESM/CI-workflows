@@ -30,7 +30,7 @@ jobs:
       - name: validate-workflow
         run: |
           /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
-          /home/jardizzo/bin/nams_check.py "${{ github.event.label.name }}" swell
+     #    /home/jardizzo/bin/nams_check.py "${{ github.event.label.name }}" swell
           
       - name: acquire-CI-workflow
         uses: actions/checkout@v3
