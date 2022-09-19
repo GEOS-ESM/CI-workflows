@@ -31,6 +31,10 @@ jobs:
         run: |
           /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
      #    /home/jardizzo/bin/nams_check.py "${{ github.event.label.name }}" swell
+     
+      - name: clean-CI-workspace
+        run: |
+          /bin/rm -r -f $CI_WORKSPACE
           
       - name: acquire-CI-workflow
         uses: actions/checkout@v3
