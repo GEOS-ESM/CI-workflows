@@ -33,15 +33,13 @@ jobs:
      
       - name: get-current-date
         run: echo "CI_DATETIME=$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
-        
-      - name: set-environment
-        env:
-          CI_WORKSPACE: ${{ env.CI_ROOT }}/${{ env.CI_DATETIME }}
-          CI_SOURCE: ${{ env.CI_ROOT }}/${{ env.CI_DATETIME }}/CI-workflow/swell/discover/nightly
      
       - name: clean-CI-workspace
         run: |
           /bin/rm -r -f $CI_WORKSPACE
+        env:
+          CI_WORKSPACE: ${{ env.CI_ROOT }}/${{ env.CI_DATETIME }}
+          CI_SOURCE: ${{ env.CI_ROOT }}/${{ env.CI_DATETIME }}/CI-workflow/swell/discover/nightly
           
       - name: acquire-CI-workflow
         uses: actions/checkout@v3
