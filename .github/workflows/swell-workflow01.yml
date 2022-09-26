@@ -37,7 +37,7 @@ jobs:
       - name: set-environment
         run: |
           echo "CI_WORKSPACE=$CI_ROOT/$CI_DATETIME" >> $GITHUB_ENV
-          echo "CI_SOURCE=$CI_ROOT/$CI_DATETIME/CI-workflow/swell/discover/nightly >> $GITHUB_ENV
+          echo "CI_SOURCE=$CI_ROOT/$CI_DATETIME/CI-workflow/swell/discover/nightly" >> $GITHUB_ENV
      
    #   - name: clean-CI-workspace
    #     run: |
