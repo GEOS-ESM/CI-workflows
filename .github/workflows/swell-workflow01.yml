@@ -39,9 +39,11 @@ jobs:
           echo "CI_WORKSPACE=$CI_ROOT/$CI_DATETIME" >> $GITHUB_ENV
           echo "CI_SOURCE=$CI_ROOT/$CI_DATETIME/CI-workflow/swell/discover/nightly" >> $GITHUB_ENV
      
-   #   - name: clean-CI-workspace
-   #     run: |
-   #       /bin/rm -r -f $CI_WORKSPACE
+      - name: create-CI-workspace
+        run: |
+          mkdir -p $CI_WORKSPACE
+          /bin/rm -f $CI_ROOT/active
+          ln -s $CI_WORKSPACE $CI_ROOT/active
           
       - name: acquire-CI-workflow
         uses: actions/checkout@v3
@@ -63,19 +65,16 @@ jobs:
           
       - name: install-CI-workflow
         run: |
-          mkdir -p $CI_WORKSPACE
           cp -r -p $GITHUB_WORKSPACE/CI-workflow $CI_WORKSPACE
           
       - name: install-swell
         run: |
           source $CI_SOURCE/modules.sh
-          mkdir -p $CI_WORKSPACE
           pip install --prefix=$CI_WORKSPACE/swell $GITHUB_WORKSPACE/swell
           
       - name: install-jedi-bundle
         run: |
           source $CI_SOURCE/modules.sh
-          mkdir -p $CI_WORKSPACE
           pip install --prefix=$CI_WORKSPACE/jedi_bundle $GITHUB_WORKSPACE/jedi_bundle
           
       - name: build-jedi
