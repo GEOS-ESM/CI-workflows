@@ -2,7 +2,7 @@
 
 #SBATCH --job-name=jedi_build
 #SBATCH --account=g0613
-#SBATCH --time=01:30:00
+#SBATCH --time=02:30:00
 #SBATCH --partition=preops
 #SBATCH --qos=dastest
 #SBATCH --ntasks=28
