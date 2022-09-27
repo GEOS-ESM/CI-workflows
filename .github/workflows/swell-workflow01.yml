@@ -42,8 +42,9 @@ jobs:
       - name: create-CI-workspace
         run: |
           mkdir -p $CI_WORKSPACE
-          /bin/rm -f $CI_ROOT/active
-          ln -s $CI_WORKSPACE $CI_ROOT/active
+          cd $CI_ROOT
+          /bin/rm -f active
+          ln -s $CI_DATETIME active
           
       - name: acquire-CI-workflow
         uses: actions/checkout@v3
@@ -85,3 +86,10 @@ jobs:
           jedi_bundle clone configure jedi_build.yaml
           cp -p $CI_SOURCE/jedi_build.yaml .
           srun $CI_SOURCE/discover_build_jedi.sh
+          
+      - name: finalize-jedi-build
+        run: |
+          cd $CI_ROOT
+          $CI_SOURCE/clean.sh
+          rm -f latest active
+          ln -s $CI_DATETIME latest
