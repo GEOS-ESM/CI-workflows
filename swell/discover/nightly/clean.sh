@@ -18,10 +18,10 @@
   for dir in $dirs; do
 
     if [ $i -le $keep ]; then
-      echo "keep $dir"
+      echo "Keeping $dir"
     else
-      echo "remove $dir"
-#     /bin/rm -r -f $dir
+      echo "Removing $dir"
+      /bin/rm -r -f $dir
     fi
 
     i=`expr $i + 1`
