@@ -80,6 +80,7 @@ jobs:
       - name: build-jedi
         run: |
           source $CI_SOURCE/modules.sh
+          echo $PATH
           cp -p $CI_SOURCE/jedi_build.yaml .
           jedi_bundle clone configure jedi_build.yaml
           cp -p $CI_SOURCE/jedi_build.yaml .
