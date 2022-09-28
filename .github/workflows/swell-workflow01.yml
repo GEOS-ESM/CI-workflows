@@ -32,64 +32,23 @@ jobs:
      #    /home/jardizzo/bin/nams_check.py "${{ github.event.label.name }}" swell
      
       - name: get-current-date
-        run: echo "CI_DATETIME=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV
+        run: echo "CI_DATETIME=20220927T190417" >> $GITHUB_ENV
         
       - name: set-environment
         run: |
           echo "CI_WORKSPACE=$CI_ROOT/$CI_DATETIME" >> $GITHUB_ENV
           echo "CI_SOURCE=$CI_ROOT/$CI_DATETIME/CI-workflow/swell/discover/nightly" >> $GITHUB_ENV
      
-      - name: create-CI-workspace
-        run: |
-          mkdir -p $CI_WORKSPACE
-          cd $CI_ROOT
-          /bin/rm -f active
-          ln -s $CI_DATETIME active
-          
-      - name: acquire-CI-workflow
-        uses: actions/checkout@v3
-        with:
-          repository: GEOS-ESM/CI-workflows-test
-          path: CI-workflow
- 
-      - name: acquire-swell
-        uses: actions/checkout@v3
-        with:
-          repository: GEOS-ESM/swell
-          path: swell
-
-      - name: acquire-jedi-bundle
-        uses: actions/checkout@v3
-        with:
-          repository: GEOS-ESM/jedi_bundle
-          path: jedi_bundle
-          
-      - name: install-CI-workflow
-        run: |
-          cp -r -p $GITHUB_WORKSPACE/CI-workflow $CI_WORKSPACE
-          
-      - name: install-swell
-        run: |
-          source $CI_SOURCE/modules.sh
-          pip install --prefix=$CI_WORKSPACE/swell $GITHUB_WORKSPACE/swell
-          
-      - name: install-jedi-bundle
-        run: |
-          source $CI_SOURCE/modules.sh
-          pip install --prefix=$CI_WORKSPACE/jedi_bundle $GITHUB_WORKSPACE/jedi_bundle
-          
-      - name: build-jedi
-        run: |
-          source $CI_SOURCE/modules.sh
-          echo $PATH
-          cp -p $CI_SOURCE/jedi_build.yaml .
-          jedi_bundle clone configure jedi_build.yaml
-          cp -p $CI_SOURCE/jedi_build.yaml .
-          srun $CI_SOURCE/discover_build_jedi.sh
-          
       - name: finalize-jedi-build
         run: |
           cd $CI_ROOT
           $CI_SOURCE/clean.sh
           rm -f latest active
           ln -s $CI_DATETIME latest
+          mkdir -p $CI_ROOT/modulefiles/jedi-swell
+          cd $CI_ROOT/modulefiles/jedi-swell
+          rm -f default.lua
+          cp $CI_SOURCE/latest.lua .
+          ln -s latest.lua default.lua
+          ln -s latest.lua $CI_DATETIME.lua
+          $CI_SOURCE/clean.sh
