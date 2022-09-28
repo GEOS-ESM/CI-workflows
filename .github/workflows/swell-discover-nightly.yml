@@ -96,7 +96,7 @@ jobs:
           mkdir -p $CI_ROOT/modulefiles/jedi-swell
           cd $CI_ROOT/modulefiles/jedi-swell
           rm -f default.lua
-          cp $CI_SOURCE/latest.lua .
+          cp $CI_SOURCE/modulefiles/jedi-swell/latest.lua .
           ln -s latest.lua default.lua
           ln -s latest.lua $CI_DATETIME.lua
           $CI_SOURCE/clean.sh
