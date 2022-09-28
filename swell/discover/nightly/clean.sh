@@ -9,19 +9,19 @@
 # Get Listing of builds
 # =====================
 
-  dirs=`/bin/ls | grep -Eo '[0-9]{8}T[0-9]{6}' | sort -r`
+  result=`/bin/ls | grep -Eo '[0-9]{8}T[0-9]{6}.*' | sort -r`
 
 # Clean expired builds
 # ====================
 
   i=1
-  for dir in $dirs; do
+  for item in $result; do
 
     if [ $i -le $keep ]; then
-      echo "Keeping $dir"
+      echo "Keeping $item"
     else
-      echo "Removing $dir"
-      /bin/rm -r -f $dir
+      echo "Removing $item"
+      /bin/rm -r -f $item
     fi
 
     i=`expr $i + 1`
