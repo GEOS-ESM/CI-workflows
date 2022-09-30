@@ -39,7 +39,7 @@ jobs:
           echo "CI_WORKSPACE=$CI_ROOT/$CI_DATETIME" >> $GITHUB_ENV
           echo "CI_SOURCE=$CI_ROOT/$CI_DATETIME/CI-workflow/swell/discover/nightly" >> $GITHUB_ENV
      
-      - name: finalize-jedi-build
+      - name: finalize-nightly-build
         run: |
           cd $CI_ROOT
           $CI_SOURCE/clean.sh
@@ -52,3 +52,18 @@ jobs:
           ln -s latest.lua default.lua
           ln -s latest.lua $CI_DATETIME.lua
           $CI_SOURCE/clean.sh
+          cd $CI_ROOT/modulefiles/swell
+          rm -f default.lua
+          cp $CI_SOURCE/modulefiles/swell/latest.lua .
+          ln -s latest.lua default.lua
+          ln -s latest.lua $CI_DATETIME.lua
+          $CI_SOURCE/clean.sh
+          
+      - name: run-hofx-experiment
+        run: |
+          source $CI_SOURCE/modules.sh
+          module use -a $CI_ROOT/modulefiles
+          module load swell
+          swell_create_experiment $CI_SOURCE/hofx_experiment.yaml
+          cd $CI_WORKSPACE/SwellExperiments/swell-nightly-hofx/swell-nightly-hofx-suite
+          swell_launch_experiment --no-detach
