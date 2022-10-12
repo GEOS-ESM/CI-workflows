@@ -1,0 +1,69 @@
+# This is a basic workflow to help you get started with Actions
+
+name: swell-discover-nightly
+
+on:
+  workflow_call:
+    inputs:
+      username:
+        required: false
+        type: string
+    secrets:
+      token:
+        required: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CI_ROOT: /discover/nobackup/jardizzo/CI/swell/nightly
+
+jobs:
+  swell-nightly:
+  
+    runs-on: self-hosted
+    
+    steps:
+    
+      - name: validate-workflow
+        run: |
+          /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
+     #    /home/jardizzo/bin/nams_check.py "${{ github.event.label.name }}" swell
+     
+      - name: get-current-date
+        run: echo "CI_DATETIME=20220927T190417" >> $GITHUB_ENV
+        
+      - name: set-environment
+        run: |
+          echo "CI_WORKSPACE=$CI_ROOT/$CI_DATETIME" >> $GITHUB_ENV
+          echo "CI_SOURCE=$CI_ROOT/$CI_DATETIME/CI-workflow/swell/discover/nightly" >> $GITHUB_ENV
+     
+      - name: finalize-nightly-build
+        run: |
+          cd $CI_ROOT
+          $CI_SOURCE/clean.sh
+          rm -f latest active
+          ln -s $CI_DATETIME latest
+          mkdir -p $CI_ROOT/modulefiles/jedi-swell
+          cd $CI_ROOT/modulefiles/jedi-swell
+          rm -f default.lua
+          cp $CI_SOURCE/modulefiles/jedi-swell/latest.lua .
+          ln -s latest.lua default.lua
+          ln -s latest.lua $CI_DATETIME.lua
+          $CI_SOURCE/clean.sh
+          cd $CI_ROOT/modulefiles/swell
+          rm -f default.lua
+          cp $CI_SOURCE/modulefiles/swell/latest.lua .
+          ln -s latest.lua default.lua
+          ln -s latest.lua $CI_DATETIME.lua
+          $CI_SOURCE/clean.sh
+          
+      - name: run-hofx-experiment
+        run: |
+          source $CI_SOURCE/modules.sh
+          module use -a $CI_ROOT/modulefiles
+          module load swell
+          swell_create_experiment $CI_SOURCE/hofx_experiment.yaml
+          cd $CI_WORKSPACE/SwellExperiments/swell-nightly-hofx/swell-nightly-hofx-suite
+          swell_launch_experiment --no-detach
