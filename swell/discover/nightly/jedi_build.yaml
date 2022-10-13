@@ -1,6 +1,6 @@
 clone_options:
   bundles:
-  - soca
+# - soca
   - fv3-jedi
   - ioda
   github_orgs:
