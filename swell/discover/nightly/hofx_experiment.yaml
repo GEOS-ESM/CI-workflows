@@ -55,7 +55,6 @@ processors:
 
 build jedi:
   existing build directory: /discover/nobackup/jardizzo/CI/swell/nightly/latest/jedi_build/build-intel-release
-
   build options:
     - release    # release, debug, relwithdebug
   packages:
@@ -192,20 +191,20 @@ OBSERVATIONS:
   - yaml::$(swell_dir)/configuration/observation_operators/aircraft.yaml
 
   # Radiances
-# - yaml::$(swell_dir)/configuration/observation_operators/amsua_aqua.yaml
-# - yaml::$(swell_dir)/configuration/observation_operators/amsua_metop-a.yaml
-# - yaml::$(swell_dir)/configuration/observation_operators/amsua_metop-b.yaml
-# - yaml::$(swell_dir)/configuration/observation_operators/amsua_metop-c.yaml
-# - yaml::$(swell_dir)/configuration/observation_operators/amsua_n15.yaml
-# - yaml::$(swell_dir)/configuration/observation_operators/amsua_n18.yaml
-# - yaml::$(swell_dir)/configuration/observation_operators/amsua_n19.yaml
-# - yaml::$(swell_dir)/configuration/observation_operators/gmi_gpm.yaml
-# - yaml::$(swell_dir)/configuration/observation_operators/amsr2_gcom-w1.yaml
+  - yaml::$(swell_dir)/configuration/observation_operators/amsua_aqua.yaml
+  - yaml::$(swell_dir)/configuration/observation_operators/amsua_metop-a.yaml
+  - yaml::$(swell_dir)/configuration/observation_operators/amsua_metop-b.yaml
+  - yaml::$(swell_dir)/configuration/observation_operators/amsua_metop-c.yaml
+  - yaml::$(swell_dir)/configuration/observation_operators/amsua_n15.yaml
+  - yaml::$(swell_dir)/configuration/observation_operators/amsua_n18.yaml
+  - yaml::$(swell_dir)/configuration/observation_operators/amsua_n19.yaml
+  - yaml::$(swell_dir)/configuration/observation_operators/gmi_gpm.yaml
+  - yaml::$(swell_dir)/configuration/observation_operators/amsr2_gcom-w1.yaml
 
   # Ozone
-# - yaml::$(swell_dir)/configuration/observation_operators/mls55_aura.yaml
-# - yaml::$(swell_dir)/configuration/observation_operators/omi_aura.yaml
-# - yaml::$(swell_dir)/configuration/observation_operators/ompsnm_npp.yaml
+  - yaml::$(swell_dir)/configuration/observation_operators/mls55_aura.yaml
+  - yaml::$(swell_dir)/configuration/observation_operators/omi_aura.yaml
+  - yaml::$(swell_dir)/configuration/observation_operators/ompsnm_npp.yaml
 # #- yaml::$(swell_dir)/configuration/observation_operators/ompslpnc_npp.yaml
 
 
