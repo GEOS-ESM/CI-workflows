@@ -22,6 +22,7 @@ module load stack-python/3.9.7
 module load jedi-ewok-env/1.0.0
 module load jedi-fv3-env/1.0.0
 module load nco/5.0.6
+module load sp/2.3.3
 
 # Set the JEDI bundle paths
 # -------------------------
