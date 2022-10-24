@@ -114,7 +114,7 @@ jobs:
           source $CI_SOURCE/modules.sh
           module use -a $CI_ROOT/modulefiles
           module load swell
-          rm -r $HOME/cylc-run/swell-nightly-hofx
+          rm -r -f $HOME/cylc-run/swell-nightly-hofx
           swell_create_experiment $CI_SOURCE/hofx_experiment.yaml
           cd $CI_WORKSPACE/SwellExperiments/swell-nightly-hofx/swell-nightly-hofx-suite
           swell_launch_experiment --no-detach --log_path $CI_WORKSPACE/SwellExperiments/swell-nightly-hofx
