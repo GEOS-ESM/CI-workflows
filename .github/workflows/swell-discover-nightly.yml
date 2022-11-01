@@ -56,13 +56,13 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: GEOS-ESM/swell
-          ref: feature/refactor+no-detach
           path: swell
 
       - name: acquire-jedi-bundle
         uses: actions/checkout@v3
         with:
           repository: GEOS-ESM/jedi_bundle
+          ref: refs/tags/1.0.2
           path: jedi_bundle
           
       - name: install-CI-workflow
@@ -113,6 +113,7 @@ jobs:
           source $CI_SOURCE/modules.sh
           module use -a $CI_ROOT/modulefiles
           module load swell
+          rm -r -f $HOME/cylc-run/swell-nightly-hofx-suite
           swell_create_experiment $CI_SOURCE/hofx_experiment.yaml
           cd $CI_WORKSPACE/SwellExperiments/swell-nightly-hofx/swell-nightly-hofx-suite
-          swell_launch_experiment --no-detach
+          swell_launch_experiment --no-detach --log_path $CI_WORKSPACE/SwellExperiments/swell-nightly-hofx
