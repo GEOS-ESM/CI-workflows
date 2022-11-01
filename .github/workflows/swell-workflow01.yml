@@ -112,10 +112,11 @@ jobs:
       - name: run-hofx-experiment
         run: |
           export CICD_EXPERIMENT_ID=swell-nightly-hofx
+          export CONFIG=$GITHUB_WORKSPACE/swell/src/swell/suites/hofx/geos_atmosphere/suites-hofx-geos_atmosphere.yaml
           source $CI_SOURCE/modules.sh
           module use -a $CI_ROOT/modulefiles
           module load swell
           rm -r -f $HOME/cylc-run/${CICD_EXPERIMENT_ID}-suite
-          swell_create_experiment --cidi swell/src/swell/suites/hofx/geos_atmosphere/suites-hofx-geos_atmosphere.yaml
+          swell_create_experiment --cidi $CONFIG
           cd $CI_WORKSPACE/SwellExperiments/$CICD_EXPERIMENT_ID/${CICD_EXPERIMENT_ID}-suite
           swell_launch_experiment --no-detach --log_path $CI_WORKSPACE/SwellExperiments/$CICD_EXPERIMENT_ID
