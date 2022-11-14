@@ -119,7 +119,7 @@ jobs:
           source $CI_SOURCE/modules.sh
           module use -a $CI_ROOT/modulefiles
           module load swell
-          rm -r -f $HOME/cylc-run/${CICD_EXPERIMENT_ID}*-suite
+          rm -r -f $HOME/cylc-run/${CICD_EXPERIMENT_ID}-suite
           swell_create_experiment --cicd $CONFIG
-          cd $CI_WORKSPACE/SwellExperiments/${CICD_EXPERIMENT_ID}*/*-suite
+          cd ${CICD_EXPERIMENT_ROOT}/${CICD_EXPERIMENT_ID}/${CICD_EXPERIMENT_ID}-suite
           swell_launch_experiment --no-detach --log_path $CICD_EXPERIMENT_ROOT/$CICD_EXPERIMENT_ID
