@@ -57,6 +57,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: GEOS-ESM/swell
+          ref: feature/cicd_option_name
           path: swell
 
       - name: acquire-jedi-bundle
@@ -113,11 +114,12 @@ jobs:
       - name: run-hofx-experiment
         run: |
           export CICD_EXPERIMENT_ID=swell-nightly-hofx
+          export CICD_EXPERIMENT_ROOT=$CI_ROOT/latest/SwellExperiments
           export CONFIG=$SWELL_SOURCE/suites/hofx/geos_atmosphere/suites-hofx-geos_atmosphere.yaml
           source $CI_SOURCE/modules.sh
           module use -a $CI_ROOT/modulefiles
           module load swell
-          rm -r -f $HOME/cylc-run/${CICD_EXPERIMENT_ID}-suite
-          swell_create_experiment --cidi $CONFIG
-          cd $CI_WORKSPACE/SwellExperiments/$CICD_EXPERIMENT_ID/${CICD_EXPERIMENT_ID}-suite
+          rm -r -f $HOME/cylc-run/${CICD_EXPERIMENT_ID}*-suite
+          swell_create_experiment --cicd $CONFIG
+          cd $CI_WORKSPACE/SwellExperiments/${CICD_EXPERIMENT_ID}*/*-suite
           swell_launch_experiment --no-detach --log_path $CICD_EXPERIMENT_ROOT/$CICD_EXPERIMENT_ID
