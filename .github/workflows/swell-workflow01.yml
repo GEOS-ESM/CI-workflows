@@ -65,6 +65,7 @@ jobs:
         with:
           repository: GEOS-ESM/jedi_bundle
         # ref: refs/tags/1.0.5
+          ref: feature/welcome_message
           path: jedi_bundle
           
       - name: install-CI-workflow
