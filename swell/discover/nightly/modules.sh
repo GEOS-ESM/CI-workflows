@@ -8,6 +8,7 @@ module purge
 
 # Git modules
 # -----------
+module load git
 module load git-lfs
 
 # Spack stack modules
