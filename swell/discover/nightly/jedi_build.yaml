@@ -1,12 +1,12 @@
 clone_options:
   bundles:
- # - soca
+  - soca
   - iodaconv
  # - saber
  # - ufo
   - fv3-jedi
  # - oops
-  - ioda
+ # - ioda
  # - vader
   github_orgs:
   - JCSDA-internal
