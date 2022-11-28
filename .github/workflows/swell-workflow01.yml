@@ -89,10 +89,6 @@ jobs:
           cp -p $CI_SOURCE/jedi_build.yaml .
           jedi_bundle clone configure jedi_build.yaml
           cp -p $CI_SOURCE/jedi_build.yaml .
-          module use /discover/swdev/jcsda/spack-stack/modulefiles
-          module load miniconda/3.9.7
-        # module use -a /discover/nobackup/drholdaw/JediOpt/modulefiles/core/
-        # ml jedi_bundle/1.0.6
           srun $CI_SOURCE/discover_build_jedi.sh
           
       - name: finalize-nightly-build
