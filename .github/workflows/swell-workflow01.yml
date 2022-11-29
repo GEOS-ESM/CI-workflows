@@ -88,6 +88,8 @@ jobs:
           echo $PATH
           cp -p $CI_SOURCE/jedi_build.yaml .
           module purge
+          module load git
+          module load git-lfs
           module use /discover/swdev/jcsda/spack-stack/modulefiles
           module load miniconda/3.9.7
           module use -a /discover/nobackup/drholdaw/JediOpt/modulefiles/core/
