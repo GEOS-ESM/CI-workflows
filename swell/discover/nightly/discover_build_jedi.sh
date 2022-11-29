@@ -12,4 +12,4 @@
 
 ulimit -s unlimited
 
-jedi_bundle make jedi_build.yaml
+jedi_bundle configure make jedi_build.yaml
