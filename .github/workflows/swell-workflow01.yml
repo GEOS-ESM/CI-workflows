@@ -95,7 +95,7 @@ jobs:
           module load miniconda/3.9.7
           module use -a /discover/nobackup/drholdaw/JediOpt/modulefiles/core/
           ml jedi_bundle/1.0.6
-          jedi_bundle clone configure jedi_build.yaml
+          jedi_bundle clone jedi_build.yaml
           cp -p $CI_SOURCE/jedi_build.yaml .
           srun $CI_SOURCE/discover_build_jedi.sh
           
