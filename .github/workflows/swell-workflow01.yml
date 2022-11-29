@@ -87,6 +87,7 @@ jobs:
           source $CI_SOURCE/modules.sh
           echo $PATH
           cp -p $CI_SOURCE/jedi_build.yaml .
+          source /usr/share/lmod/lmod/init/bash
           module purge
           module load git
           module load git-lfs
