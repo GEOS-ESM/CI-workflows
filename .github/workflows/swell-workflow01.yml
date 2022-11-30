@@ -97,14 +97,7 @@ jobs:
           
       - name: build-jedi
         run: |
-          source /usr/share/lmod/lmod/init/bash
-          module purge
-          module load git
-          module load git-lfs
-          module use /discover/swdev/jcsda/spack-stack/modulefiles
-          module load miniconda/3.9.7
-          export PATH=$CI_WORKSPACE/jedi_bundle/bin:$PATH
-          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/jedi_bundle/lib/python3.9/site-packages
+          source $CI_SOURCE/modules.sh
           cp -p $CI_SOURCE/jedi_build.yaml .
           jedi_bundle clone jedi_build.yaml
           srun $CI_SOURCE/discover_build_jedi.sh
