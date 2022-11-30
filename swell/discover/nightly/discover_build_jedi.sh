@@ -2,11 +2,10 @@
 
 #SBATCH --job-name=jedi_build
 #SBATCH --account=g0613
-#SBATCH --time=04:00:00
+#SBATCH --time=03:00:00
 #SBATCH --partition=preops
 #SBATCH --qos=dastest
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=28
+#SBATCH --ntasks=21
 #SBATCH --export=NONE
 #SBATCH --constraint=sky
 #SBATCH --output=$CI_WORKSPACE/jedi_build/build.output
