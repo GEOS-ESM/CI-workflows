@@ -5,7 +5,7 @@ local pkgName    = myModuleName()
 local pkgVersion = myModuleVersion()
 local pkgNameVer = myModuleFullName()
 
-local CIroot = "/discover/nobackup/jardizzo/CI/swell/nightly"
+local CIroot = "/discover/nobackup/gmao_ci/swell/nightly"
 local rbase = pathJoin(CIroot, pkgVersion, "swell")
 
 local base = subprocess("realpath " .. rbase)
