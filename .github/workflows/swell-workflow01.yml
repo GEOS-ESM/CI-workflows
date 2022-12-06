@@ -17,7 +17,7 @@ defaults:
     shell: bash
 
 env:
-  CI_ROOT: /discover/nobackup/gmao_ci/CI/swell/nightly
+  CI_ROOT: /discover/nobackup/gmao_ci/swell/nightly
 
 jobs:
   swell-nightly:
