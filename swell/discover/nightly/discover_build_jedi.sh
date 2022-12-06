@@ -3,8 +3,7 @@
 #SBATCH --job-name=jedi_build
 #SBATCH --account=g0613
 #SBATCH --time=03:00:00
-#SBATCH --partition=preops
-#SBATCH --qos=dastest
+#SBATCH --qos=allnccs
 #SBATCH --ntasks=21
 #SBATCH --export=NONE
 #SBATCH --constraint=sky
