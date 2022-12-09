@@ -22,7 +22,7 @@ env:
 jobs:
   swell-nightly:
   
-    runs-on: self-hosted
+    runs-on: nccs-discover
     
     steps:
     
