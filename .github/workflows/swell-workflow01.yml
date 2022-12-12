@@ -111,7 +111,7 @@ jobs:
       - name: run-hofx-experiment
         run: |
           export CICD_EXPERIMENT_ID=swell-nightly-hofx
-          export CICD_EXPERIMENT_ROOT=$CI_ROOT/latest/SwellExperiments
+          export CICD_EXPERIMENT_ROOT=$CI_ROOT/latest
           export CONFIG=$SWELL_SOURCE/suites/hofx/geos_atmosphere/suites-hofx-geos_atmosphere.yaml
           source $CI_SOURCE/modules.sh
           module use -a $CI_ROOT/modulefiles
