@@ -20,13 +20,24 @@ env:
   CI_ROOT: /discover/nobackup/gmao_ci/swell/nightly
 
 jobs:
-  swell-nightly:
-  
+  validate:
+    uses: GEOS-ESM/CI-workflows/.github/workflows/validate@main swell
+    
+  swell-nightly-build:
+    needs: validate
+    uses: GEOS-ESM/CI-workflows/.github/workflows/swell-build@swell/discover
+    
+  swell-nightly-hofx:
+    needs swell-nightly-build
+    uses: GEOS-ESM/CI-workflows/.github/workflows/swell-hofx@swell/discover
     runs-on: nccs-discover
+    needs: validate
     
     steps:
     
       - name: validate-workflow
+        uses: GEOS-ESM/CI-workflows/.github/workflows/validate@main swell
+        
         run: |
           /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
      #    /home/jardizzo/bin/nams_check.py "${{ github.event.label.name }}" swell
