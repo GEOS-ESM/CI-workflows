@@ -71,6 +71,7 @@ jobs:
           
       - name: build-jedi
         run: |
+          cd $CI_ROOT/latest
           source $CI_SOURCE/modules.sh
           echo "experiment_id: jedi" > build_jedi.yaml
           echo "experiment_root: $CI_ROOT/latest" >> build_jedi.yaml
@@ -97,16 +98,3 @@ jobs:
           ln -s latest.lua default.lua
           ln -s latest.lua $CI_DATETIME.lua
           $CI_SOURCE/clean.sh
-          
-      - name: run-hofx-experiment
-        run: |
-          export CICD_EXPERIMENT_ID=swell-nightly-hofx
-          export CICD_EXPERIMENT_ROOT=$CI_ROOT/latest
-          export CONFIG=$SWELL_SOURCE/suites/hofx/geos_atmosphere/suites-hofx-geos_atmosphere.yaml
-          source $CI_SOURCE/modules.sh
-          module use -a $CI_ROOT/modulefiles
-          module load swell
-          rm -r -f $HOME/cylc-run/${CICD_EXPERIMENT_ID}-suite
-          swell_create_experiment --cicd
-          cd ${CICD_EXPERIMENT_ROOT}/${CICD_EXPERIMENT_ID}/${CICD_EXPERIMENT_ID}-suite
-          swell_launch_experiment --no-detach --log_path $CICD_EXPERIMENT_ROOT/$CICD_EXPERIMENT_ID
