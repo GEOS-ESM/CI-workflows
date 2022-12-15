@@ -27,5 +27,8 @@ module load sp/2.3.3
 
 # Set the JEDI bundle paths
 # -------------------------
-export PATH=$CI_WORKSPACE/jedi_bundle/bin:$PATH
-export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/jedi_bundle/lib/python3.9/site-packages
+#export PATH=$CI_WORKSPACE/jedi_bundle/bin:$PATH
+#export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/jedi_bundle/lib/python3.9/site-packages
+
+export PATH=$CI_WORKSPACE/swell/bin:$PATH
+export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
