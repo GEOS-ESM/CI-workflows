@@ -57,15 +57,8 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: GEOS-ESM/swell
-          ref: feature/cicd_mods_2
+          ref: feature/override
           path: swell
-
-      - name: acquire-jedi-bundle
-        uses: actions/checkout@v3
-        with:
-          repository: GEOS-ESM/jedi_bundle
-       #  ref: refs/tags/1.0.6
-          path: jedi_bundle
           
       - name: install-CI-workflow
         run: |
@@ -76,17 +69,14 @@ jobs:
           source $CI_SOURCE/modules.sh
           pip install --prefix=$CI_WORKSPACE/swell $GITHUB_WORKSPACE/swell
           
-      - name: install-jedi-bundle
-        run: |
-          source $CI_SOURCE/modules.sh
-          pip install --prefix=$CI_WORKSPACE/jedi_bundle $GITHUB_WORKSPACE/jedi_bundle
-          
       - name: build-jedi
         run: |
           source $CI_SOURCE/modules.sh
-          cp -p $CI_SOURCE/jedi_build.yaml .
-          jedi_bundle clone jedi_build.yaml
-          srun $CI_SOURCE/discover_build_jedi.sh
+          echo "experiment_id: jedi" > build_jedi.yaml
+          echo "experiment_root: $CI_ROOT/latest" >> build_jedi.yaml
+          swell_prepare_experiment_config -m defaults -s build_jedi -p nccs_discover -o build_jedi.yaml
+          swell_create_experiment -c jedi.yaml
+          swell_launch_experiment --suite_path $CI_ROOT/latest/jedi/jedi-suite --no-detach --log_path $CI_ROOT/latest/jedi
           
       - name: finalize-nightly-build
         run: |
