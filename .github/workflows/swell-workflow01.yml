@@ -71,13 +71,13 @@ jobs:
           
       - name: build-jedi
         run: |
-          cd $CI_ROOT/latest
+          cd $CI_WORKSPACE
           source $CI_SOURCE/modules.sh
           echo "experiment_id: jedi" > build_jedi.yaml
-          echo "experiment_root: $CI_ROOT/latest" >> build_jedi.yaml
+          echo "experiment_root: $CI_WORKSPACE" >> build_jedi.yaml
           swell_prepare_experiment_config -m defaults -s build_jedi -p nccs_discover -o build_jedi.yaml
           swell_create_experiment -c jedi.yaml
-          swell_launch_experiment --suite_path $CI_ROOT/latest/jedi/jedi-suite --no-detach --log_path $CI_ROOT/latest/jedi
+          swell_launch_experiment --suite_path $CI_WORKSPACE/jedi/jedi-suite --no-detach --log_path $CI_WORKSPACE/jedi
           
       - name: finalize-nightly-build
         run: |
