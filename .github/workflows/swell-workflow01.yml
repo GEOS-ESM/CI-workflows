@@ -98,3 +98,13 @@ jobs:
           ln -s latest.lua default.lua
           ln -s latest.lua $CI_DATETIME.lua
           $CI_SOURCE/clean.sh
+          
+      - name: run-swell-hofx
+        run: |
+          cd $CI_WORKSPACE
+          source $CI_SOURCE/modules.sh
+          echo "experiment_id: swell-hofx" > hofx.yaml
+          echo "experiment_root: $CI_WORKSPACE" >> hofx.yaml
+          swell_prepare_experiment_config -m defaults -s hofx -p nccs_discover -o hofx.yaml
+          swell_create_experiment -c swell-hofx.yaml
+          swell_launch_experiment --suite_path $CI_WORKSPACE/swell-hofx/jedi-suite --no-detach --log_path $CI_WORKSPACE/swell-hofx
