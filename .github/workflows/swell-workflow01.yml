@@ -73,11 +73,11 @@ jobs:
         run: |
           cd $CI_WORKSPACE
           source $CI_SOURCE/modules.sh
-          echo "experiment_id: jedi" > build_jedi.yaml
+          echo "experiment_id: swell-build" > build_jedi.yaml
           echo "experiment_root: $CI_WORKSPACE" >> build_jedi.yaml
           swell_prepare_experiment_config -m defaults -s build_jedi -p nccs_discover -o build_jedi.yaml
-          swell_create_experiment -c jedi.yaml
-          swell_launch_experiment --suite_path $CI_WORKSPACE/jedi/jedi-suite --no-detach --log_path $CI_WORKSPACE/jedi
+          swell_create_experiment -c swell-build.yaml
+          swell_launch_experiment --suite_path $CI_WORKSPACE/swell-build/swell-build-suite --no-detach --log_path $CI_WORKSPACE/swell-build
           
       - name: finalize-nightly-build
         run: |
@@ -86,9 +86,8 @@ jobs:
           rm -f latest active
           ln -s $CI_DATETIME latest
           cd latest
-          ln -s jedi/jedi_bundle/source jedi_build
-          cd jedi_build
-          ln -s ../build/bin build-intel-release
+          mv swell-build/jedi_bundle/source jedi_build
+          mv swell-build/jedi_bundle/build jedi_build/build-intel-release
           mkdir -p $CI_ROOT/modulefiles/jedi-swell
           cd $CI_ROOT/modulefiles/jedi-swell
           rm -f default.lua
