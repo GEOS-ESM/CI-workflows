@@ -85,6 +85,10 @@ jobs:
           $CI_SOURCE/clean.sh
           rm -f latest active
           ln -s $CI_DATETIME latest
+          cd latest
+          ln -s jedi/jedi_bundle/source jedi_build
+          cd jedi_build
+          ln -s ../build/bin build-intel-release
           mkdir -p $CI_ROOT/modulefiles/jedi-swell
           cd $CI_ROOT/modulefiles/jedi-swell
           rm -f default.lua
@@ -98,6 +102,7 @@ jobs:
           ln -s latest.lua default.lua
           ln -s latest.lua $CI_DATETIME.lua
           $CI_SOURCE/clean.sh
+          ln -s $CI_$CI_ROOT/latest/jedi_build
           
       - name: run-swell-hofx
         run: |
@@ -107,4 +112,4 @@ jobs:
           echo "experiment_root: $CI_WORKSPACE" >> hofx.yaml
           swell_prepare_experiment_config -m defaults -s hofx -p nccs_discover -o hofx.yaml
           swell_create_experiment -c swell-hofx.yaml
-          swell_launch_experiment --suite_path $CI_WORKSPACE/swell-hofx/jedi-suite --no-detach --log_path $CI_WORKSPACE/swell-hofx
+          swell_launch_experiment --suite_path $CI_WORKSPACE/swell-hofx/swell-hofx-suite --no-detach --log_path $CI_WORKSPACE/swell-hofx
