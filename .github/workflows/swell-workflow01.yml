@@ -101,7 +101,6 @@ jobs:
           ln -s latest.lua default.lua
           ln -s latest.lua $CI_DATETIME.lua
           $CI_SOURCE/clean.sh
-          ln -s $CI_$CI_ROOT/latest/jedi_build
           
       - name: run-swell-hofx
         run: |
