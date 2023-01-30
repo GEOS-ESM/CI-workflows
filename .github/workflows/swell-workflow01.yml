@@ -31,6 +31,10 @@ jobs:
           /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
      #    /home/jardizzo/bin/nams_check.py "${{ github.event.label.name }}" swell
      
+      - name: check-run-status
+        run: |
+          if [ -f "$CI_ROOT/.lock" ]; then echo "Lock file present. Aborting."; exit 1; fi
+     
       - name: get-current-date
         run: echo "CI_DATETIME=20230118T115001" >> $GITHUB_ENV
         
@@ -45,18 +49,3 @@ jobs:
         with:
           repository: GEOS-ESM/swell
           path: swell
-          
-      - name: install-swell
-        run: |
-          source $CI_SOURCE/modules.sh
-          pip install --prefix=$CI_WORKSPACE/swell $GITHUB_WORKSPACE/swell
-          
-      - name: run-swell-hofx
-        run: |
-          cd $CI_WORKSPACE
-          source $CI_SOURCE/modules.sh
-          echo "experiment_id: swell-hofx" > hofx.yaml
-          echo "experiment_root: $CI_WORKSPACE" >> hofx.yaml
-          swell_prepare_experiment_config -m defaults -s hofx -p nccs_discover -o hofx.yaml
-          swell_create_experiment -c swell-hofx.yaml
-          swell_launch_experiment --suite_path $CI_WORKSPACE/swell-hofx/swell-hofx-suite --no-detach --log_path $CI_WORKSPACE/swell-hofx
