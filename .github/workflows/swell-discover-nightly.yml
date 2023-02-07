@@ -1,4 +1,4 @@
-# This is a basic workflow to help you get started with Actions
+# This is the SWELL Project Nightly Workflow for the Discover Platform.
 
 name: swell-discover-nightly
 
@@ -17,12 +17,12 @@ defaults:
     shell: bash
 
 env:
-  CI_ROOT: /discover/nobackup/jardizzo/CI/swell/nightly
+  CI_ROOT: /discover/nobackup/gmao_ci/swell/nightly
 
 jobs:
   swell-nightly:
   
-    runs-on: self-hosted
+    runs-on: nccs-discover
     
     steps:
     
@@ -31,6 +31,11 @@ jobs:
           /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
      #    /home/jardizzo/bin/nams_check.py "${{ github.event.label.name }}" swell
      
+      - name: establish-workflow-status
+        run: |
+          if [ -f "$CI_ROOT/.lock" ]; then echo "Lock file present. Aborting."; exit 1; fi
+          touch $CI_ROOT/.lock
+     
       - name: get-current-date
         run: echo "CI_DATETIME=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV
         
@@ -38,6 +43,7 @@ jobs:
         run: |
           echo "CI_WORKSPACE=$CI_ROOT/$CI_DATETIME" >> $GITHUB_ENV
           echo "CI_SOURCE=$CI_ROOT/$CI_DATETIME/CI-workflow/swell/discover/nightly" >> $GITHUB_ENV
+          echo "CICD_EXPERIMENT_ROOT=$CI_ROOT/latest/SwellExperiments" >> $GITHUB_ENV
      
       - name: create-CI-workspace
         run: |
@@ -57,13 +63,6 @@ jobs:
         with:
           repository: GEOS-ESM/swell
           path: swell
-
-      - name: acquire-jedi-bundle
-        uses: actions/checkout@v3
-        with:
-          repository: GEOS-ESM/jedi_bundle
-          ref: refs/tags/1.0.2
-          path: jedi_bundle
           
       - name: install-CI-workflow
         run: |
@@ -74,19 +73,15 @@ jobs:
           source $CI_SOURCE/modules.sh
           pip install --prefix=$CI_WORKSPACE/swell $GITHUB_WORKSPACE/swell
           
-      - name: install-jedi-bundle
-        run: |
-          source $CI_SOURCE/modules.sh
-          pip install --prefix=$CI_WORKSPACE/jedi_bundle $GITHUB_WORKSPACE/jedi_bundle
-          
       - name: build-jedi
         run: |
+          cd $CI_WORKSPACE
           source $CI_SOURCE/modules.sh
-          echo $PATH
-          cp -p $CI_SOURCE/jedi_build.yaml .
-          jedi_bundle clone configure jedi_build.yaml
-          cp -p $CI_SOURCE/jedi_build.yaml .
-          srun $CI_SOURCE/discover_build_jedi.sh
+          echo "experiment_id: swell-build-$CI_DATETIME" > build_jedi.yaml
+          echo "experiment_root: $CI_WORKSPACE" >> build_jedi.yaml
+          swell_prepare_experiment_config -m defaults -s build_jedi -p nccs_discover -o build_jedi.yaml
+          swell_create_experiment -c swell-build-$CI_DATETIME.yaml
+          swell_launch_experiment --suite_path $CI_WORKSPACE/swell-build-$CI_DATETIME/swell-build-${CI_DATETIME}-suite --no-detach --log_path $CI_WORKSPACE/swell-build-$CI_DATETIME
           
       - name: finalize-nightly-build
         run: |
@@ -94,6 +89,9 @@ jobs:
           $CI_SOURCE/clean.sh
           rm -f latest active
           ln -s $CI_DATETIME latest
+          cd latest
+          mv swell-build-$CI_DATETIME/jedi_bundle/source jedi_build
+          mv swell-build-$CI_DATETIME/jedi_bundle/build jedi_build/build-intel-release
           mkdir -p $CI_ROOT/modulefiles/jedi-swell
           cd $CI_ROOT/modulefiles/jedi-swell
           rm -f default.lua
@@ -108,12 +106,18 @@ jobs:
           ln -s latest.lua $CI_DATETIME.lua
           $CI_SOURCE/clean.sh
           
-      - name: run-hofx-experiment
+      - name: run-swell-hofx
         run: |
+          cd $CI_WORKSPACE
           source $CI_SOURCE/modules.sh
-          module use -a $CI_ROOT/modulefiles
-          module load swell
-          rm -r -f $HOME/cylc-run/swell-nightly-hofx-suite
-          swell_create_experiment $CI_SOURCE/hofx_experiment.yaml
-          cd $CI_WORKSPACE/SwellExperiments/swell-nightly-hofx/swell-nightly-hofx-suite
-          swell_launch_experiment --no-detach --log_path $CI_WORKSPACE/SwellExperiments/swell-nightly-hofx
+          echo "experiment_id: swell-hofx" > hofx.yaml
+          echo "experiment_root: $CI_WORKSPACE" >> hofx.yaml
+          rm -r -f $HOME/cylc-run/swell-hofx-suite
+          swell_prepare_experiment_config -m defaults -s hofx -p nccs_discover -o hofx.yaml
+          swell_create_experiment -c swell-hofx.yaml
+          swell_launch_experiment --suite_path $CI_WORKSPACE/swell-hofx/swell-hofx-suite --no-detach --log_path $CI_WORKSPACE/swell-hofx
+          
+      - name: exit-workflow
+        run: |
+          rm -f $CI_ROOT/.lock
+          echo "Workflow complete"
