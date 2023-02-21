@@ -39,4 +39,5 @@ jobs:
       - name: exit-workflow
         run: |
           rm -f $CI_ROOT/.lock
+          sleep 300
           echo "Workflow complete"
