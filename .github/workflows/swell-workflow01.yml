@@ -22,7 +22,7 @@ env:
 jobs:
   swell-nightly:
   
-    runs-on: nccs-ddiscover
+    runs-on: nccs-discover
     
     steps:
     
