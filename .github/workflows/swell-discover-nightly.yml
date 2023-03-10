@@ -55,7 +55,7 @@ jobs:
       - name: acquire-CI-workflow
         uses: actions/checkout@v3
         with:
-          repository: GEOS-ESM/CI-workflows-test
+          repository: GEOS-ESM/CI-workflows
           path: CI-workflow
  
       - name: acquire-swell
