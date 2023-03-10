@@ -1,4 +1,4 @@
-# This is the SWELL Project Nightly Workflow for the Discover Platform.
+# This is the GEOSldas Project Tier1 Workflow for the Discover Platform.
 
 name: GEOSldas-discover-tier1
 
@@ -58,6 +58,8 @@ jobs:
           
       - name: build-GEOSldas
         run: |
+          module use -a /discover/swdev/gmao_SIteam/modulefiles-SLES12
+          module load GEOSenv
           
       - name: exit-workflow
         run: |
