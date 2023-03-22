@@ -28,6 +28,7 @@ jobs:
     
       - name: validate-workflow
         run: |
+          sleep 30
           /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
      #    /home/jardizzo/bin/nams_check.py "${{ github.event.label.name }}" swell
      
