@@ -21,9 +21,10 @@ env:
 
 jobs:
 
-  swell-nightly-initialize:
+  swell-nightly:
   
     runs-on: nccs-discover
+    timeout-minutes: 600
     
     steps:
     
@@ -74,13 +75,6 @@ jobs:
         run: |
           source $CI_SOURCE/modules.sh
           pip install --prefix=$CI_WORKSPACE/swell $GITHUB_WORKSPACE/swell
-          
-  swell-nightly-build:
-  
-    runs-on: nccs-discover
-    needs: swell-nightly-initialize
-    
-    steps:
     
       - name: build-jedi
         run: |
@@ -114,13 +108,6 @@ jobs:
           ln -s latest.lua default.lua
           ln -s latest.lua $CI_DATETIME.lua
           $CI_SOURCE/clean.sh
-         
-  swell-nightly-hofx:
-  
-    runs-on: nccs-discover
-    needs: swell-nightly-build
-    
-    steps:
     
       - name: run-swell-hofx
         run: |
