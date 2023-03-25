@@ -115,7 +115,7 @@ jobs:
           ln -s latest.lua $CI_DATETIME.lua
           $CI_SOURCE/clean.sh
          
- swell-nightly-hofx:
+  swell-nightly-hofx:
   
     runs-on: nccs-discover
     needs: swell-nightly-build
