@@ -80,6 +80,8 @@ jobs:
     runs-on: nccs-discover
     needs: swell-nightly-initialize
     
+    steps:
+    
       - name: build-jedi
         run: |
           cd $CI_WORKSPACE
@@ -117,6 +119,8 @@ jobs:
   
     runs-on: nccs-discover
     needs: swell-nightly-build
+    
+    steps:
     
       - name: run-swell-hofx
         run: |
