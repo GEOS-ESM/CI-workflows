@@ -20,7 +20,8 @@ env:
   CI_ROOT: /discover/nobackup/gmao_ci/swell/nightly
 
 jobs:
-  swell-nightly:
+
+  swell-nightly-initialize:
   
     runs-on: nccs-discover
     
@@ -74,6 +75,11 @@ jobs:
           source $CI_SOURCE/modules.sh
           pip install --prefix=$CI_WORKSPACE/swell $GITHUB_WORKSPACE/swell
           
+  swell-nightly-build:
+  
+    runs-on: nccs-discover
+    needs: swell-nightly-initialize
+    
       - name: build-jedi
         run: |
           cd $CI_WORKSPACE
@@ -83,7 +89,12 @@ jobs:
           swell_prepare_experiment_config -m defaults -s build_jedi -p nccs_discover -o build_jedi.yaml
           swell_create_experiment -c swell-build-$CI_DATETIME.yaml
           swell_launch_experiment --suite_path $CI_WORKSPACE/swell-build-$CI_DATETIME/swell-build-${CI_DATETIME}-suite --no-detach --log_path $CI_WORKSPACE/swell-build-$CI_DATETIME
-          
+      
+  swell-nightly-finalize:
+  
+    runs-on: nccs-discover
+    needs: swell-nightly-build
+    
       - name: finalize-nightly-build
         run: |
           cd $CI_ROOT
