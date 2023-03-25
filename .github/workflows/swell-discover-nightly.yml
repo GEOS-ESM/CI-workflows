@@ -89,11 +89,6 @@ jobs:
           swell_prepare_experiment_config -m defaults -s build_jedi -p nccs_discover -o build_jedi.yaml
           swell_create_experiment -c swell-build-$CI_DATETIME.yaml
           swell_launch_experiment --suite_path $CI_WORKSPACE/swell-build-$CI_DATETIME/swell-build-${CI_DATETIME}-suite --no-detach --log_path $CI_WORKSPACE/swell-build-$CI_DATETIME
-      
-  swell-nightly-finalize:
-  
-    runs-on: nccs-discover
-    needs: swell-nightly-build
     
       - name: finalize-nightly-build
         run: |
@@ -117,7 +112,12 @@ jobs:
           ln -s latest.lua default.lua
           ln -s latest.lua $CI_DATETIME.lua
           $CI_SOURCE/clean.sh
-          
+         
+ swell-nightly-hofx:
+  
+    runs-on: nccs-discover
+    needs: swell-nightly-build
+    
       - name: run-swell-hofx
         run: |
           cd $CI_WORKSPACE
