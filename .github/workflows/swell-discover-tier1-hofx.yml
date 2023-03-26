@@ -10,7 +10,7 @@ defaults:
 
 env:
   CI_ROOT: /discover/nobackup/gmao_ci/swell/tier1/hofx
-  CI_NIGHTLY: /discover/nobackup/gmao_ci/swell/nightly/latest
+  CI_NIGHTLY: /discover/nobackup/gmao_ci/swell/nightly
 
 jobs:
 
@@ -32,14 +32,11 @@ jobs:
         run: |
           echo "CI_WORKSPACE=$CI_ROOT/$CI_DATETIME" >> $GITHUB_ENV
           echo "CI_SOURCE=$CI_ROOT/$CI_DATETIME/CI-workflow/swell/discover/nightly" >> $GITHUB_ENV
-          echo "CICD_EXPERIMENT_ROOT=$CI_ROOT/latest/SwellExperiments" >> $GITHUB_ENV
+          echo "CICD_EXPERIMENT_ROOT=$CI_ROOT/$CI_DATETIME/SwellExperiments" >> $GITHUB_ENV
      
       - name: create-CI-workspace
         run: |
           mkdir -p $CI_WORKSPACE
-          cd $CI_ROOT
-          /bin/rm -f active
-          ln -s $CI_DATETIME active
           
       - name: acquire-CI-workflow
         uses: actions/checkout@v3
@@ -50,7 +47,6 @@ jobs:
       - name: acquire-swell
         uses: actions/checkout@v3
         with:
-          repository: GEOS-ESM/swell
           path: swell
           
       - name: install-CI-workflow
@@ -68,6 +64,8 @@ jobs:
           source $CI_SOURCE/modules.sh
           echo "experiment_id: swell-hofx" > hofx.yaml
           echo "experiment_root: $CI_WORKSPACE" >> hofx.yaml
+          echo "existing_source_directory: $CI_NIGHTLY/latest/jedi_build" >> hofx.yaml
+          echo "existing_build_directory: $CI_NIGHTLY/latest/jedi_build/build-intel-release" >> hofx.yaml
           rm -r -f $HOME/cylc-run/swell-hofx-suite
           swell_prepare_experiment_config -m defaults -s hofx -p nccs_discover -o hofx.yaml
           swell_create_experiment -c swell-hofx.yaml
