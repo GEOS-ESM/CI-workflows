@@ -28,6 +28,7 @@ jobs:
       - name: establish-workflow-status
         run: |
           if [ -f "$CI_ROOT/.lock" ]; then echo "Lock file present. Aborting."; exit 1; fi
+          mkdir -p $CI_ROOT
           touch $CI_ROOT/.lock
      
       - name: get-current-date
