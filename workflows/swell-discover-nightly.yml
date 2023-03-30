@@ -2,15 +2,7 @@
 
 name: swell-discover-nightly
 
-on:
-  workflow_call:
-    inputs:
-      username:
-        required: false
-        type: string
-    secrets:
-      token:
-        required: false
+on: workflow_call
 
 defaults:
   run:
