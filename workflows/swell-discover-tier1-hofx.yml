@@ -1,0 +1,77 @@
+# SWELL Tier-1 Workflow - Executes HOFX Experiment
+
+name: swell-discover-tier1-hofx
+
+on: workflow_call
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CI_ROOT: /discover/nobackup/gmao_ci/swell/tier1/hofx
+  CI_NIGHTLY: /discover/nobackup/gmao_ci/swell/nightly
+
+jobs:
+
+  swell-tier1-hofx:
+  
+    runs-on: nccs-discover
+    timeout-minutes: 600
+    
+    steps:
+    
+      - name: validate-workflow
+        run: |
+          /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
+     
+      - name: get-current-date
+        run: echo "CI_DATETIME=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV
+        
+      - name: set-environment
+        run: |
+          echo "CI_WORKSPACE=$CI_ROOT/$CI_DATETIME" >> $GITHUB_ENV
+          echo "CI_SOURCE=$CI_ROOT/$CI_DATETIME/CI-workflow/swell/discover/nightly" >> $GITHUB_ENV
+          echo "CICD_EXPERIMENT_ROOT=$CI_ROOT/$CI_DATETIME/SwellExperiments" >> $GITHUB_ENV
+     
+      - name: create-CI-workspace
+        run: |
+          mkdir -p $CI_WORKSPACE
+          
+      - name: acquire-CI-workflow
+        uses: actions/checkout@v3
+        with:
+          repository: GEOS-ESM/CI-workflows
+          path: CI-workflow
+ 
+      - name: acquire-swell
+        uses: actions/checkout@v3
+        with:
+          repository: GEOS-ESM/swell
+          path: swell
+          
+      - name: install-CI-workflow
+        run: |
+          cp -r -p $GITHUB_WORKSPACE/CI-workflow $CI_WORKSPACE
+          
+      - name: install-swell
+        run: |
+          source $CI_SOURCE/modules.sh
+          pip install --prefix=$CI_WORKSPACE/swell $GITHUB_WORKSPACE/swell
+    
+      - name: run-swell-hofx
+        run: |
+          cd $CI_WORKSPACE
+          source $CI_SOURCE/modules.sh
+          echo "experiment_id: swell-tier1-hofx" > hofx.yaml
+          echo "experiment_root: $CI_WORKSPACE" >> hofx.yaml
+          echo "existing_source_directory: $CI_NIGHTLY/latest/jedi_build" >> hofx.yaml
+          echo "existing_build_directory: $CI_NIGHTLY/latest/jedi_build/build-intel-release" >> hofx.yaml
+          rm -r -f $HOME/cylc-run/swell-tier1-hofx-suite
+          swell_prepare_experiment_config -m defaults -s hofx -p nccs_discover -o hofx.yaml
+          swell_create_experiment -c swell-tier1-hofx.yaml
+          swell_launch_experiment --suite_path $CI_WORKSPACE/swell-tier1-hofx/swell-tier1-hofx-suite --no-detach --log_path $CI_WORKSPACE/swell-tier1-hofx
+          
+      - name: exit-workflow
+        run: |
+          echo "Workflow complete"

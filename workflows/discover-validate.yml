@@ -1,0 +1,28 @@
+# This is a utility workflow for validating on-prem access.
+
+name: discover-validate
+
+on:
+  workflow_call:
+    inputs:
+      accessor:
+        required: true
+        type: string
+      project:
+        required: true
+        type: string
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  discover-validate:
+  
+    runs-on: nccs-discover
+    
+    steps:
+    
+      - name: validate-workflow
+        run: |
+          /home/jardizzo/bin/nams_check.py ${{ inputs.accessor }} ${{ inputs.project }}

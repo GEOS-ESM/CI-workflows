@@ -1,0 +1,88 @@
+# This is the SWELL Project Nightly Workflow for the Discover Platform.
+
+name: swell-discover-nightly
+
+on:
+  workflow_call:
+    inputs:
+      username:
+        required: false
+        type: string
+    secrets:
+      token:
+        required: false
+
+defaults:
+  run:
+    shell: bash
+
+env:
+  CI_ROOT: /discover/nobackup/gmao_ci/swell/nightly
+
+jobs:
+  swell-nightly:
+  
+    runs-on: nccs-discover
+    
+    steps:
+    
+      - name: validate-workflow
+        run: |
+          sleep 30
+          /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
+     #    /home/jardizzo/bin/nams_check.py "${{ github.event.label.name }}" swell
+     
+      - name: establish-workflow-status
+        run: sleep 1
+     
+      - name: get-current-date
+        run: echo "CI_DATETIME=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV
+        
+      - name: set-environment
+        run: |
+          echo "CI_WORKSPACE=$CI_ROOT/$CI_DATETIME" >> $GITHUB_ENV
+          echo "CI_SOURCE=$CI_ROOT/$CI_DATETIME/CI-workflow/swell/discover/nightly" >> $GITHUB_ENV
+          echo "CICD_EXPERIMENT_ROOT=$CI_ROOT/latest/SwellExperiments" >> $GITHUB_ENV
+     
+      - name: create-CI-workspace
+        run: |
+          mkdir -p $CI_WORKSPACE
+          cd $CI_ROOT
+          /bin/rm -f active
+          ln -s $CI_DATETIME active
+          
+      - name: acquire-CI-workflow
+        uses: actions/checkout@v3
+        with:
+          repository: GEOS-ESM/CI-workflows
+          path: CI-workflow
+ 
+      - name: acquire-swell
+        uses: actions/checkout@v3
+        with:
+          repository: GEOS-ESM/swell
+          ref: test/node_types
+          path: swell
+          
+      - name: install-CI-workflow
+        run: |
+          cp -r -p $GITHUB_WORKSPACE/CI-workflow $CI_WORKSPACE
+          
+      - name: install-swell
+        run: |
+          source $CI_SOURCE/modules.sh
+          pip install --prefix=$CI_WORKSPACE/swell $GITHUB_WORKSPACE/swell
+          
+      - name: build-jedi
+        run: sleep 1
+          
+      - name: finalize-nightly-build
+        run: sleep 1
+        
+      - name: run-swell-hofx
+        run: sleep 1
+          
+      - name: exit-workflow
+        run: |
+          sleep 1
+          echo "Workflow complete"
