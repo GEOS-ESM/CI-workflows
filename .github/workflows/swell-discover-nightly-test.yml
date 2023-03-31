@@ -9,7 +9,7 @@ defaults:
     shell: bash
 
 env:
-  CI_ROOT: /discover/nobackup/gmao_ci/swell/test
+  CI_ROOT: /discover/nobackup/gmao_ci/swell/nightly
 
 jobs:
 
