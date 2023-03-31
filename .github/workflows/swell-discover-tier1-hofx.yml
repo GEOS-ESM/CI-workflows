@@ -47,7 +47,6 @@ jobs:
       - name: acquire-swell
         uses: actions/checkout@v3
         with:
-          repository: GEOS-ESM/swell
           path: swell
           
       - name: install-CI-workflow
