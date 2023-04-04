@@ -2,15 +2,10 @@
 
 name: geosongpu-ondemand
 
-on:
-  workflow_call:
-    inputs:
-      accessor:
-        required: true
-        type: string
-      project:
-        required: true
-        type: string
+on: workflow_call:
+
+env:
+  CI_ROOT: $NOBACKUP/geosongpu
 
 defaults:
   run:
@@ -20,6 +15,7 @@ jobs:
   geosongpu-ondemand:
   
     runs-on: nccs-discover
+    timeout-minutes: 600
     
     steps:
     
