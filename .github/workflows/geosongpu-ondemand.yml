@@ -21,7 +21,7 @@ jobs:
     
       - name: validate-workflow
         run: |
-          /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} geosonpu
+          /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} geosongpu
 
       - name: heartbeat
         run: |
