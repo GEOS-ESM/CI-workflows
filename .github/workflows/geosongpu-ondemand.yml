@@ -1,0 +1,32 @@
+# This is the test bed for GEOS on GPU
+
+name: geosongpu-ondemand
+
+on:
+  workflow_call:
+    inputs:
+      accessor:
+        required: true
+        type: string
+      project:
+        required: true
+        type: string
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  geosongpu-ondemand:
+  
+    runs-on: nccs-discover
+    
+    steps:
+    
+      - name: validate-workflow
+        run: |
+          /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} geosonpu
+
+      - name: heartbeat
+        run: |
+          /discover/nobackup/fgdeconi/work/ci/heartbeat.py

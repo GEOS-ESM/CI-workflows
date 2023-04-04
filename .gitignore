@@ -78,6 +78,11 @@ flycheck_*.el
 # network security
 /network-security.data
 
+#######################
+# gitignore for vscode #
+#######################
+
+.vscode
 
 ######################
 # OS generated files #
