@@ -2,7 +2,7 @@
 
 name: geosongpu-ondemand
 
-on: workflow_call:
+on: workflow_call
 
 env:
   CI_ROOT: $NOBACKUP/geosongpu
