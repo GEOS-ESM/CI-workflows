@@ -65,7 +65,7 @@ jobs:
           python3 -m venv venv
           source ./venv/bin/activate
           pip install $GITHUB_WORKSPACE/geosongpu-ci
-          geosongpu_dispatch ${{ inputs.experiment_name }}  ${{ inputs.experiment_version }}
+          geosongpu_dispatch ${{ inputs.experiment_name }}  ${{ inputs.experiment_action }}
   
       - name: cleanup
         run: |
