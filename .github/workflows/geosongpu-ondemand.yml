@@ -14,7 +14,7 @@ on:
         type: string
 
 env:
-  CI_ROOT: $NOBACKUP/geosongpu
+  CI_ROOT: /discover/nobackup/gmao_ci/geosongpu
 
 defaults:
   run:
@@ -32,11 +32,11 @@ jobs:
         run: |
           /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} geosongpu
 
-      - name: establish-workflow-status
-        run: |
-          if [ -f "$CI_ROOT/.lock" ]; then echo "Lock file present. Aborting."; exit 1; fi
-          mkdir -p $CI_ROOT
-          touch $CI_ROOT/.lock
+      # - name: establish-workflow-status
+      #   run: |
+      #     if [ -f "$CI_ROOT/.lock" ]; then echo "Lock file present. Aborting."; exit 1; fi
+      #     mkdir -p $CI_ROOT
+      #     touch $CI_ROOT/.lock
 
       - name: get-current-date
         run: echo "CI_DATETIME=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV
@@ -69,8 +69,8 @@ jobs:
           cd $CI_WORKSPACE
           /bin/rm *
 
-      - name: exit-workflow
-        run: |
-          /bin/rm -f $CI_ROOT/.lock
-          echo "Workflow complete"
+      # - name: exit-workflow
+      #   run: |
+      #     /bin/rm -f $CI_ROOT/.lock
+      #     echo "Workflow complete"
   
