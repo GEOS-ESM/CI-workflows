@@ -62,8 +62,10 @@ jobs:
       - name: experiment-run
         run: |
           cd $CI_WORKSPACE
-          pip install -e --prefix=$CI_WORKSPACE/geosongpu-ci $GITHUB_WORKSPACE/geosongpu-ci
-          $CI_WORKSPACE/geosongpu-ci/bin/geosongpu_dispatch  ${{ inputs.experiment_name }}  ${{ inputs.experiment_version }}
+          python3 -m venv venv
+          source ./venv/bin/activate
+          pip install $GITHUB_WORKSPACE/geosongpu-ci
+          geosongpu_dispatch ${{ inputs.experiment_name }}  ${{ inputs.experiment_version }}
   
       - name: cleanup
         run: |
