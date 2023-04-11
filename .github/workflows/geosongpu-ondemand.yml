@@ -12,6 +12,9 @@ on:
       experiment_action:
         required: true
         type: string
+      geosongpu_ci_ref:
+        required: true
+        type: string
 
 env:
   CI_ROOT: /discover/nobackup/gmao_ci/geosongpu
@@ -59,6 +62,7 @@ jobs:
         uses: actions/checkout@v3
         with:
           repository: GEOS-ESM/geosongpu-ci
+          ref: ${{ inputs.geosongpu_ci_ref }}
           path: geosongpu-ci
 
       - name: experiment-run
