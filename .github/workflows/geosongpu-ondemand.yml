@@ -68,7 +68,7 @@ jobs:
       - name: experiment-run
         run: |
           cd $CI_WORKSPACE
-          python3 -m venv venv
+          python3.6 -m venv venv
           source ./venv/bin/activate
           pip install $GITHUB_WORKSPACE/geosongpu-ci
           geosongpu_dispatch ${{ inputs.experiment_name }} ${{ inputs.experiment_action }} $CI_ARTIFACT
