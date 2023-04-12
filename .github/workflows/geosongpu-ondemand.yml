@@ -56,7 +56,7 @@ jobs:
           mkdir -p $CI_WORKSPACE
           cd $CI_ROOT
           /bin/rm -f active
-          ln -s $CI_DATETIME active
+          ln -s $CI_WORKSPACE active
           
       - name: acquire-geosongpu-ci
         uses: actions/checkout@v3
