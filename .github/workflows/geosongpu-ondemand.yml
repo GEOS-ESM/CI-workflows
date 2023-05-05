@@ -47,8 +47,8 @@ jobs:
       - name: set-environment
         run: |
           echo "CI_DATETIME_EXP=$(date +'%Y%m%dT%H%M%S')_${{ inputs.experiment_name }}" >> $GITHUB_ENV
-          echo "CI_WORKSPACE=$CI_ROOT/work/$CI_DATETIME" >> $GITHUB_ENV
-          echo "CI_ARTIFACT=$CI_ROOT/artifact/$CI_DATETIME" >> $GITHUB_ENV
+          echo "CI_WORKSPACE=$CI_ROOT/work/$CI_DATETIME_EXP" >> $GITHUB_ENV
+          echo "CI_ARTIFACT=$CI_ROOT/artifact/$CI_DATETIME_EXP" >> $GITHUB_ENV
 
       - name: create-CI-workspace
         run: |
