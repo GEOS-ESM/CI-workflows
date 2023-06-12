@@ -85,8 +85,8 @@ jobs:
           source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
           echo "experiment_id: swell-hofx" > hofx.yaml
           echo "experiment_root: $CI_WORKSPACE" >> hofx.yaml
-          echo "existing_source_directory: $CI_WORKSPACE/jedi_build" >> hofx.yaml
-          echo "existing_build_directory: $CI_WORKSPACE/jedi_build/build-intel-release" >> hofx.yaml
+          echo "existing_jedi_source_directory: $CI_WORKSPACE/jedi_build" >> hofx.yaml
+          echo "existing_jedi_build_directory: $CI_WORKSPACE/jedi_build/build-intel-release" >> hofx.yaml
           rm -r -f $HOME/cylc-run/swell-hofx-suite
           swell_prepare_experiment_config -m defaults -s hofx -p nccs_discover -o hofx.yaml
           swell_create_experiment -c swell-hofx.yaml
