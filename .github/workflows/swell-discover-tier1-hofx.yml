@@ -62,6 +62,8 @@ jobs:
         run: |
           cd $CI_WORKSPACE
           source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
+          export PATH=$CI_WORKSPACE/swell/bin:$PATH
+          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
           echo "experiment_id: swell-tier1-hofx" > hofx.yaml
           echo "experiment_root: $CI_WORKSPACE" >> hofx.yaml
           echo "existing_jedi_source_directory: $CI_NIGHTLY/latest/jedi_build" >> hofx.yaml
