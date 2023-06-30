@@ -68,5 +68,7 @@ jobs:
   
       - name: cleanup
         run: |
-          cd $CI_WORKSPACE
-          /bin/rm -r *
+          if [ -d $CI_WORKSPACE ]; then
+            cd $CI_WORKSPACE
+            /bin/rm -r *
+          fi
