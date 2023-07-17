@@ -62,7 +62,7 @@ jobs:
 
       - name: set-environment
         run: |
-        echo "CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/$CI_JOBTIME/hofx_test" >> $GITHUB_ENV
+          echo "CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/$CI_JOBTIME/hofx_test" >> $GITHUB_ENV
 
       - name: acquire-swell
         uses: actions/checkout@v3
