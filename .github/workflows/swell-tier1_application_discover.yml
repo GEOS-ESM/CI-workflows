@@ -18,7 +18,7 @@ jobs:
     steps:
       - name: Set current datetime
         id: set_datetime
-        run: echo "CI_DATETIME=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV
+        run: echo "CI_TIMESTAMP=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV
 
       - name: validate-workflow
         run: |
