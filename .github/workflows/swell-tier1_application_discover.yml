@@ -7,11 +7,11 @@ defaults:
     shell: bash
 
 env:
-  CI_ROOT: /discover/nobackup/gmao_ci/swell/tier1
+  CI_JOBTIME: $(date +'%Y%m%dT%H%M%S')
 
 jobs:
 
-  swell-tier_1:
+  swell-tier_1-ufo_testing:
 
     runs-on: nccs-discover
     timeout-minutes: 600
@@ -24,7 +24,7 @@ jobs:
 
       - name: set-environment
         run: |
-          echo "CI_WORKSPACE=$CI_ROOT/$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV
+          echo "CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/$CI_JOBTIME/ufo_testing" >> $GITHUB_ENV
 
       - name: acquire-swell
         uses: actions/checkout@v3
@@ -48,6 +48,31 @@ jobs:
           swell_prepare_experiment_config -m defaults -s ufo_testing -p nccs_discover -o ufo_testing.yaml
           swell_create_experiment -c swell-ufo_testing.yaml
           swell_launch_experiment --suite_path $CI_WORKSPACE/swell-ufo_testing/swell-ufo_testing-suite --no-detach --log_path $CI_WORKSPACE/swell-ufo_testing
+
+  swell-tier_1-hofx:
+
+    runs-on: nccs-discover
+    timeout-minutes: 600
+
+    steps:
+
+      - name: validate-workflow
+        run: |
+          /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
+
+      - name: set-environment
+        run: |
+        echo "CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/$CI_JOBTIME/hofx_test" >> $GITHUB_ENV
+
+      - name: acquire-swell
+        uses: actions/checkout@v3
+        with:
+          path: swell
+
+      - name: install-swell
+        run: |
+          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
+          pip install --prefix=$CI_WORKSPACE/swell $GITHUB_WORKSPACE/swell
 
       - name: run-swell-hofx
         run: |
