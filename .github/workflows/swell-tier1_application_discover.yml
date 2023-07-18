@@ -20,12 +20,9 @@ jobs:
         run: |
           /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
 
-      - name: Set current datetime
-        id: set_datetime
-        run: echo "CI_TIMESTAMP=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV
-
-      - name: set-environment
+      - name: set-path-to-workspace
         run: |
+          CI_TIMESTAMP=$(date +'%Y%m%dT%H%M%S')
           echo "CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/$CI_TIMESTAMP" >> $GITHUB_ENV
 
       - name: acquire-swell
