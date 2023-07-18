@@ -64,7 +64,7 @@ jobs:
           cd $CI_WORKSPACE_JOB
           swell_prepare_experiment_config -m defaults -s ${SUITE_NAME} -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           swell_create_experiment -c ${EXPERIMENT_ID}.yaml
-          #swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/swell-${SUITE_NAME}/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/swell-${SUITE_NAME}
+          swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
   # Run hofx workflow
   # -----------------
@@ -98,7 +98,7 @@ jobs:
           cd $CI_WORKSPACE_JOB
           swell_prepare_experiment_config -m defaults -s ${SUITE_NAME} -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           swell_create_experiment -c ${EXPERIMENT_ID}.yaml
-          #swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/swell-${SUITE_NAME}/$EXPERIMENT_ID-suite --no-detach --log_path $CI_WORKSPACE_JOB/swell-${SUITE_NAME}
+          swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
 # Perform all the clean up
 # ------------------------
