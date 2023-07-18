@@ -13,12 +13,25 @@ env:
 
 jobs:
 
+ job1:
+    runs-on: nccs-discover
+    # Map a step output to a job output
+    outputs:
+      output1: ${{ steps.step1.outputs.test }}
+      output2: ${{ steps.step2.outputs.test }}
+    steps:
+      - id: step1
+        run: echo "test=hello" >> "$GITHUB_OUTPUT"
+
   swell-nightly:
 
     runs-on: nccs-discover
     timeout-minutes: 600
-
+    
     steps:
+    
+    - id: step1
+        run: echo "CI_DATETIME=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV
 
       - name: validate-workflow
         run: |
