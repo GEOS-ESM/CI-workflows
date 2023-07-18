@@ -47,6 +47,7 @@ jobs:
           CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
           SUITE_NAME=ufo_testing
           CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
+          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
 
           mkdir -p $CI_WORKSPACE_JOB
 
@@ -55,15 +56,15 @@ jobs:
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
 
-          echo "experiment_id: swell-${SUITE_NAME}-${GITHUB_RUN_ID}" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
-          rm -r -f $HOME/cylc-run/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite
+          rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
           cd $CI_WORKSPACE_JOB
           swell_prepare_experiment_config -m defaults -s ${SUITE_NAME} -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          swell_create_experiment -c swell-${SUITE_NAME}-${GITHUB_RUN_ID}.yaml
-          swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/swell-${SUITE_NAME}/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/swell-${SUITE_NAME}
+          swell_create_experiment -c ${EXPERIMENT_ID}.yaml
+          #swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/swell-${SUITE_NAME}/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/swell-${SUITE_NAME}
 
   # Run hofx workflow
   # -----------------
@@ -80,6 +81,7 @@ jobs:
           CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
           SUITE_NAME=hofx
           CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
+          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
 
           mkdir -p $CI_WORKSPACE_JOB
 
@@ -88,33 +90,33 @@ jobs:
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
 
-          echo "experiment_id: swell-${SUITE_NAME}-${GITHUB_RUN_ID}" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
-          rm -r -f $HOME/cylc-run/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite
+          rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
           cd $CI_WORKSPACE_JOB
           swell_prepare_experiment_config -m defaults -s ${SUITE_NAME} -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          swell_create_experiment -c swell-${SUITE_NAME}-${GITHUB_RUN_ID}.yaml
-          swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/swell-${SUITE_NAME}/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/swell-${SUITE_NAME}
+          swell_create_experiment -c ${EXPERIMENT_ID}.yaml
+          #swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/swell-${SUITE_NAME}/$EXPERIMENT_ID-suite --no-detach --log_path $CI_WORKSPACE_JOB/swell-${SUITE_NAME}
 
 # Perform all the clean up
 # ------------------------
 
-  swell-tier_1-clean_up:
-
-    runs-on: nccs-discover-swell
-    timeout-minutes: 30
-    needs: [swell-tier_1-ufo_testing, swell-tier_1-hofx]
-
-    steps:
-
-      - name: Remove the run directory
-        run: |
-          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
-          rm -r -f $CI_WORKSPACE
-
-      - name: Remove the cylc logging directories
-        run: |
-          rm -r -f $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite
-          rm -r -f $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite
+#  swell-tier_1-clean_up:
+#
+#    runs-on: nccs-discover-swell
+#    timeout-minutes: 30
+#    needs: [swell-tier_1-ufo_testing, swell-tier_1-hofx]
+#
+#    steps:
+#
+#      - name: Remove the run directory
+#        run: |
+#          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
+#          rm -r -f $CI_WORKSPACE
+#
+#      - name: Remove the cylc logging directories
+#        run: |
+#          rm -r -f $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite
+#          rm -r -f $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite
