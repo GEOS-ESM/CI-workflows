@@ -8,9 +8,7 @@ defaults:
 
 jobs:
 
-  # Initialization needed by all the workflows
-  # ------------------------------------------
-  setup:
+  tier1_setup:
 
     runs-on: nccs-discover
     timeout-minutes: 30
@@ -46,7 +44,7 @@ jobs:
 
     runs-on: nccs-discover
     timeout-minutes: 600s
-    needs: setup
+    needs: tier1_setup
 
     steps:
 
@@ -69,7 +67,7 @@ jobs:
 
     runs-on: nccs-discover
     timeout-minutes: 600
-    needs: setup
+    needs: tier1_setup
 
     steps:
 
