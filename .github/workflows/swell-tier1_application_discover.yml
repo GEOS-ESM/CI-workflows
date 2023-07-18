@@ -54,6 +54,8 @@ jobs:
           source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
+          echo $PATH
+          echo $PYTHONPATH
           echo "experiment_id: swell-ufo_testing" > ufo_testing.yaml
           echo "experiment_root: $CI_WORKSPACE_JOB" >> ufo_testing.yaml
           rm -r -f $HOME/cylc-run/swell-ufo_testing-suite
