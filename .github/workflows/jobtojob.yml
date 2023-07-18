@@ -13,16 +13,21 @@ env:
 
 jobs:
 
- job1:
+ datetime:
     runs-on: nccs-discover
     # Map a step output to a job output
     outputs:
-      output1: ${{ steps.step1.outputs.test }}
-      output2: ${{ steps.step2.outputs.test }}
+      datetime: ${{ steps.getdate.outputs.datetime }}
     steps:
-      - id: step1
-        run: echo "test=hello" >> "$GITHUB_OUTPUT"
+      - id: getdate
+        run: echo "datatimete +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV
 
+job2:
+    runs-on: ubuntu-latest
+    needs: datetime
+    CI_DATETIME: ${{needs.datetime.outputs.datetime}}
+        run: echo "$OUTPUT1 $OUTPUT2"
+        
   swell-nightly:
 
     runs-on: nccs-discover
