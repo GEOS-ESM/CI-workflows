@@ -36,8 +36,6 @@ jobs:
           module use /discover/swdev/jcsda/spack-stack/modulefiles
           module load miniconda/3.9.7
           pip install --prefix=$CI_WORKSPACE/swell -r $GITHUB_WORKSPACE/swell/requirements.txt --no-cache-dir $GITHUB_WORKSPACE/swell
-          export PATH=$CI_WORKSPACE/swell/bin:$PATH
-          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
 
   # Run ufo_testing workflow
   # ------------------------
@@ -54,6 +52,8 @@ jobs:
           echo "CI_WORKSPACE_JOB=$CI_WORKSPACE/ufo_testing" >> $GITHUB_ENV
           cd $CI_WORKSPACE_JOB
           source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
+          export PATH=$CI_WORKSPACE/swell/bin:$PATH
+          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
           echo "experiment_id: swell-ufo_testing" > ufo_testing.yaml
           echo "experiment_root: $CI_WORKSPACE_JOB" >> ufo_testing.yaml
           rm -r -f $HOME/cylc-run/swell-ufo_testing-suite
@@ -77,6 +77,8 @@ jobs:
           echo "CI_WORKSPACE_JOB=$CI_WORKSPACE/hofx" >> $GITHUB_ENV
           cd $CI_WORKSPACE_JOB
           source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
+          export PATH=$CI_WORKSPACE/swell/bin:$PATH
+          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
           echo "experiment_id: swell-hofx" > hofx.yaml
           echo "experiment_root: $CI_WORKSPACE_JOB" >> hofx.yaml
           rm -r -f $HOME/cylc-run/swell-hofx-suite
