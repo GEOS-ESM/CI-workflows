@@ -22,20 +22,21 @@ jobs:
 
       - name: set-path-to-workspace
         run: |
-          CI_TIMESTAMP=$(date +'%Y%m%dT%H%M%S')
-          echo "CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/$CI_TIMESTAMP" >> $GITHUB_ENV
+          echo ${GITHUB_RUN_ID}
+#          CI_TIMESTAMP=$(date +'%Y%m%dT%H%M%S')
+#          echo "CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/$CI_TIMESTAMP" >> $GITHUB_ENV
 
-      - name: acquire-swell
-        uses: actions/checkout@v3
-        with:
-          path: swell
-
-      - name: install-swell
-        run: |
-          module purge
-          module use /discover/swdev/jcsda/spack-stack/modulefiles
-          module load miniconda/3.9.7
-          pip install --prefix=$CI_WORKSPACE/swell -r $GITHUB_WORKSPACE/swell/requirements.txt --no-cache-dir $GITHUB_WORKSPACE/swell
+#      - name: acquire-swell
+#        uses: actions/checkout@v3
+#        with:
+#          path: swell
+#
+#      - name: install-swell
+#        run: |
+#          module purge
+#          module use /discover/swdev/jcsda/spack-stack/modulefiles
+#          module load miniconda/3.9.7
+#          pip install --prefix=$CI_WORKSPACE/swell -r $GITHUB_WORKSPACE/swell/requirements.txt --no-cache-dir $GITHUB_WORKSPACE/swell
 
   # Run ufo_testing workflow
   # ------------------------
@@ -47,22 +48,26 @@ jobs:
 
     steps:
 
-      - name: run-swell-ufo_testing
+      - name: set-path-to-workspace
         run: |
-          echo "CI_WORKSPACE_JOB=$CI_WORKSPACE/ufo_testing" >> $GITHUB_ENV
-          cd $CI_WORKSPACE_JOB
-          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
-          export PATH=$CI_WORKSPACE/swell/bin:$PATH
-          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
-          ls $CI_WORKSPACE/swell/bin
-          echo $PATH
-          echo $PYTHONPATH
-          echo "experiment_id: swell-ufo_testing" > ufo_testing.yaml
-          echo "experiment_root: $CI_WORKSPACE_JOB" >> ufo_testing.yaml
-          rm -r -f $HOME/cylc-run/swell-ufo_testing-suite
-          swell_prepare_experiment_config -m defaults -s ufo_testing -p nccs_discover -o ufo_testing.yaml
-          swell_create_experiment -c swell-ufo_testing.yaml
-          swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/swell-ufo_testing/swell-ufo_testing-suite --no-detach --log_path $CI_WORKSPACE_JOB/swell-ufo_testing
+          echo ${GITHUB_RUN_ID}
+
+#      - name: run-swell-ufo_testing
+#        run: |
+#          echo "CI_WORKSPACE_JOB=$CI_WORKSPACE/ufo_testing" >> $GITHUB_ENV
+#          cd $CI_WORKSPACE_JOB
+#          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
+#          export PATH=$CI_WORKSPACE/swell/bin:$PATH
+#          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
+#          ls $CI_WORKSPACE/swell/bin
+#          echo $PATH
+#          echo $PYTHONPATH
+#          echo "experiment_id: swell-ufo_testing" > ufo_testing.yaml
+#          echo "experiment_root: $CI_WORKSPACE_JOB" >> ufo_testing.yaml
+#          rm -r -f $HOME/cylc-run/swell-ufo_testing-suite
+#          swell_prepare_experiment_config -m defaults -s ufo_testing -p nccs_discover -o ufo_testing.yaml
+#          swell_create_experiment -c swell-ufo_testing.yaml
+#          swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/swell-ufo_testing/swell-ufo_testing-suite --no-detach --log_path $CI_WORKSPACE_JOB/swell-ufo_testing
 
   # Run hofx workflow
   # -----------------
@@ -75,16 +80,20 @@ jobs:
 
     steps:
 
-      - name: run-swell-hofx
+      - name: set-path-to-workspace
         run: |
-          echo "CI_WORKSPACE_JOB=$CI_WORKSPACE/hofx" >> $GITHUB_ENV
-          cd $CI_WORKSPACE_JOB
-          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
-          export PATH=$CI_WORKSPACE/swell/bin:$PATH
-          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
-          echo "experiment_id: swell-hofx" > hofx.yaml
-          echo "experiment_root: $CI_WORKSPACE_JOB" >> hofx.yaml
-          rm -r -f $HOME/cylc-run/swell-hofx-suite
-          swell_prepare_experiment_config -m defaults -s hofx -p nccs_discover -o hofx.yaml
-          swell_create_experiment -c swell-hofx.yaml
-          swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/swell-hofx/swell-hofx-suite --no-detach --log_path $CI_WORKSPACE_JOB/swell-hofx
+          echo ${GITHUB_RUN_ID}
+
+#      - name: run-swell-hofx
+#        run: |
+#          echo "CI_WORKSPACE_JOB=$CI_WORKSPACE/hofx" >> $GITHUB_ENV
+#          cd $CI_WORKSPACE_JOB
+#          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
+#          export PATH=$CI_WORKSPACE/swell/bin:$PATH
+#          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
+#          echo "experiment_id: swell-hofx" > hofx.yaml
+#          echo "experiment_root: $CI_WORKSPACE_JOB" >> hofx.yaml
+#          rm -r -f $HOME/cylc-run/swell-hofx-suite
+#          swell_prepare_experiment_config -m defaults -s hofx -p nccs_discover -o hofx.yaml
+#          swell_create_experiment -c swell-hofx.yaml
+#          swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/swell-hofx/swell-hofx-suite --no-detach --log_path $CI_WORKSPACE_JOB/swell-hofx
