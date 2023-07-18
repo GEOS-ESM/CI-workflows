@@ -12,7 +12,7 @@ jobs:
   # ------------------------------------------
   setup:
 
-    runs-on: nccs-discover
+    runs-on: nccs-discover-swell
     timeout-minutes: 30
 
     steps:
