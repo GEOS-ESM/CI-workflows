@@ -10,7 +10,7 @@ jobs:
 
   # Initialization needed by all the workflows
   # ------------------------------------------
-  tier1_setup:
+    swell-tier_1-setup:
 
     runs-on: nccs-discover-swell
     timeout-minutes: 30
@@ -20,23 +20,17 @@ jobs:
         run: |
           /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
 
-      - name: set-path-to-workspace
-        run: |
-          echo ${GITHUB_RUN_ID}
-#          CI_TIMESTAMP=$(date +'%Y%m%dT%H%M%S')
-#          echo "CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/$CI_TIMESTAMP" >> $GITHUB_ENV
+      - name: acquire-swell
+        uses: actions/checkout@v3
+        with:
+          path: swell
 
-#      - name: acquire-swell
-#        uses: actions/checkout@v3
-#        with:
-#          path: swell
-#
-#      - name: install-swell
-#        run: |
-#          module purge
-#          module use /discover/swdev/jcsda/spack-stack/modulefiles
-#          module load miniconda/3.9.7
-#          pip install --prefix=$CI_WORKSPACE/swell -r $GITHUB_WORKSPACE/swell/requirements.txt --no-cache-dir $GITHUB_WORKSPACE/swell
+      - name: install-swell
+        run: |
+          module purge
+          module use /discover/swdev/jcsda/spack-stack/modulefiles
+          module load miniconda/3.9.7
+          pip install --prefix=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell -r $GITHUB_WORKSPACE/swell/requirements.txt --no-cache-dir $GITHUB_WORKSPACE/swell
 
   # Run ufo_testing workflow
   # ------------------------
@@ -44,56 +38,70 @@ jobs:
 
     runs-on: nccs-discover-swell
     timeout-minutes: 600
-    needs: tier1_setup
+    needs: swell-tier_1-setup
 
     steps:
 
-      - name: set-path-to-workspace
+      - name: run-swell-ufo_testing
         run: |
-          echo ${GITHUB_RUN_ID}
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
+          SUITE_NAME=hofx
 
-#      - name: run-swell-ufo_testing
-#        run: |
-#          echo "CI_WORKSPACE_JOB=$CI_WORKSPACE/ufo_testing" >> $GITHUB_ENV
-#          cd $CI_WORKSPACE_JOB
-#          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
-#          export PATH=$CI_WORKSPACE/swell/bin:$PATH
-#          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
-#          ls $CI_WORKSPACE/swell/bin
-#          echo $PATH
-#          echo $PYTHONPATH
-#          echo "experiment_id: swell-ufo_testing" > ufo_testing.yaml
-#          echo "experiment_root: $CI_WORKSPACE_JOB" >> ufo_testing.yaml
-#          rm -r -f $HOME/cylc-run/swell-ufo_testing-suite
-#          swell_prepare_experiment_config -m defaults -s ufo_testing -p nccs_discover -o ufo_testing.yaml
-#          swell_create_experiment -c swell-ufo_testing.yaml
-#          swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/swell-ufo_testing/swell-ufo_testing-suite --no-detach --log_path $CI_WORKSPACE_JOB/swell-ufo_testing
+          module use /discover/swdev/jcsda/spack-stack/modulefiles
+          module load miniconda/3.9.7
+          export PATH=$CI_WORKSPACE/swell/bin:$PATH
+          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
+
+          echo "experiment_id: swell-${SUITE_NAME}-${GITHUB_RUN_ID}" > $CI_WORKSPACE/${SUITE_NAME}/${SUITE_NAME}-override.yaml
+          echo "experiment_root: $CI_WORKSPACE/${SUITE_NAME}" >> $CI_WORKSPACE/${SUITE_NAME}/${SUITE_NAME}-override.yaml
+
+          rm -r -f $HOME/cylc-run/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite
+
+          swell_prepare_experiment_config -m defaults -s ${SUITE_NAME} -p nccs_discover -o $CI_WORKSPACE/${SUITE_NAME}/${SUITE_NAME}-override.yaml
+          #swell_create_experiment -c swell-${SUITE_NAME}.yaml
+          #swell_launch_experiment --suite_path $CI_WORKSPACE/${SUITE_NAME}/swell-${SUITE_NAME}/swell-${SUITE_NAME}-suite --no-detach --log_path $CI_WORKSPACE/${SUITE_NAME}/swell-${SUITE_NAME}
 
   # Run hofx workflow
   # -----------------
-
   swell-tier_1-hofx:
 
     runs-on: nccs-discover-swell
     timeout-minutes: 600
-    needs: tier1_setup
+    needs: swell-tier_1-setup
 
     steps:
 
-      - name: set-path-to-workspace
+      - name: run-swell-hofx
         run: |
-          echo ${GITHUB_RUN_ID}
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
+          SUITE_NAME=hofx
 
-#      - name: run-swell-hofx
-#        run: |
-#          echo "CI_WORKSPACE_JOB=$CI_WORKSPACE/hofx" >> $GITHUB_ENV
-#          cd $CI_WORKSPACE_JOB
-#          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
-#          export PATH=$CI_WORKSPACE/swell/bin:$PATH
-#          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
-#          echo "experiment_id: swell-hofx" > hofx.yaml
-#          echo "experiment_root: $CI_WORKSPACE_JOB" >> hofx.yaml
-#          rm -r -f $HOME/cylc-run/swell-hofx-suite
-#          swell_prepare_experiment_config -m defaults -s hofx -p nccs_discover -o hofx.yaml
-#          swell_create_experiment -c swell-hofx.yaml
-#          swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/swell-hofx/swell-hofx-suite --no-detach --log_path $CI_WORKSPACE_JOB/swell-hofx
+          module use /discover/swdev/jcsda/spack-stack/modulefiles
+          module load miniconda/3.9.7
+          export PATH=$CI_WORKSPACE/swell/bin:$PATH
+          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
+
+          echo "experiment_id: swell-${SUITE_NAME}-${GITHUB_RUN_ID}" > $CI_WORKSPACE/${SUITE_NAME}/${SUITE_NAME}-override.yaml
+          echo "experiment_root: $CI_WORKSPACE/${SUITE_NAME}" >> $CI_WORKSPACE/${SUITE_NAME}/${SUITE_NAME}-override.yaml
+
+          rm -r -f $HOME/cylc-run/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite
+
+          swell_prepare_experiment_config -m defaults -s ${SUITE_NAME} -p nccs_discover -o $CI_WORKSPACE/${SUITE_NAME}/${SUITE_NAME}-override.yaml
+          #swell_create_experiment -c swell-${SUITE_NAME}.yaml
+          #swell_launch_experiment --suite_path $CI_WORKSPACE/${SUITE_NAME}/swell-${SUITE_NAME}/swell-${SUITE_NAME}-suite --no-detach --log_path $CI_WORKSPACE/${SUITE_NAME}/swell-${SUITE_NAME}
+
+# Perform all the clean up
+# ------------------------
+
+  swell-tier_1-clean_up:
+
+    runs-on: nccs-discover-swell
+    timeout-minutes: 30
+    needs: [swell-tier_1-ufo_testing, swell-tier_1-hofx]
+
+    steps:
+
+      - name: Remove the run directory
+        run: |
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
+          rm -r -f $CI_WORKSPACE
