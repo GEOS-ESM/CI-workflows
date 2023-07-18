@@ -60,6 +60,7 @@ jobs:
 
           rm -r -f $HOME/cylc-run/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite
 
+          cd $CI_WORKSPACE_JOB
           swell_prepare_experiment_config -m defaults -s ${SUITE_NAME} -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           #swell_create_experiment -c swell-${SUITE_NAME}.yaml
           #swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/swell-${SUITE_NAME}/swell-${SUITE_NAME}-suite --no-detach --log_path $CI_WORKSPACE_JOB/swell-${SUITE_NAME}
@@ -92,6 +93,7 @@ jobs:
 
           rm -r -f $HOME/cylc-run/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite
 
+          cd $CI_WORKSPACE_JOB
           swell_prepare_experiment_config -m defaults -s ${SUITE_NAME} -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           #swell_create_experiment -c swell-${SUITE_NAME}.yaml
           #swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/swell-${SUITE_NAME}/swell-${SUITE_NAME}-suite --no-detach --log_path $CI_WORKSPACE_JOB/swell-${SUITE_NAME}
