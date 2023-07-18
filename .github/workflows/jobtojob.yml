@@ -1,6 +1,6 @@
 # This is the SWELL Project Nightly Workflow for the Discover Platform.
 
-name: swell-discover-nightly
+name: job-to-job-test
 
 on: workflow_call
 
@@ -13,125 +13,20 @@ env:
 
 jobs:
 
- datetime:
+  datetime:
     runs-on: nccs-discover
-    # Map a step output to a job output
     outputs:
       datetime: ${{ steps.getdate.outputs.datetime }}
     steps:
       - id: getdate
-        run: echo "datatimete +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV
+        run: echo "datetime=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV
 
-job2:
-    runs-on: ubuntu-latest
-    needs: datetime
-    CI_DATETIME: ${{needs.datetime.outputs.datetime}}
-        run: echo "$OUTPUT1 $OUTPUT2"
-        
-  swell-nightly:
-
+  job2:
     runs-on: nccs-discover
-    timeout-minutes: 600
+    needs: datetime
+    env:
+      CI_DATETIME: ${{needs.datetime.outputs.datetime}}
     
     steps:
-    
-    - id: step1
-        run: echo "CI_DATETIME=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV
-
-      - name: validate-workflow
-        run: |
-          /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
-     #    /home/jardizzo/bin/nams_check.py "${{ github.event.label.name }}" swell
-
-      - name: establish-workflow-status
-        run: |
-          if [ -f "$CI_ROOT/.lock" ]; then echo "Lock file present. Aborting."; exit 1; fi
-          mkdir -p $CI_ROOT
-          touch $CI_ROOT/.lock
-
-      - name: set-environment
-        run: |
-          echo "CI_WORKSPACE=$CI_ROOT/$CI_DATETIME" >> $GITHUB_ENV
-          echo "CI_SOURCE=$CI_ROOT/$CI_DATETIME/CI-workflow/swell/discover/nightly" >> $GITHUB_ENV
-          echo "CICD_EXPERIMENT_ROOT=$CI_ROOT/latest/SwellExperiments" >> $GITHUB_ENV
-
-      - name: create-CI-workspace
-        run: |
-          mkdir -p $CI_WORKSPACE
-          cd $CI_ROOT
-          /bin/rm -f active
-          ln -s $CI_DATETIME active
-
-      - name: acquire-CI-workflow
-        uses: actions/checkout@v3
-        with:
-          repository: GEOS-ESM/CI-workflows
-          path: CI-workflow
-
-      - name: acquire-swell
-        uses: actions/checkout@v3
-        with:
-          path: swell
-
-      - name: install-CI-workflow
-        run: |
-          cp -r -p $GITHUB_WORKSPACE/CI-workflow $CI_WORKSPACE
-
-      - name: install-swell
-        run: |
-          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
-          pip install --prefix=$CI_WORKSPACE/swell $GITHUB_WORKSPACE/swell
-
-      - name: build-jedi
-        run: |
-          cd $CI_WORKSPACE
-          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
-          export PATH=$CI_WORKSPACE/swell/bin:$PATH
-          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
-          echo "experiment_id: swell-build-$CI_DATETIME" > build_jedi.yaml
-          echo "experiment_root: $CI_WORKSPACE" >> build_jedi.yaml
-          swell_prepare_experiment_config -m defaults -s build_jedi -p nccs_discover -o build_jedi.yaml
-          swell_create_experiment -c swell-build-$CI_DATETIME.yaml
-          swell_launch_experiment --suite_path $CI_WORKSPACE/swell-build-$CI_DATETIME/swell-build-${CI_DATETIME}-suite --no-detach --log_path $CI_WORKSPACE/swell-build-$CI_DATETIME
-          mv swell-build-$CI_DATETIME/jedi_bundle/source jedi_build
-          mv swell-build-$CI_DATETIME/jedi_bundle/build jedi_build/build-intel-release
-
-      - name: run-swell-hofx
-        run: |
-          cd $CI_WORKSPACE
-          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
-          export PATH=$CI_WORKSPACE/swell/bin:$PATH
-          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
-          echo "experiment_id: swell-hofx" > hofx.yaml
-          echo "experiment_root: $CI_WORKSPACE" >> hofx.yaml
-          echo "existing_jedi_source_directory: $CI_WORKSPACE/jedi_build" >> hofx.yaml
-          echo "existing_jedi_build_directory: $CI_WORKSPACE/jedi_build/build-intel-release" >> hofx.yaml
-          rm -r -f $HOME/cylc-run/swell-hofx-suite
-          swell_prepare_experiment_config -m defaults -s hofx -p nccs_discover -o hofx.yaml
-          swell_create_experiment -c swell-hofx.yaml
-          swell_launch_experiment --suite_path $CI_WORKSPACE/swell-hofx/swell-hofx-suite --no-detach --log_path $CI_WORKSPACE/swell-hofx
-
-      - name: finalize-nightly-build
-        run: |
-          cd $CI_ROOT
-          $CI_SOURCE/clean.sh
-          rm -f latest active
-          ln -s $CI_DATETIME latest
-          mkdir -p $CI_ROOT/modulefiles/jedi-swell
-          cd $CI_ROOT/modulefiles/jedi-swell
-          rm -f default.lua
-          cp $CI_SOURCE/modulefiles/jedi-swell/latest.lua .
-          ln -s latest.lua default.lua
-          ln -s latest.lua $CI_DATETIME.lua
-          $CI_SOURCE/clean.sh
-          cd $CI_ROOT/modulefiles/swell
-          rm -f default.lua
-          cp $CI_SOURCE/modulefiles/swell/latest.lua .
-          ln -s latest.lua default.lua
-          ln -s latest.lua $CI_DATETIME.lua
-          $CI_SOURCE/clean.sh
-
-      - name: exit-workflow
-        run: |
-          rm -f $CI_ROOT/.lock
-          echo "Workflow complete"
+      - name: check-param
+        run: echo "$CI_DATETIME"
