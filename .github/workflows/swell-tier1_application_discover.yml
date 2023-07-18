@@ -10,7 +10,7 @@ jobs:
 
   # Initialization needed by all the workflows
   # ------------------------------------------
-  setup:
+  tier1_setup:
 
     runs-on: nccs-discover-swell
     timeout-minutes: 30
@@ -36,7 +36,7 @@ jobs:
       - name: install-swell
         run: |
           source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
-          pip install --prefix=$CI_WORKSPACE/swell $GITHUB_WORKSPACE/swell
+          pip install --prefix=$CI_WORKSPACE/swell -r $GITHUB_WORKSPACE/swell/requirements.txt $GITHUB_WORKSPACE/swell
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
 
@@ -44,9 +44,9 @@ jobs:
   # ------------------------
   swell-tier_1-ufo_testing:
 
-    runs-on: nccs-discover
+    runs-on: nccs-discover-swell
     timeout-minutes: 600
-    needs: setup
+    needs: tier1_setup
 
     steps:
 
@@ -67,9 +67,9 @@ jobs:
 
   swell-tier_1-hofx:
 
-    runs-on: nccs-discover
+    runs-on: nccs-discover-swell
     timeout-minutes: 600
-    needs: setup
+    needs: tier1_setup
 
     steps:
 
