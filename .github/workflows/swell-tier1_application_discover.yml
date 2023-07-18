@@ -32,7 +32,9 @@ jobs:
 
       - name: install-swell
         run: |
-          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
+          module purge
+          module use /discover/swdev/jcsda/spack-stack/modulefiles
+          module load miniconda/3.9.7
           pip install --prefix=$CI_WORKSPACE/swell -r $GITHUB_WORKSPACE/swell/requirements.txt --no-cache-dir $GITHUB_WORKSPACE/swell
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
