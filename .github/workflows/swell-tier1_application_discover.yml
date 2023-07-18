@@ -8,6 +8,8 @@ defaults:
 
 jobs:
 
+  # Initialization needed by all the workflows
+  # ------------------------------------------
   tier1_setup:
 
     runs-on: nccs-discover
@@ -43,7 +45,7 @@ jobs:
   swell-tier_1-ufo_testing:
 
     runs-on: nccs-discover
-    timeout-minutes: 600s
+    timeout-minutes: 600
     needs: tier1_setup
 
     steps:
