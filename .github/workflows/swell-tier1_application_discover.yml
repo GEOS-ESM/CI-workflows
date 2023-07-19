@@ -36,7 +36,7 @@ jobs:
   # ------------------------
   swell-tier_1-ufo_testing:
 
-    runs-on: nccs-discover-swell
+    runs-on: nccs-discover
     timeout-minutes: 600
     needs: swell-tier_1-setup
 
@@ -70,7 +70,7 @@ jobs:
   # -----------------
   swell-tier_1-hofx:
 
-    runs-on: nccs-discover-swell
+    runs-on: nccs-discover
     timeout-minutes: 600
     needs: swell-tier_1-setup
 
@@ -103,20 +103,20 @@ jobs:
 # Perform all the clean up
 # ------------------------
 
-#  swell-tier_1-clean_up:
-#
-#    runs-on: nccs-discover-swell
-#    timeout-minutes: 30
-#    needs: [swell-tier_1-ufo_testing, swell-tier_1-hofx]
-#
-#    steps:
-#
-#      - name: Remove the run directory
-#        run: |
-#          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
-#          rm -r -f $CI_WORKSPACE
-#
-#      - name: Remove the cylc logging directories
-#        run: |
-#          rm -r -f $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite
-#          rm -r -f $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite
+  swell-tier_1-clean_up:
+
+    runs-on: nccs-discover-swell
+    timeout-minutes: 30
+    needs: [swell-tier_1-ufo_testing, swell-tier_1-hofx]
+
+    steps:
+
+      - name: Remove the run directory
+        run: |
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
+          rm -r -f $CI_WORKSPACE
+
+      - name: Remove the cylc logging directories
+        run: |
+          rm -r -f $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite
+          rm -r -f $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite
