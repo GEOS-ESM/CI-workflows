@@ -30,7 +30,7 @@ jobs:
           # Copy and source modules
           cp ${GITHUB_WORKSPACE}/src/swell/deployment/platforms/nccs_discover/modules /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/
           source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
-          pip install --prefix=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/requirements.txt --no-cache-dir ${GITHUB_RUN_ID}/swell
+          pip install --prefix=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/requirements.txt --no-cache-dir ${GITHUB_WORKSPACE}
           # Remove source code (needed to ensure nothing relies on the source)
           rm -rf ${GITHUB_WORKSPACE}
 
@@ -108,16 +108,15 @@ jobs:
     runs-on: nccs-discover
     timeout-minutes: 30
     needs: [swell-tier_1-ufo_testing, swell-tier_1-hofx]
+    if: always()  # Always run the clean up, even if failed or cancelled
 
     steps:
 
       - name: Remove the run directory
         run: |
-          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
-          rm -r -f $CI_WORKSPACE
+          rm -r -f /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
 
       - name: Remove the cylc logging directories
         run: |
           rm -r -f $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite
-          rm -r -f ${GITHUB_WORKSPACE}/${GITHUB_RUN_ID}
