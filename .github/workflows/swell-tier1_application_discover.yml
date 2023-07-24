@@ -22,13 +22,15 @@ jobs:
 
       - name: acquire-swell
         uses: actions/checkout@v3
-        with:
-          path: ${GITHUB_RUN_ID}
 
       - name: install-swell
         run: |
-          source ${GITHUB_WORKSPACE}/${GITHUB_RUN_ID}/swell/src/swell/deployment/platforms/nccs_discover/modules
-          pip install --prefix=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/${GITHUB_RUN_ID}/swell/requirements.txt --no-cache-dir ${GITHUB_RUN_ID}/${GITHUB_WORKSPACE}/swell
+          # Copy modules
+          cp ${GITHUB_WORKSPACE}/swell/src/swell/deployment/platforms/nccs_discover/modules /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
+          source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
+          pip install --prefix=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/swell/requirements.txt --no-cache-dir ${GITHUB_RUN_ID}/swell
+          # Remove source code
+          rm -rf ${GITHUB_WORKSPACE}/swell
 
   # Run ufo_testing workflow
   # ------------------------
@@ -49,7 +51,7 @@ jobs:
 
           mkdir -p $CI_WORKSPACE_JOB
 
-          source ${GITHUB_WORKSPACE}/${GITHUB_RUN_ID}/swell/src/swell/deployment/platforms/nccs_discover/modules
+          source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
 
@@ -82,7 +84,7 @@ jobs:
 
           mkdir -p $CI_WORKSPACE_JOB
 
-          source ${GITHUB_WORKSPACE}/${GITHUB_RUN_ID}/swell/src/swell/deployment/platforms/nccs_discover/modules
+          source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
 
