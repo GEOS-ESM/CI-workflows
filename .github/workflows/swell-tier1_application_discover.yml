@@ -23,12 +23,12 @@ jobs:
       - name: acquire-swell
         uses: actions/checkout@v3
         with:
-          path: swell
+          path: /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell/src
 
       - name: install-swell
         run: |
-          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
-          pip install --prefix=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell -r $GITHUB_WORKSPACE/swell/requirements.txt --no-cache-dir $GITHUB_WORKSPACE/swell
+          source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell/src/src/swell/deployment/platforms/nccs_discover/modules
+          pip install --prefix=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell -r /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell/src/requirements.txt --no-cache-dir /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell/src
 
   # Run ufo_testing workflow
   # ------------------------
