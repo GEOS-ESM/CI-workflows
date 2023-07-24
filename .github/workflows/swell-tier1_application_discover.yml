@@ -27,9 +27,7 @@ jobs:
 
       - name: install-swell
         run: |
-          module purge
-          module use /discover/swdev/jcsda/spack-stack/modulefiles
-          module load miniconda/3.9.7
+          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
           pip install --prefix=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell -r $GITHUB_WORKSPACE/swell/requirements.txt --no-cache-dir $GITHUB_WORKSPACE/swell
 
   # Run ufo_testing workflow
