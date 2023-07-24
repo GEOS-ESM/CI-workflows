@@ -23,12 +23,12 @@ jobs:
       - name: acquire-swell
         uses: actions/checkout@v3
         with:
-          path: /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell/src
+          path: ${GITHUB_RUN_ID}
 
       - name: install-swell
         run: |
-          source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell/src/src/swell/deployment/platforms/nccs_discover/modules
-          pip install --prefix=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell -r /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell/src/requirements.txt --no-cache-dir /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell/src
+          source ${GITHUB_WORKSPACE}/${GITHUB_RUN_ID}/swell/src/swell/deployment/platforms/nccs_discover/modules
+          pip install --prefix=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/${GITHUB_RUN_ID}/swell/requirements.txt --no-cache-dir ${GITHUB_RUN_ID}/${GITHUB_WORKSPACE}/swell
 
   # Run ufo_testing workflow
   # ------------------------
@@ -49,7 +49,7 @@ jobs:
 
           mkdir -p $CI_WORKSPACE_JOB
 
-          source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell/src/src/swell/deployment/platforms/nccs_discover/modules
+          source ${GITHUB_WORKSPACE}/${GITHUB_RUN_ID}/swell/src/swell/deployment/platforms/nccs_discover/modules
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
 
@@ -82,7 +82,7 @@ jobs:
 
           mkdir -p $CI_WORKSPACE_JOB
 
-          source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell/src/src/swell/deployment/platforms/nccs_discover/modules
+          source ${GITHUB_WORKSPACE}/${GITHUB_RUN_ID}/swell/src/swell/deployment/platforms/nccs_discover/modules
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
 
@@ -116,3 +116,4 @@ jobs:
         run: |
           rm -r -f $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite
+          rm -r -f ${GITHUB_WORKSPACE}/${GITHUB_RUN_ID}
