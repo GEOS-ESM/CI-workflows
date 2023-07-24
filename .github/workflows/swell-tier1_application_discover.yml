@@ -26,6 +26,7 @@ jobs:
       - name: install-swell
         run: |
           # Copy modules
+          echo ${GITHUB_WORKSPACE}
           cp ${GITHUB_WORKSPACE}/swell/src/swell/deployment/platforms/nccs_discover/modules /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
           source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
           pip install --prefix=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/swell/requirements.txt --no-cache-dir ${GITHUB_RUN_ID}/swell
