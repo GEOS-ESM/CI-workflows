@@ -32,7 +32,6 @@ jobs:
           source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
           pip install --prefix=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/requirements.txt --no-cache-dir ${GITHUB_WORKSPACE}
           # Remove source code (needed to ensure nothing relies on the source)
-          rm -rf ${GITHUB_WORKSPACE}
 
   # Run ufo_testing workflow
   # ------------------------
