@@ -68,7 +68,7 @@ jobs:
 
       - uses: actions/upload-artifact@v3
         with:
-          path: $CI_ARTIFACT
+          path: ${{ env.CI_ARTIFACT }}
 
       - name: cleanup
         run: |
