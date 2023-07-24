@@ -26,12 +26,11 @@ jobs:
       - name: install-swell
         run: |
           # Copy modules
-          echo ${GITHUB_WORKSPACE}
-          cp ${GITHUB_WORKSPACE}/swell/src/swell/deployment/platforms/nccs_discover/modules /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
+          cp ${GITHUB_WORKSPACE}/src/swell/deployment/platforms/nccs_discover/modules /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
           source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
-          pip install --prefix=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/swell/requirements.txt --no-cache-dir ${GITHUB_RUN_ID}/swell
+          pip install --prefix=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/requirements.txt --no-cache-dir ${GITHUB_RUN_ID}/swell
           # Remove source code
-          rm -rf ${GITHUB_WORKSPACE}/swell
+          rm -rf ${GITHUB_WORKSPACE}
 
   # Run ufo_testing workflow
   # ------------------------
