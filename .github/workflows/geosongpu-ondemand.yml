@@ -66,9 +66,10 @@ jobs:
           pip install $GITHUB_WORKSPACE/geosongpu-ci
           geosongpu_dispatch ${{ inputs.experiment_name }} ${{ inputs.experiment_action }} $CI_ARTIFACT
 
-      - uses: actions/upload-artifact@v3
-        with:
-          path: ${{ env.CI_ARTIFACT }}
+      # ENOENT bug https://github.com/actions/upload-artifact/issues/240 
+      # - uses: actions/upload-artifact@v3
+      #   with:
+      #     path: ${{ env.CI_ARTIFACT }}
 
       - name: cleanup
         run: |
