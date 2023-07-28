@@ -61,7 +61,8 @@ jobs:
       - name: experiment-run
         run: |
           cd $CI_WORKSPACE
-          module load python/GEOSpyD/Min4.11.0_py3.9
+          module use -a /discover/nobackup/projects/geosongpu/sw/modulefiles
+          module load pchakrab/python/3.9-general-purpose
           python -m venv venv
           source ./venv/bin/activate
           pip install $GITHUB_WORKSPACE/geosongpu-ci
