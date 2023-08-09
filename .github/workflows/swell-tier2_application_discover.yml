@@ -6,129 +6,206 @@ defaults:
   run:
     shell: bash
 
-env:
-  CI_ROOT: /discover/nobackup/gmao_ci/swell/nightly
-
 jobs:
 
-  swell-tier_2:
+  # Initialization needed by all the workflows
+  # ------------------------------------------
+  swell-tier_2-setup:
 
     runs-on: nccs-discover
-    timeout-minutes: 600
+    timeout-minutes: 30
 
     steps:
-
       - name: validate-workflow
         run: |
           /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
 
       - name: establish-workflow-status
         run: |
-          if [ -f "$CI_ROOT/.lock" ]; then echo "Lock file present. Aborting."; exit 1; fi
-          mkdir -p $CI_ROOT
-          touch $CI_ROOT/.lock
-
-      - name: get-current-date
-        run: echo "CI_DATETIME=$(date +'%Y%m%dT%H%M%S')" >> $GITHUB_ENV
-
-      - name: set-environment
-        run: |
-          echo "CI_WORKSPACE=$CI_ROOT/$CI_DATETIME" >> $GITHUB_ENV
-          echo "CI_SOURCE=$CI_ROOT/$CI_DATETIME/CI-workflow/swell/discover/nightly" >> $GITHUB_ENV
-          echo "CICD_EXPERIMENT_ROOT=$CI_ROOT/latest/SwellExperiments" >> $GITHUB_ENV
-
-      - name: create-CI-workspace
-        run: |
-          mkdir -p $CI_WORKSPACE
-          cd $CI_ROOT
-          /bin/rm -f active
-          ln -s $CI_DATETIME active
-
-      - name: acquire-CI-workflow
-        uses: actions/checkout@v3
-        with:
-          repository: GEOS-ESM/CI-workflows
-          path: CI-workflow
+          if [ -f "/discover/nobackup/gmao_ci/swell/tier2/running" ]; then echo "Tier 2 is already running. Abort"; exit 1; fi
+          touch /discover/nobackup/gmao_ci/swell/tier2/running
 
       - name: acquire-swell
         uses: actions/checkout@v3
-        with:
-          path: swell
-
-      - name: install-CI-workflow
-        run: |
-          cp -r -p $GITHUB_WORKSPACE/CI-workflow $CI_WORKSPACE
 
       - name: install-swell
         run: |
-          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
-          pip install --prefix=$CI_WORKSPACE/swell $GITHUB_WORKSPACE/swell
+          # Make experiment directory
+          mkdir /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
+          # Copy and source modules
+          cp ${GITHUB_WORKSPACE}/src/swell/deployment/platforms/nccs_discover/modules /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/
+          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
+          pip install --prefix=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/requirements.txt --no-cache-dir ${GITHUB_WORKSPACE}
+          # Remove source code (needed to ensure nothing relies on the source)
 
-      - name: build-jedi
+  # --------------------------------------------
+  # STEP1: BUILD JEDI CODE FROM DEVELOP BRANCHES
+  # --------------------------------------------
+
+  swell-tier_2-build_jedi:
+
+    runs-on: nccs-discover
+    timeout-minutes: 600
+    needs: swell-tier_2-setup
+
+    steps:
+
+      - name: run-swell-build_jedi
         run: |
-          cd $CI_WORKSPACE
-          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
+          SUITE_NAME=build_jedi
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
+          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
+
+          mkdir -p $CI_WORKSPACE_JOB
+
+          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
-          echo "experiment_id: swell-build-$CI_DATETIME" > build_jedi.yaml
-          echo "experiment_root: $CI_WORKSPACE" >> build_jedi.yaml
-          swell_prepare_experiment_config -m defaults -s build_jedi -p nccs_discover -o build_jedi.yaml
-          swell_create_experiment -c swell-build-$CI_DATETIME.yaml
-          swell_launch_experiment --suite_path $CI_WORKSPACE/swell-build-$CI_DATETIME/swell-build-${CI_DATETIME}-suite --no-detach --log_path $CI_WORKSPACE/swell-build-$CI_DATETIME
-          mv swell-build-$CI_DATETIME/jedi_bundle/source jedi_build
-          mv swell-build-$CI_DATETIME/jedi_bundle/build jedi_build/build-intel-release
+
+          echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+
+          rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
+
+          cd $CI_WORKSPACE_JOB
+          swell_prepare_experiment_config -m defaults -s ${SUITE_NAME} -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          swell_create_experiment -c ${EXPERIMENT_ID}.yaml
+          swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
+
+          # Create symbolic link to build that does not involve $GITHUB_RUN_ID
+          ln -s $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/jedi_bundle $CI_WORKSPACE_JOB/jedi_bundle
+
+
+  # -----------------------------------------------
+  # STEP2: RUN TIER 1 TESTS WITH THE NEW JEDI BUILD
+  # -----------------------------------------------
+
+  # Run ufo_testing workflow
+  # ------------------------
+  swell-tier_2-ufo_testing:
+
+    runs-on: nccs-discover
+    timeout-minutes: 600
+    needs: swell-tier_2-build_jedi
+
+    steps:
 
       - name: run-swell-ufo_testing
         run: |
-          cd $CI_WORKSPACE
-          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
+          SUITE_NAME=ufo_testing
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
+          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
+
+          mkdir -p $CI_WORKSPACE_JOB
+
+          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
-          echo "experiment_id: swell-ufo_testing" > ufo_testing.yaml
-          echo "experiment_root: $CI_WORKSPACE" >> ufo_testing.yaml
-          echo "existing_jedi_source_directory: $CI_WORKSPACE/jedi_build" >> ufo_testing.yaml
-          echo "existing_jedi_build_directory: $CI_WORKSPACE/jedi_build/build-intel-release" >> ufo_testing.yaml
-          rm -r -f $HOME/cylc-run/swell-ufo_testing-suite
-          swell_prepare_experiment_config -m defaults -s ufo_testing -p nccs_discover -o ufo_testing.yaml
-          swell_create_experiment -c swell-ufo_testing.yaml
-          swell_launch_experiment --suite_path $CI_WORKSPACE/swell-ufo_testing/swell-ufo_testing-suite --no-detach --log_path $CI_WORKSPACE/swell-ufo_testing
+
+          echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+
+          # Point to the active build
+          echo "existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+
+          rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
+
+          cd $CI_WORKSPACE_JOB
+          swell_prepare_experiment_config -m defaults -s ${SUITE_NAME} -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          swell_create_experiment -c ${EXPERIMENT_ID}.yaml
+          swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
+
+  # Run hofx workflow
+  # -----------------
+  swell-tier_2-hofx:
+
+    runs-on: nccs-discover
+    timeout-minutes: 600
+    needs: swell-tier_2-build_jedi
+
+    steps:
 
       - name: run-swell-hofx
         run: |
-          cd $CI_WORKSPACE
-          source $GITHUB_WORKSPACE/swell/src/swell/deployment/platforms/nccs_discover/modules
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
+          SUITE_NAME=hofx
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
+          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
+
+          mkdir -p $CI_WORKSPACE_JOB
+
+          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
-          echo "experiment_id: swell-hofx" > hofx.yaml
-          echo "experiment_root: $CI_WORKSPACE" >> hofx.yaml
-          echo "existing_jedi_source_directory: $CI_WORKSPACE/jedi_build" >> hofx.yaml
-          echo "existing_jedi_build_directory: $CI_WORKSPACE/jedi_build/build-intel-release" >> hofx.yaml
-          rm -r -f $HOME/cylc-run/swell-hofx-suite
-          swell_prepare_experiment_config -m defaults -s hofx -p nccs_discover -o hofx.yaml
-          swell_create_experiment -c swell-hofx.yaml
-          swell_launch_experiment --suite_path $CI_WORKSPACE/swell-hofx/swell-hofx-suite --no-detach --log_path $CI_WORKSPACE/swell-hofx
 
-      - name: finalize-nightly-build
-        run: |
-          cd $CI_ROOT
-          $CI_SOURCE/clean.sh
-          rm -f latest active
-          ln -s $CI_DATETIME latest
-          mkdir -p $CI_ROOT/modulefiles/jedi-swell
-          cd $CI_ROOT/modulefiles/jedi-swell
-          rm -f default.lua
-          cp $CI_SOURCE/modulefiles/jedi-swell/latest.lua .
-          ln -s latest.lua default.lua
-          ln -s latest.lua $CI_DATETIME.lua
-          $CI_SOURCE/clean.sh
-          cd $CI_ROOT/modulefiles/swell
-          rm -f default.lua
-          cp $CI_SOURCE/modulefiles/swell/latest.lua .
-          ln -s latest.lua default.lua
-          ln -s latest.lua $CI_DATETIME.lua
-          $CI_SOURCE/clean.sh
+          echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
-      - name: exit-workflow
+          # Point to the active build
+          echo "existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+
+          rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
+
+          cd $CI_WORKSPACE_JOB
+          swell_prepare_experiment_config -m defaults -s ${SUITE_NAME} -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          swell_create_experiment -c ${EXPERIMENT_ID}.yaml
+          swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
+
+
+  # -------------------------------------------------------------
+  # STEP3: PERFORM UPDATES OF STABLE NIGHTLY POINTER AND CLEAN UP
+  # -------------------------------------------------------------
+
+  # Update the nightly pointer (only runs if tier 1 tests were sucessful)
+  # --------------------------
+  swell-tier_2-update_if_stable:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs: [swell-tier_2-ufo_testing, swell-tier_2-hofx]
+
+    steps:
+      - name: Replace link to stable with link to current run and remove old directory
         run: |
-          rm -f $CI_ROOT/.lock
-          echo "Workflow complete"
+          # Get full path to previous sucessful run
+          previous_stable=realpath=`readlink -f /discover/nobackup/gmao_ci/swell/tier2/stable`
+
+          # Remove link
+          rm -f /discover/nobackup/gmao_ci/swell/tier2/stable
+
+          # Link to new stable
+          ln -sf /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID} /discover/nobackup/gmao_ci/swell/tier2/stable
+
+          # Remove old stable
+          rm -r -f $previous_stable
+
+
+  # Perform all the clean up (always runs regardless of success of failure)
+  # ------------------------
+
+  swell-tier_2-clean_up:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs: [swell-tier_2-ufo_testing, swell-tier_2-hofx]
+    if: always()  # Always run the clean up, even if failed or cancelled
+
+    steps:
+
+      - name: Remove the tier 2 testing directories
+        run: |
+          rm -r -f /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/ufo_testing
+          rm -r -f /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/hofx
+
+      - name: Remove the cylc logging directories
+        run: |
+          rm -r -f $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite
+          rm -r -f $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite
+
+      - name: Remove the running lock
+        run: |
+          rm -f /discover/nobackup/gmao_ci/swell/tier2/running
