@@ -22,8 +22,8 @@ jobs:
 
       - name: establish-workflow-status
         run: |
-          if [ -f "/discover/nobackup/gmao_ci/swell/tier2/running" ]; then echo "Tier 2 is already running. Abort"; exit 1; fi
-          touch /discover/nobackup/gmao_ci/swell/tier2/running
+          if [ -f "/discover/nobackup/gmao_ci/swell/tier2/__running__" ]; then echo "Tier 2 is already running. Abort"; exit 1; fi
+          touch /discover/nobackup/gmao_ci/swell/tier2/__running__
 
       - name: acquire-swell
         uses: actions/checkout@v3
@@ -201,7 +201,7 @@ jobs:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [swell-tier_2-ufo_testing, swell-tier_2-hofx]
+    needs: [swell-tier_2-convert_ncdiags, swell-tier_2-ufo_testing, swell-tier_2-hofx]
 
     steps:
       - name: Replace link to stable with link to current run and remove old directory
@@ -226,7 +226,7 @@ jobs:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [swell-tier_2-ufo_testing, swell-tier_2-hofx]
+    needs: [swell-tier_2-convert_ncdiags, swell-tier_2-ufo_testing, swell-tier_2-hofx]
     if: always()  # Always run the clean up, even if failed or cancelled
 
     steps:
@@ -245,4 +245,4 @@ jobs:
 
       - name: Remove the running lock
         run: |
-          rm -f /discover/nobackup/gmao_ci/swell/tier2/running
+          rm -f /discover/nobackup/gmao_ci/swell/tier2/__running__
