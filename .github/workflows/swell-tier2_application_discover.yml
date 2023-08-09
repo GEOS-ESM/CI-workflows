@@ -77,12 +77,48 @@ jobs:
           ln -s $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/jedi_bundle $CI_WORKSPACE_JOB/jedi_bundle
 
 
-  # -----------------------------------------------
-  # STEP2: RUN TIER 1 TESTS WITH THE NEW JEDI BUILD
-  # -----------------------------------------------
+  # ----------------------------------------
+  # STEP2: RUN TESTING SUITES WITH NEW BUILD
+  # ----------------------------------------
 
-  # Run ufo_testing workflow
-  # ------------------------
+  # Run ncdiag convesion suite
+    swell-tier_2-convert_ncdiags:
+
+      runs-on: nccs-discover
+      timeout-minutes: 600
+      needs: swell-tier_2-build_jedi
+
+      steps:
+
+        - name: run-swell-convert_ncdiags
+          run: |
+            CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
+            SUITE_NAME=convert_ncdiags
+            CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
+            EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
+
+            mkdir -p $CI_WORKSPACE_JOB
+
+            source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
+            export PATH=$CI_WORKSPACE/swell/bin:$PATH
+            export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
+
+            echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+            echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+
+            # Point to the active build
+            echo "existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+            echo "existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+
+            rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
+
+            cd $CI_WORKSPACE_JOB
+            swell_prepare_experiment_config -m defaults -s ${SUITE_NAME} -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+            swell_create_experiment -c ${EXPERIMENT_ID}.yaml
+            swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
+
+
+  # Run ufo_testing suite
   swell-tier_2-ufo_testing:
 
     runs-on: nccs-discover
@@ -118,8 +154,7 @@ jobs:
           swell_create_experiment -c ${EXPERIMENT_ID}.yaml
           swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
-  # Run hofx workflow
-  # -----------------
+  # Run hofx suite
   swell-tier_2-hofx:
 
     runs-on: nccs-discover
@@ -196,13 +231,15 @@ jobs:
 
     steps:
 
-      - name: Remove the tier 2 testing directories
+      - name: Remove the testing directories used by the suites
         run: |
+          rm -r -f /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/convert_ncdiags
           rm -r -f /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/ufo_testing
           rm -r -f /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/hofx
 
       - name: Remove the cylc logging directories
         run: |
+          rm -r -f $HOME/cylc-run/swell-convert_ncdiags-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite
 
