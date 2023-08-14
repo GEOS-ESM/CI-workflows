@@ -62,8 +62,8 @@ jobs:
           rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
           cd $CI_WORKSPACE_JOB
-          swell_prepare_experiment_config -m defaults -s ${SUITE_NAME} -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          swell_create_experiment -c ${EXPERIMENT_ID}.yaml
+          swell_prepare_experiment_config ${SUITE_NAME} -t stable_build -m defaults -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          swell_create_experiment ${EXPERIMENT_ID}.yaml
           swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
   # Run hofx workflow
@@ -95,8 +95,8 @@ jobs:
           rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
           cd $CI_WORKSPACE_JOB
-          swell_prepare_experiment_config -m defaults -s ${SUITE_NAME} -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          swell_create_experiment -c ${EXPERIMENT_ID}.yaml
+          swell_prepare_experiment_config ${SUITE_NAME} -t stable_build -m defaults -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          swell_create_experiment ${EXPERIMENT_ID}.yaml
           swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
 # Perform all the clean up
@@ -119,3 +119,7 @@ jobs:
         run: |
           rm -r -f $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite
+
+      - name: Remove the R2D2 experiment output
+        run: |
+          rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/ncdiag/ob/swell-hofx-${GITHUB_RUN_ID}

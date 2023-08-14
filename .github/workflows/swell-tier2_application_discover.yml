@@ -20,6 +20,7 @@ jobs:
         run: |
           /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
 
+      # Only one tier 2 run is allowed at a given time
       - name: establish-workflow-status
         run: |
           if [ -f "/discover/nobackup/gmao_ci/swell/tier2/__running__" ]; then echo "Tier 2 is already running. Abort"; exit 1; fi
@@ -218,6 +219,10 @@ jobs:
           # Remove old stable
           rm -r -f $previous_stable
 
+      # Remove the running lock if the update was sucessful
+      - name: Remove the running lock
+        run: |
+          rm -f /discover/nobackup/gmao_ci/swell/tier2/__running__
 
   # Perform all the clean up (always runs regardless of success of failure)
   # ------------------------
@@ -243,6 +248,6 @@ jobs:
           rm -r -f $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite
 
-      - name: Remove the running lock
+      - name: Remove the R2D2 experiment output
         run: |
-          rm -f /discover/nobackup/gmao_ci/swell/tier2/__running__
+          rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/ncdiag/ob/swell-hofx-${GITHUB_RUN_ID}
