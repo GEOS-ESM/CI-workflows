@@ -208,7 +208,7 @@ jobs:
       - name: Replace link to stable with link to current run and remove old directory
         run: |
           # Get full path to previous sucessful run
-          previous_stable=realpath=`readlink -f /discover/nobackup/gmao_ci/swell/tier2/stable`
+          previous_stable=`readlink -f /discover/nobackup/gmao_ci/swell/tier2/stable`
 
           # Remove link
           rm -f /discover/nobackup/gmao_ci/swell/tier2/stable
@@ -217,6 +217,7 @@ jobs:
           ln -sf /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID} /discover/nobackup/gmao_ci/swell/tier2/stable
 
           # Remove old stable
+          echo "Removing previous stable: $previous_stable"
           rm -r -f $previous_stable
 
       # Remove the running lock if the update was sucessful
@@ -247,6 +248,7 @@ jobs:
           rm -r -f $HOME/cylc-run/swell-convert_ncdiags-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite
+          rm -r -f $HOME/cylc-run/swell-build_jedi-${GITHUB_RUN_ID}-suite
 
       - name: Remove the R2D2 experiment output
         run: |
