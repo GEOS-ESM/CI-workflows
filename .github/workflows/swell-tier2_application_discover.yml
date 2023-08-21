@@ -32,7 +32,7 @@ jobs:
       - name: install-swell
         run: |
           # Make experiment directory
-          mkdir /discover/nobackup/gmao_ci/swell/tier2/5929150304
+          mkdir -p /discover/nobackup/gmao_ci/swell/tier2/5929150304
           # Copy and source modules
           cp ${GITHUB_WORKSPACE}/src/swell/deployment/platforms/nccs_discover/modules /discover/nobackup/gmao_ci/swell/tier2/5929150304/
           source /discover/nobackup/gmao_ci/swell/tier2/5929150304/modules
