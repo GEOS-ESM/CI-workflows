@@ -77,8 +77,9 @@ jobs:
     steps:
       - name: Copy cylc Logs
         run: |
-          cp -r $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-ufo_testing-${GITHUB_RUN_ID}-suite
-
+          if [ -d "$HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite" ]; then
+            cp -r $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-ufo_testing-${GITHUB_RUN_ID}-suite
+          fi
 
   # Run hofx workflow
   # -----------------
@@ -124,8 +125,9 @@ jobs:
     steps:
       - name: Copy cylc Logs
         run: |
-          cp -r $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-hofx-${GITHUB_RUN_ID}-suite
-
+          if [ -d "$HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite" ]; then
+            cp -r $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-hofx-${GITHUB_RUN_ID}-suite
+          fi
 
 # Perform all the clean up
 # ------------------------

@@ -88,7 +88,9 @@ jobs:
     steps:
       - name: Copy cylc logs
         run: |
-          mv $HOME/cylc-run/swell-build_jedi-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-build_jedi-${GITHUB_RUN_ID}-suite
+          if [ -d "$HOME/cylc-run/swell-build_jedi-${GITHUB_RUN_ID}-suite" ]; then
+            cp -r $HOME/cylc-run/swell-build_jedi-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-build_jedi-${GITHUB_RUN_ID}-suite
+          fi
 
   # ----------------------------------------
   # STEP2: RUN TESTING SUITES WITH NEW BUILD
@@ -141,7 +143,9 @@ jobs:
     steps:
       - name: Copy cylc logs
         run: |
-          cp -r $HOME/cylc-run/swell-convert_ncdiags-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-convert_ncdiags-${GITHUB_RUN_ID}-suite
+          if [ -d "$HOME/cylc-run/swell-convert_ncdiags-${GITHUB_RUN_ID}-suite" ]; then
+            cp -r $HOME/cylc-run/swell-convert_ncdiags-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-convert_ncdiags-${GITHUB_RUN_ID}-suite
+          fi
 
   # Run ufo_testing suite
   swell-tier_2-ufo_testing:
@@ -190,8 +194,9 @@ jobs:
     steps:
       - name: Copy cylc logs
         run: |
-          cp -r $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-ufo_testing-${GITHUB_RUN_ID}-suite
-
+          if [ -d "$HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite" ]; then
+            cp -r $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-ufo_testing-${GITHUB_RUN_ID}-suite
+          fi
 
   # Run hofx suite
   swell-tier_2-hofx:
@@ -240,8 +245,9 @@ jobs:
     steps:
       - name: Copy cylc logs
         run: |
-          cp -r $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-hofx-${GITHUB_RUN_ID}-suite
-
+          if [ -d "$HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite" ]; then
+            cp -r $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-hofx-${GITHUB_RUN_ID}-suite
+          fi
 
   # -------------------------------------------------------------
   # STEP3: PERFORM UPDATES OF STABLE NIGHTLY POINTER AND CLEAN UP
