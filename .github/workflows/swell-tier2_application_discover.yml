@@ -32,11 +32,11 @@ jobs:
       - name: install-swell
         run: |
           # Make experiment directory
-          mkdir /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
+          mkdir /discover/nobackup/gmao_ci/swell/tier2/5929150304
           # Copy and source modules
-          cp ${GITHUB_WORKSPACE}/src/swell/deployment/platforms/nccs_discover/modules /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/
-          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
-          pip install --prefix=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/requirements.txt --no-cache-dir ${GITHUB_WORKSPACE}
+          cp ${GITHUB_WORKSPACE}/src/swell/deployment/platforms/nccs_discover/modules /discover/nobackup/gmao_ci/swell/tier2/5929150304/
+          source /discover/nobackup/gmao_ci/swell/tier2/5929150304/modules
+          pip install --prefix=/discover/nobackup/gmao_ci/swell/tier2/5929150304/swell -r ${GITHUB_WORKSPACE}/requirements.txt --no-cache-dir ${GITHUB_WORKSPACE}
           # Remove source code (needed to ensure nothing relies on the source)
 
   # --------------------------------------------
@@ -53,29 +53,30 @@ jobs:
 
       - name: run-swell-build_jedi
         run: |
-          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
-          SUITE_NAME=build_jedi
-          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
-          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
-
-          mkdir -p $CI_WORKSPACE_JOB
-
-          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
-          export PATH=$CI_WORKSPACE/swell/bin:$PATH
-          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
-
-          echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-
-          rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
-
-          cd $CI_WORKSPACE_JOB
-          swell_prepare_experiment_config ${SUITE_NAME} -m defaults -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          swell_create_experiment ${EXPERIMENT_ID}.yaml
-          swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
-
-          # Create symbolic link to build that does not involve $GITHUB_RUN_ID
-          ln -s $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/jedi_bundle $CI_WORKSPACE_JOB/jedi_bundle
+          echo "ALL GOOD"
+#          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/5929150304
+#          SUITE_NAME=build_jedi
+#          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/5929150304/${SUITE_NAME}
+#          EXPERIMENT_ID=swell-${SUITE_NAME}-5929150304
+#
+#          mkdir -p $CI_WORKSPACE_JOB
+#
+#          source /discover/nobackup/gmao_ci/swell/tier2/5929150304/modules
+#          export PATH=$CI_WORKSPACE/swell/bin:$PATH
+#          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
+#
+#          echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+#          echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+#
+#          rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
+#
+#          cd $CI_WORKSPACE_JOB
+#          swell_prepare_experiment_config ${SUITE_NAME} -m defaults -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+#          swell_create_experiment ${EXPERIMENT_ID}.yaml
+#          swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
+#
+#          # Create symbolic link to build that does not involve $GITHUB_RUN_ID
+#          ln -s $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/jedi_bundle $CI_WORKSPACE_JOB/jedi_bundle
 
   # Copy cylc logs upon failure
   swell-tier_2-build_jedi-failure:
@@ -86,11 +87,15 @@ jobs:
     if: failure()
 
     steps:
-      - name: Copy cylc logs
+      - name: Fail hold for build_jedi
         run: |
-          if [ -d "$HOME/cylc-run/swell-build_jedi-${GITHUB_RUN_ID}-suite" ]; then
-            cp -r $HOME/cylc-run/swell-build_jedi-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-build_jedi-${GITHUB_RUN_ID}-suite
+          SUITE_NAME=build_jedi
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/5929150304/${SUITE_NAME}
+          if [ -d "$HOME/cylc-run/swell-${SUITE_NAME}-5929150304-suite" ]; then
+            cp -r $HOME/cylc-run/swell-${SUITE_NAME}-5929150304-suite ${CI_WORKSPACE_JOB}/cylc_logs-swell-${SUITE_NAME}-5929150304-suite
           fi
+          mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
+
 
   # ----------------------------------------
   # STEP2: RUN TESTING SUITES WITH NEW BUILD
@@ -107,14 +112,14 @@ jobs:
 
       - name: run-swell-convert_ncdiags
         run: |
-          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/5929150304
           SUITE_NAME=convert_ncdiags
-          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
-          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/5929150304/${SUITE_NAME}
+          EXPERIMENT_ID=swell-${SUITE_NAME}-5929150304
 
           mkdir -p $CI_WORKSPACE_JOB
 
-          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
+          source /discover/nobackup/gmao_ci/swell/tier2/5929150304/modules
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
 
@@ -122,8 +127,8 @@ jobs:
           echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
           # Point to the active build
-          echo "existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          echo "existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/5929150304/build_jedi/jedi_bundle/source" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/5929150304/build_jedi/jedi_bundle/build" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
           rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
@@ -141,11 +146,15 @@ jobs:
     if: failure()
 
     steps:
-      - name: Copy cylc logs
+      - name: Fail hold for convert_ncdiags
         run: |
-          if [ -d "$HOME/cylc-run/swell-convert_ncdiags-${GITHUB_RUN_ID}-suite" ]; then
-            cp -r $HOME/cylc-run/swell-convert_ncdiags-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-convert_ncdiags-${GITHUB_RUN_ID}-suite
+          SUITE_NAME=convert_ncdiags
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/5929150304/${SUITE_NAME}
+          if [ -d "$HOME/cylc-run/swell-${SUITE_NAME}-5929150304-suite" ]; then
+            cp -r $HOME/cylc-run/swell-${SUITE_NAME}-5929150304-suite ${CI_WORKSPACE_JOB}/cylc_logs-swell-${SUITE_NAME}-5929150304-suite
           fi
+          mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
+
 
   # Run ufo_testing suite
   swell-tier_2-ufo_testing:
@@ -158,14 +167,14 @@ jobs:
 
       - name: run-swell-ufo_testing
         run: |
-          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/5929150304
           SUITE_NAME=ufo_testing
-          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
-          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/5929150304/${SUITE_NAME}
+          EXPERIMENT_ID=swell-${SUITE_NAME}-5929150304
 
           mkdir -p $CI_WORKSPACE_JOB
 
-          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
+          source /discover/nobackup/gmao_ci/swell/tier2/5929150304/modules
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
 
@@ -173,8 +182,8 @@ jobs:
           echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
           # Point to the active build
-          echo "existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          echo "existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/5929150304/build_jedi/jedi_bundle/source" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/5929150304/build_jedi/jedi_bundle/build" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
           rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
@@ -192,11 +201,14 @@ jobs:
     if: failure()
 
     steps:
-      - name: Copy cylc logs
+      - name: Fail hold for ufo_testing
         run: |
-          if [ -d "$HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite" ]; then
-            cp -r $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-ufo_testing-${GITHUB_RUN_ID}-suite
+          SUITE_NAME=ufo_testing
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/5929150304/${SUITE_NAME}
+          if [ -d "$HOME/cylc-run/swell-${SUITE_NAME}-5929150304-suite" ]; then
+            cp -r $HOME/cylc-run/swell-${SUITE_NAME}-5929150304-suite ${CI_WORKSPACE_JOB}/cylc_logs-swell-${SUITE_NAME}-5929150304-suite
           fi
+          mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
 
   # Run hofx suite
   swell-tier_2-hofx:
@@ -209,14 +221,14 @@ jobs:
 
       - name: run-swell-hofx
         run: |
-          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/5929150304
           SUITE_NAME=hofx
-          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
-          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/5929150304/${SUITE_NAME}
+          EXPERIMENT_ID=swell-${SUITE_NAME}-5929150304
 
           mkdir -p $CI_WORKSPACE_JOB
 
-          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
+          source /discover/nobackup/gmao_ci/swell/tier2/5929150304/modules
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
 
@@ -224,8 +236,8 @@ jobs:
           echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
           # Point to the active build
-          echo "existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          echo "existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/5929150304/build_jedi/jedi_bundle/source" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/5929150304/build_jedi/jedi_bundle/build" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
           rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
@@ -243,11 +255,14 @@ jobs:
     if: failure()
 
     steps:
-      - name: Copy cylc logs
+      - name: Fail hold for hofx
         run: |
-          if [ -d "$HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite" ]; then
-            cp -r $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-hofx-${GITHUB_RUN_ID}-suite
+          SUITE_NAME=hofx
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/5929150304/${SUITE_NAME}
+          if [ -d "$HOME/cylc-run/swell-${SUITE_NAME}-5929150304-suite" ]; then
+            cp -r $HOME/cylc-run/swell-${SUITE_NAME}-5929150304-suite ${CI_WORKSPACE_JOB}/cylc_logs-swell-${SUITE_NAME}-5929150304-suite
           fi
+          mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
 
   # -------------------------------------------------------------
   # STEP3: PERFORM UPDATES OF STABLE NIGHTLY POINTER AND CLEAN UP
@@ -271,7 +286,7 @@ jobs:
           rm -f /discover/nobackup/gmao_ci/swell/tier2/stable
 
           # Link to new stable
-          ln -sf /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID} /discover/nobackup/gmao_ci/swell/tier2/stable
+          ln -sf /discover/nobackup/gmao_ci/swell/tier2/5929150304 /discover/nobackup/gmao_ci/swell/tier2/stable
 
           # Remove old stable
           echo "Removing previous stable: $previous_stable"
@@ -294,19 +309,13 @@ jobs:
 
     steps:
 
-      - name: Remove the testing directories used by the suites
-        run: |
-          rm -r -f /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/convert_ncdiags
-          rm -r -f /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/ufo_testing
-          rm -r -f /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/hofx
-
       - name: Remove the cylc logging directories
         run: |
-          rm -r -f $HOME/cylc-run/swell-convert_ncdiags-${GITHUB_RUN_ID}-suite
-          rm -r -f $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite
-          rm -r -f $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite
-          rm -r -f $HOME/cylc-run/swell-build_jedi-${GITHUB_RUN_ID}-suite
+          rm -r -f $HOME/cylc-run/swell-convert_ncdiags-5929150304-suite
+          rm -r -f $HOME/cylc-run/swell-ufo_testing-5929150304-suite
+          rm -r -f $HOME/cylc-run/swell-hofx-5929150304-suite
+          rm -r -f $HOME/cylc-run/swell-build_jedi-5929150304-suite
 
       - name: Remove the R2D2 experiment output
         run: |
-          rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/ncdiag/ob/swell-hofx-${GITHUB_RUN_ID}
+          rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/ncdiag/ob/swell-hofx-5929150304
