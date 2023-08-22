@@ -66,7 +66,7 @@ jobs:
           swell_create_experiment ${EXPERIMENT_ID}.yaml
           swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
-  # Copy cylc Logs upon failure
+  # Move experiment directory on failure
   swell-tier_2-ufo_testing-failure:
 
     runs-on: nccs-discover
@@ -115,7 +115,7 @@ jobs:
           swell_create_experiment ${EXPERIMENT_ID}.yaml
           swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
-  # Copy cylc Logs upon failure
+  # Move experiment directory on failure
   swell-tier_2-hofx-failure:
 
     runs-on: nccs-discover

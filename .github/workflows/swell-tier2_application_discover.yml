@@ -77,7 +77,7 @@ jobs:
           # Create symbolic link to build that does not involve $GITHUB_RUN_ID
           ln -s $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/jedi_bundle $CI_WORKSPACE_JOB/jedi_bundle
 
-  # Copy cylc logs upon failure
+  # Move experiment directory on failure
   swell-tier_2-build_jedi-failure:
 
     runs-on: nccs-discover
@@ -133,7 +133,7 @@ jobs:
           swell_create_experiment ${EXPERIMENT_ID}.yaml
           swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
-  # Copy cylc logs upon failure
+  # Move experiment directory on failure
   swell-tier_2-convert_ncdiags-failure:
 
     runs-on: nccs-discover
@@ -185,7 +185,7 @@ jobs:
           swell_create_experiment ${EXPERIMENT_ID}.yaml
           swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
-  # Copy cylc logs upon failure
+  # Move experiment directory on failure
   swell-tier_2-ufo_testing-failure:
 
     runs-on: nccs-discover
@@ -236,7 +236,7 @@ jobs:
           swell_create_experiment ${EXPERIMENT_ID}.yaml
           swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
-  # Copy cylc logs upon failure
+  # Move experiment directory on failure
   swell-tier_2-hofx-failure:
 
     runs-on: nccs-discover
