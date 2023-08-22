@@ -73,6 +73,10 @@ jobs:
       #   with:
       #     path: ${{ env.CI_ARTIFACT }}
 
+      # Due to the high level of files that can be littered, we always
+      # clean up after ourselves. Therefore, logs should carry sufficient information
+      # to allow for DEBUG.
       - name: cleanup
+        if: always()
         run: |
           /bin/rm -rf $CI_WORKSPACE
