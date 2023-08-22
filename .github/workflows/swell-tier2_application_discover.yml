@@ -90,9 +90,6 @@ jobs:
         run: |
           SUITE_NAME=build_jedi
           CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
-          if [ -d "$HOME/cylc-run/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite" ]; then
-            cp -r $HOME/cylc-run/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite ${CI_WORKSPACE_JOB}/cylc_logs-swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite
-          fi
           mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
 
 
@@ -149,9 +146,6 @@ jobs:
         run: |
           SUITE_NAME=convert_ncdiags
           CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
-          if [ -d "$HOME/cylc-run/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite" ]; then
-            cp -r $HOME/cylc-run/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite ${CI_WORKSPACE_JOB}/cylc_logs-swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite
-          fi
           mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
 
 
@@ -204,9 +198,6 @@ jobs:
         run: |
           SUITE_NAME=ufo_testing
           CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
-          if [ -d "$HOME/cylc-run/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite" ]; then
-            cp -r $HOME/cylc-run/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite ${CI_WORKSPACE_JOB}/cylc_logs-swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite
-          fi
           mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
 
   # Run hofx suite
@@ -258,9 +249,6 @@ jobs:
         run: |
           SUITE_NAME=hofx
           CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
-          if [ -d "$HOME/cylc-run/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite" ]; then
-            cp -r $HOME/cylc-run/swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite ${CI_WORKSPACE_JOB}/cylc_logs-swell-${SUITE_NAME}-${GITHUB_RUN_ID}-suite
-          fi
           mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
 
   # -------------------------------------------------------------

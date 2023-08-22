@@ -75,11 +75,12 @@ jobs:
     if: failure()
 
     steps:
-      - name: Copy cylc Logs
+      - name: Fail hold for ufo_testing
         run: |
-          if [ -d "$HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite" ]; then
-            cp -r $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-ufo_testing-${GITHUB_RUN_ID}-suite
-          fi
+          SUITE_NAME=ufo_testing
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
+          mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
+                - name: Copy cylc Logs
 
   # Run hofx workflow
   # -----------------
@@ -123,16 +124,28 @@ jobs:
     if: failure()
 
     steps:
-      - name: Copy cylc Logs
+      - name: Fail hold for hofx
         run: |
-          if [ -d "$HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite" ]; then
-            cp -r $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}/cylc_logs-swell-hofx-${GITHUB_RUN_ID}-suite
-          fi
+          SUITE_NAME=hofx
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
+          mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
 
 # Perform all the clean up
 # ------------------------
 
-  swell-tier_1-clean_up:
+  swell-tier_1-clean_up_success:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs: [swell-tier_1-ufo_testing, swell-tier_1-hofx]
+
+    steps:
+
+      - name: Remove the run directory
+        run: |
+          rm -r -f /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
+
+  swell-tier_1-clean_up_always:
 
     runs-on: nccs-discover
     timeout-minutes: 30
@@ -140,10 +153,6 @@ jobs:
     if: always()  # Always run the clean up, even if failed or cancelled
 
     steps:
-
-      - name: Remove the run directory
-        run: |
-          rm -r -f /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
 
       - name: Remove the cylc logging directories
         run: |
