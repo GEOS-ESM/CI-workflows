@@ -66,6 +66,22 @@ jobs:
           swell_create_experiment ${EXPERIMENT_ID}.yaml
           swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
+  # Move experiment directory on failure
+  swell-tier_2-ufo_testing-failure:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs: swell-tier_2-ufo_testing
+    if: failure()
+
+    steps:
+      - name: Fail hold for ufo_testing
+        run: |
+          SUITE_NAME=ufo_testing
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
+          mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
+                - name: Copy cylc Logs
+
   # Run hofx workflow
   # -----------------
   swell-tier_1-hofx:
@@ -99,10 +115,37 @@ jobs:
           swell_create_experiment ${EXPERIMENT_ID}.yaml
           swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
+  # Move experiment directory on failure
+  swell-tier_2-hofx-failure:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs: swell-tier_2-hofx
+    if: failure()
+
+    steps:
+      - name: Fail hold for hofx
+        run: |
+          SUITE_NAME=hofx
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
+          mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
+
 # Perform all the clean up
 # ------------------------
 
-  swell-tier_1-clean_up:
+  swell-tier_1-clean_up_success:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs: [swell-tier_1-ufo_testing, swell-tier_1-hofx]
+
+    steps:
+
+      - name: Remove the run directory
+        run: |
+          rm -r -f /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
+
+  swell-tier_1-clean_up_always:
 
     runs-on: nccs-discover
     timeout-minutes: 30
@@ -110,10 +153,6 @@ jobs:
     if: always()  # Always run the clean up, even if failed or cancelled
 
     steps:
-
-      - name: Remove the run directory
-        run: |
-          rm -r -f /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
 
       - name: Remove the cylc logging directories
         run: |
