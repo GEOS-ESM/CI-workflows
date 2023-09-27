@@ -62,7 +62,7 @@ jobs:
           rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
           cd $CI_WORKSPACE_JOB
-          swell_prepare_experiment_config ${SUITE_NAME} -t stable_build -m defaults -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          swell_prepare_experiment_config ${SUITE_NAME} -m defaults -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           swell_create_experiment ${EXPERIMENT_ID}.yaml
           swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
@@ -111,7 +111,7 @@ jobs:
           rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
           cd $CI_WORKSPACE_JOB
-          swell_prepare_experiment_config ${SUITE_NAME} -t stable_build -m defaults -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          swell_prepare_experiment_config ${SUITE_NAME} -m defaults -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           swell_create_experiment ${EXPERIMENT_ID}.yaml
           swell_launch_experiment --suite_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
