@@ -53,8 +53,12 @@ jobs:
           mkdir -p $CI_WORKSPACE_JOB
 
           source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
+
+          # Get python version
+          PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
+
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
-          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
+          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
 
           echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
@@ -101,8 +105,12 @@ jobs:
           mkdir -p $CI_WORKSPACE_JOB
 
           source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
+
+          # Get python version
+          PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
+
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
-          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python3.9/site-packages
+          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
 
           echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
