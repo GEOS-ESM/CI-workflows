@@ -66,7 +66,7 @@ jobs:
           python -m venv venv
           source ./venv/bin/activate
           pip install --upgrade pip setuptools wheel
-          pip install $GITHUB_WORKSPACE/geosongpu-ci
+          pip install $GITHUB_WORKSPACE/smtn
           tcn-ci ${{ inputs.experiment_name }} ${{ inputs.experiment_action }} --artifact $CI_ARTIFACT
 
       # ENOENT bug https://github.com/actions/upload-artifact/issues/240 
@@ -77,7 +77,7 @@ jobs:
       # Due to the high level of files that can be littered, we always
       # clean up after ourselves. Therefore, logs should carry sufficient information
       # to allow for DEBUG.
-      # - name: cleanup
-      #   if: always()
-      #   run: |
-      #     /bin/rm -rf $CI_WORKSPACE
+      - name: cleanup
+        if: always()
+        run: |
+          /bin/rm -rf $CI_WORKSPACE
