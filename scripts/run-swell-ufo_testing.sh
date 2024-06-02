@@ -2,6 +2,9 @@
 
 set -euxo pipefail
 
+source scripts/utils.sh
+github_variables
+
 CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
 SUITE_NAME=ufo_testing
 CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}

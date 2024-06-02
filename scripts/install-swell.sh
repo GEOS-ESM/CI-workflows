@@ -2,6 +2,9 @@
 
 set -euxo pipefail
 
+source scripts/utils.sh
+github_variables
+
 # Make experiment directory
 mkdir /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
 
