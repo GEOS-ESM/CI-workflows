@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: install-swell
-        run: ./scripts/install-swell.sh
+        run: bash scripts/install-swell.sh
 
   # Run ufo_testing workflow
   # ------------------------
@@ -37,7 +37,7 @@ jobs:
     steps:
 
       - name: run-swell-ufo_testing
-        run: ./scripts/run-swell-ufo_testing.sh
+        run: bash scripts/run-swell-suite.sh ufo_testing
 
   # Move experiment directory on failure
   swell-tier_1-ufo_testing-failure:
@@ -66,7 +66,7 @@ jobs:
     steps:
 
       - name: run-swell-hofx
-        run: ./scripts/run-swell-hofx.sh
+        run: scripts/run-swell-suite.sh hofx
 
   # Move experiment directory on failure
   swell-tier_1-hofx-failure:
@@ -94,7 +94,7 @@ jobs:
     steps:
 
       - name: run-swell-3dvar
-        run: ./scripts/run-swell-3dvar.sh
+        run: bash scripts/run-swell-suite.sh 3dvar
 
   # Move experiment directory on failure
   swell-tier_1-3dvar-failure:

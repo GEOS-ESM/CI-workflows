@@ -2,13 +2,25 @@
 
 set -euxo pipefail
 
+SUITE_NAME="$1"
+
+if [[ -z "$SUITE_NAME" ]]; then
+  echo "Variable SUITE_NAME is unset."
+  exit 1
+fi
+
 source scripts/utils.sh
 github_variables
 
 CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
-SUITE_NAME=hofx
 CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
 EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
+
+echo "----------------------------------------"
+echo "CI_WORKSPACE=${CI_WORKSPACE}"
+echo "CI_WORKSPACE_JOB=${CI_WORKSPACE}"
+echo "EXPERIMENT_ID=${CI_WORKSPACE}"
+echo "----------------------------------------"
 
 mkdir -p $CI_WORKSPACE_JOB
 
@@ -19,6 +31,8 @@ PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
 
 export PATH=$CI_WORKSPACE/swell/bin:$PATH
 export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
+
+echo "PYTHONPATH=${PYTHONPATH}"
 
 echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
