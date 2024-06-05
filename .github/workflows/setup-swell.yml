@@ -1,0 +1,40 @@
+name: Set up Swell
+
+on:
+  workflow_call:
+    inputs:
+      tier:
+        description: 'Test tier (e.g., tier1, tier2)'
+        required: true
+        type: string
+
+jobs:
+  swell-tier_1-setup:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+
+    steps:
+      - name: validate-workflow
+        run: |
+          /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
+
+      # Only one tier 2 run is allowed at a given time
+      - name: establish-workflow-status
+        if: ${{ inputs.tier == 'tier2' }}
+        run: |
+          if [ -f "/discover/nobackup/gmao_ci/swell/tier2/__running__" ]; then echo "Tier 2 is already running. Abort"; exit 1; fi
+          touch /discover/nobackup/gmao_ci/swell/tier2/__running__
+
+      - name: acquire-swell
+        uses: actions/checkout@v3
+
+      - name: install-swell
+        run: |
+          # Make experiment directory
+          mkdir /discover/nobackup/gmao_ci/swell/${{ inputs.tier }}/${GITHUB_RUN_ID}
+
+          # Copy and source modules
+          cp ${GITHUB_WORKSPACE}/src/swell/deployment/platforms/nccs_discover/modules /discover/nobackup/gmao_ci/swell/${{ inputs.tier }}/${GITHUB_RUN_ID}/
+          source /discover/nobackup/gmao_ci/swell/${{ inputs.tier }}/${GITHUB_RUN_ID}/modules
+          pip install --prefix=/discover/nobackup/gmao_ci/swell/${{ inputs.tier }}/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/requirements.txt --no-cache-dir ${GITHUB_WORKSPACE}
