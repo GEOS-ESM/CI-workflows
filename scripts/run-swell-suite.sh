@@ -9,8 +9,13 @@ if [[ -z "$SUITE_NAME" ]]; then
   exit 1
 fi
 
-source scripts/utils.sh
-github_variables
+# Set default value to `LOCAL_$(RANDOM) if unset`
+: "${GITHUB_RUN_ID:=LOCAL_$RANDOM}"
+export GITHUB_RUN_ID
+
+# Set default value to current working directory
+: "${GITHUB_WORKSPACE:=$PWD}"
+export GITHUB_WORKSPACE
 
 CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
 CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
