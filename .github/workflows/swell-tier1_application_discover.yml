@@ -12,6 +12,8 @@ jobs:
   # ------------------------------------------
   swell-tier_1-setup:
     uses: ./.github/workflows/setup-swell.yml
+    with:
+      tier: "tier1"
 
   tier_1_matrix:
     strategy:
@@ -21,6 +23,7 @@ jobs:
       - uses: ./.github/workflows/run-swell-suite.yml
         needs: swell-tier_1-setup
         with:
+          tier: "tier1"
           suite: ${{ matrix.suite }}
 
 # Perform all the clean up

@@ -4,6 +4,11 @@ on:
   workflow_call:
     inputs:
       suite:
+        description: 'SWELL suite to run (e.g., 3dvar, hofx, ufo_testing)'
+        required: true
+        type: string
+      tier:
+        description: 'Test tier (e.g., "tier1", "tier2")'
         required: true
         type: string
 
@@ -19,12 +24,13 @@ jobs:
       - name: run-swell-${{ inputs.suite }}
         run: |
           SUITE_NAME=${{ inputs.suite }}
-          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
-          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/${{ inputs.tier }}/${GITHUB_RUN_ID}
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/${{ inputs.tier }}/${GITHUB_RUN_ID}/${SUITE_NAME}
           EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
+
           mkdir -p $CI_WORKSPACE_JOB
 
-          source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
+          source /discover/nobackup/gmao_ci/swell/${{ inputs.tier }}/${GITHUB_RUN_ID}/modules
 
           # Get python version
           PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
@@ -36,6 +42,13 @@ jobs:
 
           echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+ 
+          # Point to the active build
+          JEDI_BUNDLE_DIR=/discover/nobackup/gmao_ci/swell/${{ inputs.tier }}/${GITHUB_RUN_ID}/build_jedi/jedi_bundle
+          if [[ ${{ inputs.tier }} == "tier2" && -d "${JEDI_BUNDLE_DIR}" ]]; then
+            echo "existing_jedi_source_directory: ${JEDI_BUNDLE_DIR}/source" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+            echo "existing_jedi_build_directory: ${JEDI_BUNDLE_DIR}/build" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          fi
 
           rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
@@ -43,9 +56,14 @@ jobs:
           swell create ${SUITE_NAME} -m defaults -p nccs_discover -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
+          if [[ ${{ inputs.tier }} == "tier2" && ${{ inputs.suite }} == "build_jedi" ]]; then
+            # Create symbolic link to build that does not involve $GITHUB_RUN_ID
+            ln -s ${CI_WORKSPACE_JOB}/${EXPERIMENT_ID}/jedi_bundle ${CI_WORKSPACE_JOB}/jedi_bundle
+          fi
+
       - name: Fail hold for ${{ inputs.suite }}
         if: failure()
         run: |
           SUITE_NAME=${{ inputs.suite }}
-          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/${{ inputs.tier }}/${GITHUB_RUN_ID}/${SUITE_NAME}
           mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
