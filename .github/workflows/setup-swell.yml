@@ -1,0 +1,20 @@
+name: Set up Swell
+
+on: workflow_call
+
+jobs:
+  swell-tier_1-setup:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+
+    steps:
+      - name: validate-workflow
+        run: |
+          /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
+
+      - name: acquire-swell
+        uses: actions/checkout@v3
+
+      - name: install-swell
+        run: bash scripts/install-swell.sh

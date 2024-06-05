@@ -1,0 +1,27 @@
+name: Run a Swell suite
+
+on:
+  workflow_call:
+    inputs:
+      suite:
+        required: true
+        type: string
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  run-swell-suite:
+    runs-on: nccs-discover
+    timeout-minutes: 600
+    steps:
+      - name: run-swell-${{ inputs.suite }}
+        run: bash scripts/run-swell-suite.sh ${{ inputs.suite }}
+
+      - name: Fail hold for ${{ inputs.suite }}
+        if: failure()
+        run: |
+          SUITE_NAME=${{ inputs.suite }}
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
+          mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
