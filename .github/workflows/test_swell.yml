@@ -39,6 +39,30 @@ jobs:
           pip install --prefix=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/requirements.txt --no-cache-dir ${GITHUB_WORKSPACE}
           # Remove source code (needed to ensure nothing relies on the source)
 
+
+  check_hash_on_discover_test:
+
+    runs-on: nccs-discover
+    timeout-minutes: 600
+    needs: swell-tier_2-setup
+
+    steps:
+
+      - name: run-check_hash_test
+        run: |
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
+          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
+
+          # Get python version
+          PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
+
+          export PATH=$CI_WORKSPACE/swell/bin:$PATH
+          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
+
+          #run check hash test script
+          python $CI_WORKSPACE/swell/lib/python$PYVER/site-packages/swell/test/platform_tests/check_hashes_discover.py
+
+
   # --------------------------------------------
   # STEP1: BUILD JEDI CODE FROM DEVELOP BRANCHES
   # --------------------------------------------
