@@ -33,9 +33,9 @@ jobs:
           pip install --prefix=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/requirements.txt --no-cache-dir ${GITHUB_WORKSPACE}
           # Remove source code (needed to ensure nothing relies on the source)
 
-  # Run ufo_testing workflow
+  # Run 3dvar_cycle workflow
   # ------------------------
-  swell-tier_1-ufo_testing:
+  swell-tier_1-3dvar_cycle:
 
     runs-on: nccs-discover
     timeout-minutes: 600
@@ -43,10 +43,10 @@ jobs:
 
     steps:
 
-      - name: run-swell-ufo_testing
+      - name: run-swell-3dvar_cycle
         run: |
           CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
-          SUITE_NAME=ufo_testing
+          SUITE_NAME=3dvar_cycle
           CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
           EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
 
@@ -70,17 +70,17 @@ jobs:
           swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
   # Move experiment directory on failure
-  swell-tier_1-ufo_testing-failure:
+  swell-tier_1-3dvar_cycle-failure:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: swell-tier_1-ufo_testing
+    needs: swell-tier_1-3dvar_cycle
     if: failure()
 
     steps:
-      - name: Fail hold for ufo_testing
+      - name: Fail hold for 3dvar_cycle
         run: |
-          SUITE_NAME=ufo_testing
+          SUITE_NAME=3dvar_cycle
           CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
           mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
                 - name: Copy cylc Logs
@@ -295,7 +295,7 @@ jobs:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [swell-tier_1-ufo_testing, swell-tier_1-hofx, swell-tier_1-3dvar, swell-tier_1-3dvar_atmos, swell-tier_1-3dfgat_atmos]
+    needs: [swell-tier_1-3dvar_cycle, swell-tier_1-hofx, swell-tier_1-3dvar, swell-tier_1-3dvar_atmos, swell-tier_1-3dfgat_atmos]
 
     steps:
 
@@ -307,16 +307,16 @@ jobs:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [swell-tier_1-ufo_testing, swell-tier_1-hofx, swell-tier_1-3dvar, swell-tier_1-3dvar_atmos, swell-tier_1-3dfgat_atmos]
+    needs: [swell-tier_1-3dvar_cycle, swell-tier_1-hofx, swell-tier_1-3dvar, swell-tier_1-3dvar_atmos, swell-tier_1-3dfgat_atmos]
     if: always()  # Always run the clean up, even if failed or cancelled
 
     steps:
 
       - name: Remove the cylc logging directories
         run: |
-          rm -r -f $HOME/cylc-run/swell-ufo_testing-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-3dvar-${GITHUB_RUN_ID}-suite
+          rm -r -f $HOME/cylc-run/swell-3dvar_cycle-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-3dvar_atmos-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-3dfgat_atmos-${GITHUB_RUN_ID}-suite
 
