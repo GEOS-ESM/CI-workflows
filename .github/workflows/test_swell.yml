@@ -319,4 +319,4 @@ jobs:
           rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/ncdiag/ob/swell-hofx-${GITHUB_RUN_ID}
           rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/ncdiag/ob/swell-3dfgat_cycle-${GITHUB_RUN_ID}
           rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/ncdiag/ob/swell-3dfgat_atmos-${GITHUB_RUN_ID}
-    
+          rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/mom6_cice6_UFS
