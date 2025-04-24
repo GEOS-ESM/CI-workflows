@@ -1,4 +1,4 @@
-name: Swell Tier 2 Applications Tests (Discover)
+name: Swell Tier 1 Applications Tests (Discover)
 
 on: workflow_call
 
@@ -10,7 +10,7 @@ jobs:
 
   # Initialization needed by all the workflows
   # ------------------------------------------
-  swell-tier_2-setup:
+  swell-tier_1-setup:
 
     runs-on: nccs-discover
     timeout-minutes: 30
@@ -20,47 +20,39 @@ jobs:
         run: |
           /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
 
-      # Only one tier 2 run is allowed at a given time
-      - name: establish-workflow-status
-        run: |
-          if [ -f "/discover/nobackup/gmao_ci/swell/tier2/__running__" ]; then echo "Tier 2 is already running. Abort"; exit 1; fi
-          touch /discover/nobackup/gmao_ci/swell/tier2/__running__
-
       - name: acquire-swell
         uses: actions/checkout@v3
 
       - name: install-swell
         run: |
           # Make experiment directory
-          mkdir -p /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
+          mkdir /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
           # Copy and source modules
-          cp ${GITHUB_WORKSPACE}/src/swell/deployment/platforms/nccs_discover_sles15/modules /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/
-          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
-          pip install --prefix=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/requirements.txt --no-cache-dir ${GITHUB_WORKSPACE}
+          cp ${GITHUB_WORKSPACE}/src/swell/deployment/platforms/nccs_discover_sles15/modules /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/
+          source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
+          pip install --prefix=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/requirements.txt --no-cache-dir ${GITHUB_WORKSPACE}
           # Remove source code (needed to ensure nothing relies on the source)
 
-  # --------------------------------------------
-  # STEP1: BUILD JEDI CODE FROM DEVELOP BRANCHES
-  # --------------------------------------------
-
-  swell-tier_2-build_jedi:
+  # Run 3dvar_cycle workflow
+  # ------------------------
+  swell-tier_1-3dvar_cycle:
 
     runs-on: nccs-discover
     timeout-minutes: 600
-    needs: swell-tier_2-setup
+    needs: swell-tier_1-setup
 
     steps:
 
-      - name: run-swell-build_jedi
+      - name: run-swell-3dvar_cycle
         run: |
-          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
-          SUITE_NAME=build_jedi
-          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
+          SUITE_NAME=3dvar_cycle
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
           EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
 
           mkdir -p $CI_WORKSPACE_JOB
 
-          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
+          source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
 
           # Get python version
           PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
@@ -77,102 +69,42 @@ jobs:
           swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
-          # Create symbolic link to build that does not involve $GITHUB_RUN_ID
-          ln -s $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/jedi_bundle $CI_WORKSPACE_JOB/jedi_bundle
-
   # Move experiment directory on failure
-  swell-tier_2-build_jedi-failure:
+  swell-tier_1-3dvar_cycle-failure:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: swell-tier_2-build_jedi
+    needs: swell-tier_1-3dvar_cycle
     if: failure()
 
     steps:
-      - name: Fail hold for build_jedi
+      - name: Fail hold for 3dvar_cycle
         run: |
-          SUITE_NAME=build_jedi
-          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
+          SUITE_NAME=3dvar_cycle
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
           mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
+                - name: Copy cylc Logs
 
-
-  # ----------------------------------------
-  # STEP2: RUN TESTING SUITES WITH NEW BUILD
-  # ----------------------------------------
-
-  # Run hofx suite
-  swell-tier_2-hofx:
+  # Run 3dfgat_cycle workflow
+  # ------------------------
+  swell-tier_1-3dfgat_cycle:
 
     runs-on: nccs-discover
     timeout-minutes: 600
-    needs: swell-tier_2-build_jedi
-
-    steps:
-
-      - name: run-swell-hofx
-        run: |
-          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
-          SUITE_NAME=hofx
-          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
-          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
-
-          mkdir -p $CI_WORKSPACE_JOB
-
-          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
-
-          # Get python version
-          PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
-
-          export PATH=$CI_WORKSPACE/swell/bin:$PATH
-          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
-
-          echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-
-          # Point to the active build
-          echo "existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          echo "existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-
-          rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
-
-          cd $CI_WORKSPACE_JOB
-          swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
-
-  # Move experiment directory on failure
-  swell-tier_2-hofx-failure:
-
-    runs-on: nccs-discover
-    timeout-minutes: 30
-    needs: swell-tier_2-hofx
-    if: failure()
-
-    steps:
-      - name: Fail hold for hofx
-        run: |
-          SUITE_NAME=hofx
-          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
-          mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
-
-  # Run 3dfgat_cycle suite
-  swell-tier_2-3dfgat_cycle:
-
-    runs-on: nccs-discover
-    timeout-minutes: 600
-    needs: swell-tier_2-build_jedi
+    needs: swell-tier_1-setup
 
     steps:
 
       - name: run-swell-3dfgat_cycle
         run: |
-          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
           SUITE_NAME=3dfgat_cycle
-          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
           EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
 
           mkdir -p $CI_WORKSPACE_JOB
 
-          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
+          source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
 
           # Get python version
           PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
@@ -183,10 +115,6 @@ jobs:
           echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
-          # Point to the active build
-          echo "existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          echo "existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-
           rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
           cd $CI_WORKSPACE_JOB
@@ -194,39 +122,41 @@ jobs:
           swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
   # Move experiment directory on failure
-  swell-tier_2-3dfgat_cycle-failure:
+  swell-tier_1-3dfgat_cycle-failure:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: swell-tier_2-3dfgat_cycle
+    needs: swell-tier_1-3dfgat_cycle
     if: failure()
 
     steps:
       - name: Fail hold for 3dfgat_cycle
         run: |
           SUITE_NAME=3dfgat_cycle
-          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
           mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
+                - name: Copy cylc Logs
 
-  # Run 3dfgat_atmos suite
-  swell-tier_2-3dfgat_atmos:
+  # Run hofx workflow
+  # -----------------
+  swell-tier_1-hofx:
 
     runs-on: nccs-discover
     timeout-minutes: 600
-    needs: swell-tier_2-build_jedi
+    needs: swell-tier_1-setup
 
     steps:
 
-      - name: run-swell-3dfgat_atmos
+      - name: run-swell-hofx
         run: |
-          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
-          SUITE_NAME=3dfgat_atmos
-          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
+          SUITE_NAME=hofx
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
           EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
 
           mkdir -p $CI_WORKSPACE_JOB
 
-          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
+          source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
 
           # Get python version
           PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
@@ -237,9 +167,56 @@ jobs:
           echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
-          # Point to the active build
-          echo "existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          echo "existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
+
+          cd $CI_WORKSPACE_JOB
+          swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
+
+  # Move experiment directory on failure
+  swell-tier_1-hofx-failure:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs: swell-tier_1-hofx
+    if: failure()
+
+    steps:
+      - name: Fail hold for hofx
+        run: |
+          SUITE_NAME=hofx
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
+          mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
+
+  # Run 3dvar workflow
+  # -----------------
+  swell-tier_1-3dvar:
+
+    runs-on: nccs-discover
+    timeout-minutes: 600
+    needs: swell-tier_1-setup
+
+    steps:
+
+      - name: run-swell-3dvar
+        run: |
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
+          SUITE_NAME=3dvar
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
+          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
+
+          mkdir -p $CI_WORKSPACE_JOB
+
+          source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
+
+          # Get python version
+          PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
+
+          export PATH=$CI_WORKSPACE/swell/bin:$PATH
+          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
+
+          echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
           rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
@@ -248,61 +225,206 @@ jobs:
           swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
   # Move experiment directory on failure
-  swell-tier_2-3dfgat_atmos-failure:
+  swell-tier_1-3dvar-failure:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: swell-tier_2-3dfgat_atmos
+    needs: swell-tier_1-3dvar
+    if: failure()
+
+    steps:
+      - name: Fail hold for 3dvar
+        run: |
+          SUITE_NAME=3dvar
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
+          mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
+
+  # Run 3dvar_atmos workflow
+  # -----------------
+  swell-tier_1-3dvar_atmos:
+
+    runs-on: nccs-discover
+    timeout-minutes: 600
+    needs: swell-tier_1-setup
+
+    steps:
+
+      - name: run-swell-3dvar_atmos
+        run: |
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
+          SUITE_NAME=3dvar_atmos
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
+          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
+
+          mkdir -p $CI_WORKSPACE_JOB
+
+          source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
+
+          # Get python version
+          PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
+
+          export PATH=$CI_WORKSPACE/swell/bin:$PATH
+          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
+
+          echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+
+          rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
+
+          cd $CI_WORKSPACE_JOB
+          swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
+
+  # Move experiment directory on failure
+  swell-tier_1-3dvar_atmos-failure:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs: swell-tier_1-3dvar_atmos
+    if: failure()
+
+    steps:
+      - name: Fail hold for 3dvar_atmos
+        run: |
+          SUITE_NAME=3dvar_atmos
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
+
+  # Run 3dfgat_atmos workflow
+  # -----------------
+  swell-tier_1-3dfgat_atmos:
+
+    runs-on: nccs-discover
+    timeout-minutes: 600
+    needs: swell-tier_1-setup
+
+    steps:
+
+      - name: run-swell-3dfgat_atmos
+        run: |
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
+          SUITE_NAME=3dfgat_atmos
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
+          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
+
+          mkdir -p $CI_WORKSPACE_JOB
+
+          source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
+
+          # Get python version
+          PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
+
+          export PATH=$CI_WORKSPACE/swell/bin:$PATH
+          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
+
+          echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+
+          rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
+
+          cd $CI_WORKSPACE_JOB
+          swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
+
+  # Move experiment directory on failure
+  swell-tier_1-3dfgat_atmos-failure:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs: swell-tier_1-3dfgat_atmos
     if: failure()
 
     steps:
       - name: Fail hold for 3dfgat_atmos
         run: |
           SUITE_NAME=3dfgat_atmos
-          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
           mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
-  
-  # -------------------------------------------------------------
-  # STEP3: PERFORM UPDATES OF STABLE NIGHTLY POINTER AND CLEAN UP
-  # -------------------------------------------------------------
 
-  # Update the nightly pointer (only runs if tier 1 tests were sucessful)
-  # --------------------------
-  swell-tier_2-update_if_stable:
+  # Run localensembleda workflow
+  # -----------------
+  swell-tier_1-localensembleda:
 
     runs-on: nccs-discover
-    timeout-minutes: 30
-    needs: [swell-tier_2-hofx, swell-tier_2-3dfgat_cycle, swell-tier_2-3dfgat_atmos]
+    timeout-minutes: 600
+    needs: swell-tier_1-setup
 
     steps:
-      - name: Replace link to stable with link to current run and remove old directory
+
+      - name: run-swell-localensembleda
         run: |
-          # Get full path to previous sucessful run
-          previous_stable=`readlink -f /discover/nobackup/gmao_ci/swell/tier2/stable`
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
+          SUITE_NAME=localensembleda
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
+          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
 
-          # Remove link
-          rm -f /discover/nobackup/gmao_ci/swell/tier2/stable
+          mkdir -p $CI_WORKSPACE_JOB
 
-          # Link to new stable
-          ln -sf /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID} /discover/nobackup/gmao_ci/swell/tier2/stable
+          source /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/modules
 
-          # Remove old stable
-          echo "Removing previous stable: $previous_stable"
-          rm -r -f $previous_stable
+          # Get python version
+          PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
 
-      # Remove the running lock if the update was sucessful
-      - name: Remove the running lock
-        run: |
-          rm -f /discover/nobackup/gmao_ci/swell/tier2/__running__
+          export PATH=$CI_WORKSPACE/swell/bin:$PATH
+          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
 
-  # Perform all the clean up (always runs regardless of success of failure)
-  # ------------------------
+          echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
-  swell-tier_2-clean_up:
+          rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
+
+          cd $CI_WORKSPACE_JOB
+          swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
+
+  # Move experiment directory on failure
+  swell-tier_1-localensembleda-failure:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [swell-tier_2-hofx, swell-tier_2-3dfgat_cycle, swell-tier_2-3dfgat_atmos]
+    needs: swell-tier_1-localensembleda
+    if: failure()
+
+    steps:
+      - name: Fail hold for localensembleda
+        run: |
+          SUITE_NAME=localensembleda
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}/${SUITE_NAME}
+          mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
+
+# Perform all the clean up
+# ------------------------
+
+  swell-tier_1-clean_up_success:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs:
+          - swell-tier_1-3dvar_cycle
+          - swell-tier_1-3dfgat_cycle
+          - swell-tier_1-hofx
+          - swell-tier_1-3dvar
+          - swell-tier_1-3dvar_atmos
+          - swell-tier_1-3dfgat_atmos
+          - swell-tier_1-localensembleda
+
+    steps:
+
+      - name: Remove the run directory
+        run: |
+          rm -r -f /discover/nobackup/gmao_ci/swell/tier1/${GITHUB_RUN_ID}
+
+  swell-tier_1-clean_up_always:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs:
+          - swell-tier_1-3dvar_cycle
+          - swell-tier_1-3dfgat_cycle
+          - swell-tier_1-hofx
+          - swell-tier_1-3dvar
+          - swell-tier_1-3dvar_atmos
+          - swell-tier_1-3dfgat_atmos
+          - swell-tier_1-localensembleda
     if: always()  # Always run the clean up, even if failed or cancelled
 
     steps:
@@ -310,13 +432,13 @@ jobs:
       - name: Remove the cylc logging directories
         run: |
           rm -r -f $HOME/cylc-run/swell-hofx-${GITHUB_RUN_ID}-suite
+          rm -r -f $HOME/cylc-run/swell-3dvar-${GITHUB_RUN_ID}-suite
+          rm -r -f $HOME/cylc-run/swell-3dvar_cycle-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-3dfgat_cycle-${GITHUB_RUN_ID}-suite
+          rm -r -f $HOME/cylc-run/swell-3dvar_atmos-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-3dfgat_atmos-${GITHUB_RUN_ID}-suite
-          rm -r -f $HOME/cylc-run/swell-build_jedi-${GITHUB_RUN_ID}-suite
+          rm -r -f $HOME/cylc-run/swell-localsensembleda-${GITHUB_RUN_ID}-suite
 
       - name: Remove the R2D2 experiment output
         run: |
           rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/ncdiag/ob/swell-hofx-${GITHUB_RUN_ID}
-          rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/ncdiag/ob/swell-3dfgat_cycle-${GITHUB_RUN_ID}
-          rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/ncdiag/ob/swell-3dfgat_atmos-${GITHUB_RUN_ID}
-          rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/mom6_cice6_UFS
