@@ -72,7 +72,7 @@ jobs:
   nag-cleanup:
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [nag-build, nag-build-failure]
+    needs: [nag-cmake, nag-cmake-failure]
     if: always()
     steps:
       - name: cleanup
