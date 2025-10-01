@@ -10,7 +10,7 @@ jobs:
   nag-build:
 
     runs-on: nccs-discover
-    timeout-minutes: 30
+    timeout-minutes: 60
     env:
       CI_WORKSPACE: /discover/nobackup/gmao_ci/mapl/nag/${{ github.run_id }}
 
@@ -33,31 +33,90 @@ jobs:
       - name: Copy modules
         run: |
           # Make testing directory
-          mkdir -p ${CI_WORKSPACE}
+          mkdir -p "${CI_WORKSPACE}"
           # Copy modules
-          cp /discover/nobackup/gmao_ci/mapl/nag/modules ${CI_WORKSPACE}/modules
+          cp /discover/nobackup/gmao_ci/mapl/nag/modules "${CI_WORKSPACE}/modules"
 
       - name: Run mepo
         run: |
-          source ${CI_WORKSPACE}/modules
-          cd ${GITHUB_WORKSPACE}
+          source "${CI_WORKSPACE}/modules"
+          cd "${GITHUB_WORKSPACE}"
           mepo clone
 
       - name: Run cmake
         run: |
-          source ${CI_WORKSPACE}/modules
-          cmake -S ${GITHUB_WORKSPACE} -B ${CI_WORKSPACE}/build -DCMAKE_BUILD_TYPE=Debug --install-prefix ${CI_WORKSPACE}/install -DUSE_F2PY=OFF
+          source "${CI_WORKSPACE}/modules"
+          cmake -S "${GITHUB_WORKSPACE}" -B "${CI_WORKSPACE}/build" -DCMAKE_BUILD_TYPE=Debug --install-prefix "${CI_WORKSPACE}/install" -DUSE_F2PY=OFF
 
-      # If anything above fails, preserve the workspace for inspection
-      - name: Preserve on failure
+      - name: submit-slurm-build-and-test
+        run: |
+          set -euo pipefail
+          source "${CI_WORKSPACE}/modules"
+
+          cat > "${CI_WORKSPACE}/build_test_job.sh" <<'EOS'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          source "${CI_WORKSPACE}/modules"
+          cd "${CI_WORKSPACE}/build"
+
+          PAR=${SLURM_CPUS_PER_TASK:-1}
+          [[ -z "${PAR}" || "${PAR}" -lt 1 ]] && PAR=1
+
+          echo "[SLURM] Building with parallelism: ${PAR}"
+          cmake --build "${CI_WORKSPACE}/build" --parallel "${PAR}"
+          cmake --install "${CI_WORKSPACE}/build"
+
+          echo "[SLURM] Running ctest"
+          cmake --build "${CI_WORKSPACE}/build" --target build-tests --parallel "${PAR}"
+          cmake --build "${CI_WORKSPACE}/build" --parallel "${PAR}" --target tests
+          ctest --test-dir "${CI_WORKSPACE}/build" --parallel "${PAR}" --output-on-failure -L 'ESSENTIAL' || ( echo "Re-running only failing tests..." && ctest --test-dir "${CI_WORKSPACE}/build" --parallel 1 --output-on-failure --rerun-failed )
+
+          EOS
+          chmod +x "${CI_WORKSPACE}/build_test_job.sh"
+
+          # Submit and wait; capture the job id for log paths
+          JOBID=$(sbatch --parsable --wait \
+            --export=ALL,CI_WORKSPACE \
+            --job-name="mapl-ci-${GITHUB_RUN_ID}" \
+            --constraint=mil \
+            --account=s1873 \
+            --nodes=1 \
+            --time=00:30:00 \
+            --output="${CI_WORKSPACE}/slurm-%j.out" \
+            --error="${CI_WORKSPACE}/slurm-%j.err" \
+            "${CI_WORKSPACE}/build_test_job.sh")
+
+          echo "${JOBID}" > "${CI_WORKSPACE}/jobid.txt"
+          echo "SLURM job completed: ${JOBID}"
+          echo "Logs: ${CI_WORKSPACE}/slurm-${JOBID}.out / ${CI_WORKSPACE}/slurm-${JOBID}.err"
+
+      # Show SLURM logs in the Actions UI if anything failed above
+      - name: show-slurm-logs-on-failure
         if: failure()
         run: |
-          mv "${CI_WORKSPACE}" "${CI_WORKSPACE}_FAILED" || true
-          echo "Preserved failed workspace at ${CI_WORKSPACE}_FAILED"
+          set -euo pipefail
+          JOBID=""
+          [[ -f "${CI_WORKSPACE}/jobid.txt" ]] && JOBID=$(cat "${CI_WORKSPACE}/jobid.txt" || true)
+          if [[ -n "${JOBID}" ]]; then
+            echo "=== slurm-${JOBID}.out (tail 200) ==="
+            tail -n 200 "${CI_WORKSPACE}/slurm-${JOBID}.out" || true
+            echo "=== slurm-${JOBID}.err (tail 200) ==="
+            tail -n 200 "${CI_WORKSPACE}/slurm-${JOBID}.err" || true
+          else
+            echo "No jobid.txt found; SLURM may have failed before submit."
+          fi
 
-      # Always clean the normal workspace (after success or after we've moved it on failure)
-      - name: Cleanup
+      # Preserve the full workspace (including SLURM logs) on failure
+      - name: preserve-on-failure
+        if: failure()
+        run: |
+          set -euo pipefail
+          DEST="${CI_WORKSPACE}_FAILED"
+          mv "${CI_WORKSPACE}" "${DEST}" || true
+          echo "Preserved failed workspace at ${DEST}"
+
+      # Clean normal workspace otherwise
+      - name: cleanup
         if: always()
         run: |
-          # Only remove the normal path; the *_FAILED path remains if we created it
           [ -d "${CI_WORKSPACE}" ] && rm -rf "${CI_WORKSPACE}" || true
