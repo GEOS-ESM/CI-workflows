@@ -13,49 +13,49 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: validate-workflow
+      - name: Validate workflow
         run: |
           /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
 
-      - name: checkout-code
+      - name: Checkout code
         uses: actions/checkout@v5
         with:
           set-safe-directory: false
 
       # Add a stable global setting that covers the workspace and any mepo clones
-      - name: trust-workspace-and-clones
+      - name: Trust workspace and clones
         run: |
           git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config --global --add safe.directory '*'
 
-      - name: copy-modules
+      - name: Copy modules
         run: |
           # Make testing directory
           mkdir -p /discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}
           # Copy modules
           cp /discover/nobackup/gmao_ci/mapl/nag/modules /discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}/
 
-      - name: run-mepo
+      - name: Run mepo
         run: |
           source /discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}/modules
           cd ${GITHUB_WORKSPACE}
           mepo clone
 
-      - name: run-cmake
+      - name: Run cmake
         run: |
           CI_WORKSPACE=/discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}
           source /discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}/modules
           cmake -S ${GITHUB_WORKSPACE} -B ${CI_WORKSPACE}/build -DCMAKE_BUILD_TYPE=Debug --install-prefix ${CI_WORKSPACE}/install -DUSE_F2PY=OFF
 
       # If anything above fails, preserve the workspace for inspection
-      - name: preserve-on-failure
+      - name: Preserve on failure
         if: failure()
         run: |
           mv "${CI_WORKSPACE}" "${CI_WORKSPACE}_FAILED" || true
           echo "Preserved failed workspace at ${CI_WORKSPACE}_FAILED"
 
       # Always clean the normal workspace (after success or after we've moved it on failure)
-      - name: cleanup
+      - name: Cleanup
         if: always()
         run: |
           # Only remove the normal path; the *_FAILED path remains if we created it
