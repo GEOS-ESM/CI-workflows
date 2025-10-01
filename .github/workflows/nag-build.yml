@@ -11,6 +11,8 @@ jobs:
 
     runs-on: nccs-discover
     timeout-minutes: 30
+    env:
+      CI_WORKSPACE: /discover/nobackup/gmao_ci/mapl/nag/${{ github.run_id }}
 
     steps:
       - name: Validate workflow
@@ -31,27 +33,25 @@ jobs:
       - name: Copy modules
         run: |
           # Make testing directory
-          mkdir -p /discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}
+          mkdir -p ${CI_WORKSPACE}
           # Copy modules
-          cp /discover/nobackup/gmao_ci/mapl/nag/modules /discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}/
+          cp /discover/nobackup/gmao_ci/mapl/nag/modules ${CI_WORKSPACE}/modules
 
       - name: Run mepo
         run: |
-          source /discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}/modules
+          source ${CI_WORKSPACE}/modules
           cd ${GITHUB_WORKSPACE}
           mepo clone
 
       - name: Run cmake
         run: |
-          CI_WORKSPACE=/discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}
-          source /discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}/modules
+          source ${CI_WORKSPACE}/modules
           cmake -S ${GITHUB_WORKSPACE} -B ${CI_WORKSPACE}/build -DCMAKE_BUILD_TYPE=Debug --install-prefix ${CI_WORKSPACE}/install -DUSE_F2PY=OFF
 
       # If anything above fails, preserve the workspace for inspection
       - name: Preserve on failure
         if: failure()
         run: |
-          CI_WORKSPACE=/discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}
           mv "${CI_WORKSPACE}" "${CI_WORKSPACE}_FAILED" || true
           echo "Preserved failed workspace at ${CI_WORKSPACE}_FAILED"
 
@@ -59,6 +59,5 @@ jobs:
       - name: Cleanup
         if: always()
         run: |
-          CI_WORKSPACE=/discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}
           # Only remove the normal path; the *_FAILED path remains if we created it
           [ -d "${CI_WORKSPACE}" ] && rm -rf "${CI_WORKSPACE}" || true
