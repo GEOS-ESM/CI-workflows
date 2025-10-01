@@ -10,7 +10,7 @@ jobs:
   nag-build:
 
     runs-on: nccs-discover
-    timeout-minutes: 60
+    timeout-minutes: 30
     env:
       CI_WORKSPACE: /discover/nobackup/gmao_ci/mapl/nag/${{ github.run_id }}
 
@@ -77,21 +77,27 @@ jobs:
           EOS
           chmod +x "${CI_WORKSPACE}/build_test_job.sh"
 
-          # Submit and wait; capture the job id for log paths
+          # ---- IMPORTANT: don't let set -e kill us before we write jobid.txt ----
+          set +e
           JOBID=$(sbatch --parsable --wait \
             --export=ALL,CI_WORKSPACE \
             --job-name="mapl-ci-${GITHUB_RUN_ID}" \
             --constraint=mil \
             --account=s1873 \
             --nodes=1 \
-            --time=00:30:00 \
+            --time=00:15:00 \
             --output="${CI_WORKSPACE}/slurm-%j.out" \
             --error="${CI_WORKSPACE}/slurm-%j.err" \
             "${CI_WORKSPACE}/build_test_job.sh")
+          SB_RC=$?
+          set -e
 
-          echo "${JOBID}" > "${CI_WORKSPACE}/jobid.txt"
-          echo "SLURM job completed: ${JOBID}"
+          echo -n "${JOBID}" > "${CI_WORKSPACE}/jobid.txt" || true
+          echo "SLURM finished (rc=${SB_RC}), jobid='${JOBID}'"
           echo "Logs: ${CI_WORKSPACE}/slurm-${JOBID}.out / ${CI_WORKSPACE}/slurm-${JOBID}.err"
+
+          # Propagate the job's exit status to the step so failure() triggers
+          exit ${SB_RC}
 
       # Show SLURM logs in the Actions UI if anything failed above
       - name: Show SLURM logs on failure
