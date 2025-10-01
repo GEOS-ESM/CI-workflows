@@ -48,7 +48,7 @@ jobs:
           source "${CI_WORKSPACE}/modules"
           cmake -S "${GITHUB_WORKSPACE}" -B "${CI_WORKSPACE}/build" -DCMAKE_BUILD_TYPE=Debug --install-prefix "${CI_WORKSPACE}/install" -DUSE_F2PY=OFF
 
-      - name: submit-slurm-build-and-test
+      - name: Submit SLURM build and test
         run: |
           set -euo pipefail
           source "${CI_WORKSPACE}/modules"
@@ -93,7 +93,7 @@ jobs:
           echo "Logs: ${CI_WORKSPACE}/slurm-${JOBID}.out / ${CI_WORKSPACE}/slurm-${JOBID}.err"
 
       # Show SLURM logs in the Actions UI if anything failed above
-      - name: show-slurm-logs-on-failure
+      - name: Show SLURM logs on failure
         if: failure()
         run: |
           set -euo pipefail
@@ -109,7 +109,7 @@ jobs:
           fi
 
       # Preserve the full workspace (including SLURM logs) on failure
-      - name: preserve-on-failure
+      - name: Preserve on failure
         if: failure()
         run: |
           set -euo pipefail
@@ -118,7 +118,7 @@ jobs:
           echo "Preserved failed workspace at ${DEST}"
 
       # Clean normal workspace otherwise
-      - name: cleanup
+      - name: Cleanup
         if: always()
         run: |
           [ -d "${CI_WORKSPACE}" ] && rm -rf "${CI_WORKSPACE}" || true
