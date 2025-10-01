@@ -22,6 +22,14 @@ jobs:
 
       - name: checkout-code
         uses: actions/checkout@v5
+        with:
+          set-safe-directory: false
+
+      # Add a stable global setting that covers the workspace and any mepo clones
+      - name: trust-workspace-and-clones
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          git config --global --add safe.directory '*'
 
       - name: copy-modules
         run: |
