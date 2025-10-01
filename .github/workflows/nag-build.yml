@@ -1,0 +1,81 @@
+name: Build and Test with NAG
+
+on: workflow_call
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+
+  # Initialization needed by all the workflows
+  # ------------------------------------------
+  nag-setup:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+
+    steps:
+      - name: validate-workflow
+        run: |
+          /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
+
+      - name: checkout-code
+        uses: actions/checkout@v5
+
+      - name: copy-modules
+        run: |
+          # Make testing directory
+          mkdir -p /discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}
+          # Copy modules
+          cp /discover/nobackup/gmao_ci/mapl/nag/modules /discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}/
+
+      - name: run-mepo
+        run: |
+          source /discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}/modules
+          cd ${GITHUB_WORKSPACE}
+          mepo clone
+
+  # ----------------
+  # STEP1: Run CMake
+  # ----------------
+
+  nag-cmake:
+    runs-on: nccs-discover
+    timeout-minutes: 600
+    needs: nag-setup
+    steps:
+      - name: run-cmake
+        run: |
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}
+          source /discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}/modules
+          cmake -S ${GITHUB_WORKSPACE} -B ${CI_WORKSPACE}/build -DCMAKE_BUILD_TYPE=Debug --install-prefix ${CI_WORKSPACE}/install -DUSE_F2PY=OFF
+
+  # Move build directory on failure
+  nag-cmake-failure:
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs: nag-cmake
+    if: failure()
+    steps:
+      - name: Fail hold for cmake
+        run: |
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}
+          mv ${CI_WORKSPACE} ${CI_WORKSPACE}_FAILED
+
+  # ---------------------
+  # STEP Final: Run Build
+  # ---------------------
+
+  # We need to clean up after ourselves if the build succeeds or fails
+
+  nag-cleanup:
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs: [nag-build, nag-build-failure]
+    if: always()
+    steps:
+      - name: cleanup
+        run: |
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}
+          rm -rf ${CI_WORKSPACE}
