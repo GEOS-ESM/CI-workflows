@@ -79,8 +79,6 @@ jobs:
             --export=ALL,CI_WORKSPACE \
             --job-name="mapl-ci-${GITHUB_RUN_ID}" \
             --constraint=mil \
-            --partition=preops \
-            --qos=benchmark \
             --account=s1873 \
             --nodes=1 \
             --time=00:30:00 \
