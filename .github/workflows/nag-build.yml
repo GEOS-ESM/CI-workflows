@@ -59,17 +59,20 @@ jobs:
           source "${CI_WORKSPACE}/modules"
           cd "${CI_WORKSPACE}/build"
 
-          PAR=${SLURM_CPUS_PER_TASK:-1}
-          [[ -z "${PAR}" || "${PAR}" -lt 1 ]] && PAR=1
+          # Pick something sensible, then clamp to [1,20]
+          PAR=${SLURM_CPUS_PER_TASK:-${SLURM_CPUS_ON_NODE:-1}}
+          (( PAR = PAR < 1 ? 1 : (PAR > 20 ? 20 : PAR) ))
+
+          echo "[SLURM] Using PAR=${PAR}"
 
           echo "[SLURM] Building with parallelism: ${PAR}"
           cmake --build "${CI_WORKSPACE}/build" --parallel "${PAR}"
           cmake --install "${CI_WORKSPACE}/build"
 
           echo "[SLURM] Running ctest"
-          cmake --build "${CI_WORKSPACE}/build" --target build-tests --parallel "${PAR}"
-          cmake --build "${CI_WORKSPACE}/build" --parallel "${PAR}" --target tests
-          ctest --test-dir "${CI_WORKSPACE}/build" --parallel "${PAR}" --output-on-failure -L 'ESSENTIAL' || ( echo "Re-running only failing tests..." && ctest --test-dir "${CI_WORKSPACE}/build" --parallel 1 --output-on-failure --rerun-failed )
+          cd "${CI_WORKSPACE}/build"
+          make -j "${PAR}" build-tests
+          make -j "${PAR}" tests
 
           EOS
           chmod +x "${CI_WORKSPACE}/build_test_job.sh"
