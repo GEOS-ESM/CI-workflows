@@ -7,10 +7,7 @@ defaults:
     shell: bash
 
 jobs:
-
-  # Initialization needed by all the workflows
-  # ------------------------------------------
-  nag-setup:
+  nag-build:
 
     runs-on: nccs-discover
     timeout-minutes: 30
@@ -44,46 +41,22 @@ jobs:
           cd ${GITHUB_WORKSPACE}
           mepo clone
 
-  # ----------------
-  # STEP1: Run CMake
-  # ----------------
-
-  nag-cmake:
-    runs-on: nccs-discover
-    timeout-minutes: 600
-    needs: nag-setup
-    steps:
       - name: run-cmake
         run: |
           CI_WORKSPACE=/discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}
           source /discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}/modules
           cmake -S ${GITHUB_WORKSPACE} -B ${CI_WORKSPACE}/build -DCMAKE_BUILD_TYPE=Debug --install-prefix ${CI_WORKSPACE}/install -DUSE_F2PY=OFF
 
-  # Move build directory on failure
-  nag-cmake-failure:
-    runs-on: nccs-discover
-    timeout-minutes: 30
-    needs: nag-cmake
-    if: failure()
-    steps:
-      - name: Fail hold for cmake
+      # If anything above fails, preserve the workspace for inspection
+      - name: preserve-on-failure
+        if: failure()
         run: |
-          CI_WORKSPACE=/discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}
-          mv ${CI_WORKSPACE} ${CI_WORKSPACE}_FAILED
+          mv "${CI_WORKSPACE}" "${CI_WORKSPACE}_FAILED" || true
+          echo "Preserved failed workspace at ${CI_WORKSPACE}_FAILED"
 
-  # ---------------------
-  # STEP Final: Run Build
-  # ---------------------
-
-  # We need to clean up after ourselves if the build succeeds or fails
-
-  nag-cleanup:
-    runs-on: nccs-discover
-    timeout-minutes: 30
-    needs: [nag-cmake, nag-cmake-failure]
-    if: always()
-    steps:
+      # Always clean the normal workspace (after success or after we've moved it on failure)
       - name: cleanup
+        if: always()
         run: |
-          CI_WORKSPACE=/discover/nobackup/gmao_ci/mapl/nag/${GITHUB_RUN_ID}
-          rm -rf ${CI_WORKSPACE}
+          # Only remove the normal path; the *_FAILED path remains if we created it
+          [ -d "${CI_WORKSPACE}" ] && rm -rf "${CI_WORKSPACE}" || true
