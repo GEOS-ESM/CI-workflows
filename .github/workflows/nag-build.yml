@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Validate workflow
         run: |
-          /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
+          /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} mapl
 
       - name: Checkout code
         uses: actions/checkout@v5
