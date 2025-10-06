@@ -1,0 +1,120 @@
+name: GEOSgcm Build Tests
+
+on:
+  workflow_call:
+    inputs:
+      compiler:
+        description: 'Compiler to use (ifort, ifx, gfortran-14, gfortran-15)'
+        required: false
+        type: string
+        default: 'ifort'
+
+      cmake-build-type:
+        description: 'CMake build type'
+        required: false
+        type: string
+        default: 'Debug'
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      container-image: ${{ steps.config.outputs.container-image }}
+      fortran-compiler: ${{ steps.config.outputs.fortran-compiler }}
+      version-command: ${{ steps.config.outputs.version-command }}
+    steps:
+      - name: Configure compiler settings
+        id: config
+        run: |
+          case "${{ inputs.compiler }}" in
+            "ifort")
+              echo "container-image=gmao/ubuntu24-geos-env:v8.19.0-intelmpi_2021.13-ifort_2021.13" >> $GITHUB_OUTPUT
+              echo "fortran-compiler=ifort" >> $GITHUB_OUTPUT
+              echo "version-command=ifort --version" >> $GITHUB_OUTPUT
+              ;;
+            "ifx")
+              echo "container-image=gmao/ubuntu24-geos-env:v8.19.0-intelmpi_2021.15-ifx_2025.1" >> $GITHUB_OUTPUT
+              echo "fortran-compiler=ifx" >> $GITHUB_OUTPUT
+              echo "version-command=ifx --version" >> $GITHUB_OUTPUT
+              ;;
+            "gfortran-14")
+              echo "container-image=gmao/ubuntu24-geos-env-mkl:v8.19.0-openmpi_5.0.5-gcc_14.2.0" >> $GITHUB_OUTPUT
+              echo "fortran-compiler=gfortran" >> $GITHUB_OUTPUT
+              echo "version-command=gfortran --version" >> $GITHUB_OUTPUT
+              ;;
+            "gfortran-15")
+              echo "container-image=gmao/ubuntu24-geos-env-mkl:v8.19.0-openmpi_5.0.5-gcc_15.2.0" >> $GITHUB_OUTPUT
+              echo "fortran-compiler=gfortran" >> $GITHUB_OUTPUT
+              echo "version-command=gfortran --version" >> $GITHUB_OUTPUT
+              ;;
+            *)
+              echo "::error::Unsupported compiler: ${{ inputs.compiler }}"
+              exit 1
+              ;;
+          esac
+
+  build_gcm:
+    name: Build GEOSgcm (${{ inputs.compiler }})
+    needs: setup
+    if: "!contains(github.event.pull_request.labels.*.name, '0 diff trivial')"
+    runs-on: ubuntu-24.04
+    container:
+      image: ${{ needs.setup.outputs.container-image }}
+
+    env:
+      OMPI_ALLOW_RUN_AS_ROOT: 1
+      OMPI_ALLOW_RUN_AS_ROOT_CONFIRM: 1
+      OMPI_MCA_btl_vader_single_copy_mechanism: none
+
+    steps:
+      - name: Delete huge unnecessary tools folder
+        run: rm -rf /opt/hostedtoolcache
+
+      - name: Checkout GCM
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+          filter: blob:none
+          repository: GEOS-ESM/GEOSgcm
+
+      - name: Set all directories as git safe
+        run: |
+          git config --global --add safe.directory '*'
+
+      - name: Versions etc.
+        run: |
+          ${{ needs.setup.outputs.version-command }}
+          mpirun --version
+          echo $BASEDIR
+
+      - name: Mepo clone external repos
+        run: |
+          mepo clone --partial blobless
+          mepo status
+
+      - name: Mepo develop usual suspects
+        run: |
+          mepo develop GEOSgcm_GridComp GEOSgcm_App GMAO_Shared GEOS_Util
+          mepo status
+
+      - name: Debug PR branch
+        run: echo "PR is coming from ${{ github.event.pull_request.head.ref }}"
+
+      - name: Update other branches
+        if: ${{ github.event.pull_request.head.ref != 'main' && github.event.pull_request.head.ref != 'develop' }}
+        run: |
+          mepo checkout-if-exists ${GITHUB_HEAD_REF}
+          mepo status
+
+      - name: CMake
+        run: |
+          cmake -B build -S . --install-prefix=${pwd}/install \
+            -DCMAKE_Fortran_COMPILER=${{ needs.setup.outputs.fortran-compiler }} \
+            -DCMAKE_BUILD_TYPE=${{ inputs.cmake-build-type }} \
+            -DMPIEXEC_PREFLAGS='--oversubscribe' \
+            -DUSE_F2PY=OFF
+
+      - name: Build
+        run: |
+          cmake --build build -j 4
+          cmake --install build
