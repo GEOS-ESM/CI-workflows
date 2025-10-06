@@ -62,10 +62,10 @@ jobs:
       - name: Set up Spack
         uses: spack/setup-spack@v2
         with:
-          ref: develop
-          color: true
-          path: spack
-          buildcache: false
+          ref: develop      # Spack version (examples: develop, releases/v0.21)
+          color: true       # Force color output (SPACK_COLOR=always)
+          path: spack       # Where to clone Spack
+          buildcache: false # Do not use the spack buildcache
 
       - name: Find compilers
         shell: spack-bash {0}
