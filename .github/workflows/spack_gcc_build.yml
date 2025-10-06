@@ -10,6 +10,13 @@ on:
         description: 'Buildcache token'
         required: true
 
+    inputs:
+      gcm-ref:
+        description: 'GEOSgcm repository ref/branch to checkout'
+        required: false
+        type: string
+        default: ''  # Empty means use default branch
+
 jobs:
   build_gcm:
     name: Spack CI GCC Build
@@ -17,11 +24,12 @@ jobs:
     steps:
 
       - name: Checkout GCM
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 1
           filter: blob:none
           repository: GEOS-ESM/GEOSgcm
+          ref: ${{ inputs.gcm-ref || null }}
 
       - name: Set all directories as git safe
         run: |
@@ -40,13 +48,11 @@ jobs:
 
       - name: Mepo clone external repos
         run: |
-          ls
           mepo clone --partial blobless
           mepo status
 
       - name: Mepo develop usual suspects
         run: |
-          ls
           mepo develop GEOSgcm_GridComp GEOSgcm_App GMAO_Shared GEOS_Util
           mepo status
 

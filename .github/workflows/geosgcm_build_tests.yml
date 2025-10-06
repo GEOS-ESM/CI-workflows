@@ -15,6 +15,12 @@ on:
         type: string
         default: 'Debug'
 
+      gcm-ref:
+        description: 'GEOSgcm repository ref/branch to checkout'
+        required: false
+        type: string
+        default: ''  # Empty means use default branch
+
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -76,6 +82,7 @@ jobs:
           fetch-depth: 1
           filter: blob:none
           repository: GEOS-ESM/GEOSgcm
+          ref: ${{ inputs.gcm-ref || null }}
 
       - name: Set all directories as git safe
         run: |
