@@ -11,12 +11,17 @@ on:
         required: true
 
     inputs:
-      gcm-ref:
-        description: 'GEOSgcm repository ref/branch to checkout'
+      fixture-repo:
+        description: 'Repository to checkout (e.g., GEOS-ESM/GEOSgcm). If not provided, uses current repo'
         required: false
         type: string
-        default: ''  # Empty means use default branch
+        default: ''
 
+      fixture-ref:
+        description: 'Repository ref/branch to checkout (only used when fixture-repo is provided)'
+        required: false
+        type: string
+        default: ''
 jobs:
   build_gcm:
     name: Spack CI GCC Build
@@ -28,8 +33,8 @@ jobs:
         with:
           fetch-depth: 1
           filter: blob:none
-          repository: GEOS-ESM/GEOSgcm
-          ref: ${{ inputs.gcm-ref || null }}
+          repository: ${{ inputs.fixture-repo || null }}
+          ref: ${{ inputs.fixture-ref || null }}
 
       - name: Set all directories as git safe
         run: |
