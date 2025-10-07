@@ -27,6 +27,11 @@ on:
         type: string
         default: ''
 
+      run-mepo-develop:
+        description: 'Whether to run mepo develop step'
+        required: false
+        type: boolean
+        default: true
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -106,6 +111,7 @@ jobs:
           mepo status
 
       - name: Mepo develop usual suspects
+        if: ${{ inputs.run-mepo-develop }}
         run: |
           mepo develop GEOSgcm_GridComp GEOSgcm_App GMAO_Shared GEOS_Util
           mepo status
