@@ -144,10 +144,12 @@ jobs:
         run: |
           cmake --build build -j ${{ inputs.build-jobs }}
 
-      # Note: We use continue-on-error here because weirdly ifort builds sometimes just
-      # "halt" in the install step. It's not like the *build* failed, but just something
-      # about the install step. So we let it continue even if install fails.
-      - name: Install
-        continue-on-error: true
-        run: |
-          cmake --install build
+      # For now we do not install. For unknown reasons, MAPL3 + ifort causes the
+      # install step to not fail, but also not complete. It just "halts" forever.
+      # And GitHub doesn't even see this as a "real" error so continue-on-error doesn
+      # not help. But, for CI, the build is the important part anyway.
+      #############################
+      # - name: Install           #
+      #   run: |                  #
+      #     cmake --install build #
+      #############################
