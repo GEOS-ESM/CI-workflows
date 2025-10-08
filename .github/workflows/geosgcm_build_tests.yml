@@ -32,6 +32,13 @@ on:
         required: false
         type: boolean
         default: true
+
+      build-jobs:
+        description: 'Number of parallel build jobs'
+        required: false
+        type: number
+        default: 4
+
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -135,5 +142,5 @@ jobs:
 
       - name: Build
         run: |
-          cmake --build build -j 4
+          cmake --build build -j ${{ inputs.build-jobs }}
           cmake --install build
