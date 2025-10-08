@@ -143,4 +143,7 @@ jobs:
       - name: Build
         run: |
           cmake --build build -j ${{ inputs.build-jobs }}
+
+      - name: Install
+        run: |
           cmake --install build
