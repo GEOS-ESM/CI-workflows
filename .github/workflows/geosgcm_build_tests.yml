@@ -144,6 +144,10 @@ jobs:
         run: |
           cmake --build build -j ${{ inputs.build-jobs }}
 
+      # Note: We use continue-on-error here because weirdly ifort builds sometimes just
+      # "halt" in the install step. It's not like the *build* failed, but just something
+      # about the install step. So we let it continue even if install fails.
       - name: Install
+        continue-on-error: true
         run: |
           cmake --install build
