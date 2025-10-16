@@ -226,7 +226,7 @@ jobs:
           echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
-          EXPERIMENT_ID_1=${COMPARISON_SUITE}-10142025
+          EXPERIMENT_ID_1=swell-${COMPARISON_SUITE}-10142025
           COMPARISON_EXP_PATH_1=/discover/nobackup/gmao_ci/SwellExperiments/${EXPERIMENT_ID_1}/${EXPERIMENT_ID_1}-suite/experiment.yaml
 
           EXPERIMENT_ID_2=swell-${COMPARISON_SUITE}-${GITHUB_RUN_ID}
@@ -329,7 +329,7 @@ jobs:
           echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
-          EXPERIMENT_ID_1=${COMPARISON_SUITE}-10142025
+          EXPERIMENT_ID_1=swell-${COMPARISON_SUITE}-10142025
           COMPARISON_EXP_PATH_1=/discover/nobackup/gmao_ci/SwellExperiments/${EXPERIMENT_ID_1}/${EXPERIMENT_ID_1}-suite/experiment.yaml
 
           EXPERIMENT_ID_2=swell-${COMPARISON_SUITE}-${GITHUB_RUN_ID}
