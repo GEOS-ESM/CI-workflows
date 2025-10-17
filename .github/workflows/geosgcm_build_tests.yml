@@ -57,7 +57,7 @@ jobs:
               echo "version-command=ifort --version" >> $GITHUB_OUTPUT
               ;;
             "ifx")
-              echo "container-image=gmao/ubuntu24-geos-env:v8.20.0-intelmpi_2021.15-ifx_2025.2" >> $GITHUB_OUTPUT
+              echo "container-image=gmao/ubuntu24-geos-env:v8.20.0-intelmpi_2021.16-ifx_2025.2" >> $GITHUB_OUTPUT
               echo "fortran-compiler=ifx" >> $GITHUB_OUTPUT
               echo "version-command=ifx --version" >> $GITHUB_OUTPUT
               ;;
