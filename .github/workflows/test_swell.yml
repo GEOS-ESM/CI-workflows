@@ -208,7 +208,7 @@ jobs:
           COMPARISON_SUITE=3dfgat_cycle
           SUITE_NAME=${COMPARISON_SUITE}-comparison
 
-          CONFIG_NAME=compare_variational_marine
+          CONFIG_NAME=compare_fgat_marine
 
           CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
           EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
