@@ -119,12 +119,14 @@ jobs:
           mpirun --version
           echo $BASEDIR
 
-      - name: Try checking out matching branch in GEOSgcm fixture
+      - name: Try matching branch in GEOSgcm fixture
         if: ${{ github.event.pull_request.head.ref != 'main' && github.event.pull_request.head.ref != 'develop' }}
         run: |
           BRANCH="${GITHUB_HEAD_REF}"
-          if git checkout "$BRANCH" 2>/dev/null; then
-            echo "✓ Found and checked out matching branch '$BRANCH' in GEOSgcm fixture"
+          # Fetch the branch if it exists
+          if git fetch origin "$BRANCH" 2>/dev/null; then
+            echo "✓ Found matching branch '$BRANCH' in GEOSgcm fixture"
+            git checkout "$BRANCH"
           else
             echo "ℹ No matching branch '$BRANCH' in GEOSgcm fixture, using default branch"
           fi
