@@ -15,6 +15,12 @@ on:
         type: string
         default: 'Debug'
 
+      baselibs-version:
+        description: 'Container version to use (e.g., v8.20.0, v9.0.0)'
+        required: false
+        type: string
+        default: 'v8.20.0'
+
       fixture-repo:
         description: 'Repository to checkout (e.g., GEOS-ESM/GEOSgcm). If not provided, uses current repo'
         required: false
@@ -50,24 +56,25 @@ jobs:
       - name: Configure compiler settings
         id: config
         run: |
+          VERSION="${{ inputs.baselibs-version }}"
           case "${{ inputs.compiler }}" in
             "ifort")
-              echo "container-image=gmao/ubuntu24-geos-env:v8.20.0-intelmpi_2021.13-ifort_2021.13" >> $GITHUB_OUTPUT
+              echo "container-image=gmao/ubuntu24-geos-env:${VERSION}-intelmpi_2021.13-ifort_2021.13" >> $GITHUB_OUTPUT
               echo "fortran-compiler=ifort" >> $GITHUB_OUTPUT
               echo "version-command=ifort --version" >> $GITHUB_OUTPUT
               ;;
             "ifx")
-              echo "container-image=gmao/ubuntu24-geos-env:v8.20.0-intelmpi_2021.16-ifx_2025.2" >> $GITHUB_OUTPUT
+              echo "container-image=gmao/ubuntu24-geos-env:${VERSION}-intelmpi_2021.16-ifx_2025.2" >> $GITHUB_OUTPUT
               echo "fortran-compiler=ifx" >> $GITHUB_OUTPUT
               echo "version-command=ifx --version" >> $GITHUB_OUTPUT
               ;;
             "gfortran-14")
-              echo "container-image=gmao/ubuntu24-geos-env-mkl:v8.20.0-openmpi_5.0.5-gcc_14.2.0" >> $GITHUB_OUTPUT
+              echo "container-image=gmao/ubuntu24-geos-env-mkl:${VERSION}-openmpi_5.0.5-gcc_14.2.0" >> $GITHUB_OUTPUT
               echo "fortran-compiler=gfortran" >> $GITHUB_OUTPUT
               echo "version-command=gfortran --version" >> $GITHUB_OUTPUT
               ;;
             "gfortran-15")
-              echo "container-image=gmao/ubuntu24-geos-env-mkl:v8.20.0-openmpi_5.0.5-gcc_15.2.0" >> $GITHUB_OUTPUT
+              echo "container-image=gmao/ubuntu24-geos-env-mkl:${VERSION}-openmpi_5.0.5-gcc_15.2.0" >> $GITHUB_OUTPUT
               echo "fortran-compiler=gfortran" >> $GITHUB_OUTPUT
               echo "version-command=gfortran --version" >> $GITHUB_OUTPUT
               ;;
