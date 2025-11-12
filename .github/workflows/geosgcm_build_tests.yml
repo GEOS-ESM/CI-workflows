@@ -45,6 +45,12 @@ on:
         type: number
         default: 4
 
+      build-target:
+        description: "Target for CMake to build"
+        required: false
+        type: string
+        default: ''
+
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -162,7 +168,7 @@ jobs:
 
       - name: Build
         run: |
-          cmake --build build -j ${{ inputs.build-jobs }}
+          cmake --build build -j ${{ inputs.build-jobs }} ${{ inputs.build-target }}
 
       # For now we do not install. For unknown reasons, MAPL3 + ifort causes the
       # install step to not fail, but also not complete. It just "halts" forever.

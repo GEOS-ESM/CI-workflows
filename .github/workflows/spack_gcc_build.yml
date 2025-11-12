@@ -45,6 +45,12 @@ on:
         type: number
         default: 4
 
+      build-target:
+        description: "Target for CMake to build"
+        required: false
+        type: string
+        default: ''
+
     secrets:
       BUILDCACHE_USERNAME:
         description: 'Buildcache username'
@@ -220,7 +226,7 @@ jobs:
             -DCMAKE_Fortran_COMPILER=${FC} \
             -DCMAKE_C_COMPILER=${CC} \
             -DCMAKE_CXX_COMPILER=${CXX}
-          cmake --build build -j ${{ inputs.build-jobs }}
+          cmake --build build -j ${{ inputs.build-jobs }} ${{ inputs.build-target }}
           cmake --install build
 
       - name: Build and run tests
