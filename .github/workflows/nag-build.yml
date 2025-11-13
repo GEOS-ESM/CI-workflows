@@ -53,6 +53,28 @@ jobs:
           set -euo pipefail
           source "${CI_WORKSPACE}/modules"
 
+          JOBID_FILE="${CI_WORKSPACE}/jobid.txt"
+          # Create/empty this early so the trap can use it
+          : > "${JOBID_FILE}"
+
+          # Trap cancellation from GitHub Actions and cancel the SLURM job
+          cancel_handler() {
+            echo "[GHA] Caught cancellation signal; attempting to cancel SLURM job..."
+            if [[ -s "${JOBID_FILE}" ]]; then
+              JID="$(cat "${JOBID_FILE}")"
+              if [[ -n "${JID}" ]]; then
+                scancel "${JID}" || true
+                echo "[GHA] scancel ${JID} requested."
+              else
+                echo "[GHA] JOBID file exists but is empty."
+              fi
+            else
+              echo "[GHA] No JOBID recorded yet; nothing to cancel."
+            fi
+            exit 1
+          }
+          trap cancel_handler TERM INT
+
           cat > "${CI_WORKSPACE}/build_test_job.sh" <<'EOS'
           #!/usr/bin/env bash
           set -euo pipefail
@@ -73,13 +95,12 @@ jobs:
           cd "${CI_WORKSPACE}/build"
           make -j "${PAR}" build-tests
           make -j "${PAR}" tests
-
           EOS
           chmod +x "${CI_WORKSPACE}/build_test_job.sh"
 
-          # ---- IMPORTANT: don't let set -e kill us before we write jobid.txt ----
-          set +e
-          JOBID=$(sbatch --parsable --wait \
+          echo "[GHA] Submitting SLURM job..."
+          # Submit without --wait so we get the jobid immediately
+          JOBID=$(sbatch --parsable \
             --export=ALL,CI_WORKSPACE \
             --job-name="mapl-ci-${GITHUB_RUN_ID}" \
             --constraint=mil \
@@ -89,15 +110,61 @@ jobs:
             --output="${CI_WORKSPACE}/slurm-%j.out" \
             --error="${CI_WORKSPACE}/slurm-%j.err" \
             "${CI_WORKSPACE}/build_test_job.sh")
-          SB_RC=$?
-          set -e
 
-          echo -n "${JOBID}" > "${CI_WORKSPACE}/jobid.txt" || true
-          echo "SLURM finished (rc=${SB_RC}), jobid='${JOBID}'"
-          echo "Logs: ${CI_WORKSPACE}/slurm-${JOBID}.out / ${CI_WORKSPACE}/slurm-${JOBID}.err"
+          # Some SLURM configs return "123456.batch" etc; strip any suffix
+          JOBID=${JOBID%%.*}
+          echo -n "${JOBID}" > "${JOBID_FILE}" || true
+          echo "[GHA] Submitted SLURM job ${JOBID}"
+          echo "Logs (once finished): ${CI_WORKSPACE}/slurm-${JOBID}.out / ${CI_WORKSPACE}/slurm-${JOBID}.err"
 
-          # Propagate the job's exit status to the step so failure() triggers
-          exit ${SB_RC}
+          # ---- Wait for job completion via sacct/squeue ----
+          EXIT_CODE=1
+          STATE="UNKNOWN"
+
+          # Give sacct a chance to see the job
+          sleep 10
+
+          while true; do
+            # Try sacct first – more definitive about final state
+            STATE=$(sacct -j "${JOBID}" --format=State --noheader 2>/dev/null | head -n 1 | awk '{print $1}')
+
+            if [[ -z "${STATE}" ]]; then
+              # Job might not have hit accounting yet; fall back to squeue
+              if squeue -h -j "${JOBID}" >/dev/null 2>&1; then
+                echo "[GHA] Job ${JOBID} running or pending (no sacct entry yet). Sleeping..."
+                sleep 30
+                continue
+              else
+                echo "[GHA] Job ${JOBID} not found in sacct or squeue; assuming failure."
+                STATE="UNKNOWN"
+                EXIT_CODE=1
+                break
+              fi
+            fi
+
+            case "${STATE}" in
+              COMPLETED)
+                EXIT_CODE=0
+                break
+                ;;
+              CANCELLED*|FAILED*|TIMEOUT*|PREEMPTED*|NODE_FAIL*|OUT_OF_MEMORY*)
+                EXIT_CODE=1
+                break
+                ;;
+              PENDING|CONFIGURING|RUNNING|COMPLETING|SUSPENDED)
+                echo "[GHA] Job ${JOBID} state=${STATE}; still waiting..."
+                sleep 30
+                ;;
+              *)
+                echo "[GHA] Job ${JOBID} in unexpected state=${STATE}; treating as failure."
+                EXIT_CODE=1
+                break
+                ;;
+            esac
+          done
+
+          echo "[GHA] SLURM job ${JOBID} finished with state=${STATE}, exit=${EXIT_CODE}"
+          exit "${EXIT_CODE}"
 
       # Show SLURM logs in the Actions UI if anything failed above
       - name: Show SLURM logs on failure
@@ -129,3 +196,4 @@ jobs:
         if: always()
         run: |
           [ -d "${CI_WORKSPACE}" ] && rm -rf "${CI_WORKSPACE}" || true
+
