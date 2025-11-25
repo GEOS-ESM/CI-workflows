@@ -193,6 +193,55 @@ jobs:
           swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
+  swell-tier2-3dfgat_cycle-comparison:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs: swell-tier_2-3dfgat_cycle
+
+    steps:
+      - name: run-swell-3dfgat_cycle-comparison
+        run: |
+
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
+          
+          COMPARISON_SUITE=3dfgat_cycle
+          SUITE_NAME=${COMPARISON_SUITE}-comparison
+
+          CONFIG_NAME=compare_fgat_marine
+
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
+          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
+
+          mkdir -p $CI_WORKSPACE_JOB
+
+          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
+
+          # Get python version
+          PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
+
+          export PATH=$CI_WORKSPACE/swell/bin:$PATH
+          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
+
+          echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+
+          EXPERIMENT_ID_1=swell-${COMPARISON_SUITE}-11042025
+          COMPARISON_EXP_PATH_1=/discover/nobackup/gmao_ci/SwellExperiments/${EXPERIMENT_ID_1}/${EXPERIMENT_ID_1}-suite/experiment.yaml
+
+          EXPERIMENT_ID_2=swell-${COMPARISON_SUITE}-${GITHUB_RUN_ID}
+          COMPARISON_EXP_PATH_2=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${COMPARISON_SUITE}/${EXPERIMENT_ID_2}/${EXPERIMENT_ID_2}-suite/experiment.yaml
+
+          echo "comparison_experiment_paths:" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "- $COMPARISON_EXP_PATH_1" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "- $COMPARISON_EXP_PATH_2" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+
+          rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
+
+          cd $CI_WORKSPACE_JOB
+          swell create ${CONFIG_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
+
   # Move experiment directory on failure
   swell-tier_2-3dfgat_cycle-failure:
 
@@ -245,6 +294,55 @@ jobs:
 
           cd $CI_WORKSPACE_JOB
           swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
+
+  swell-tier2-3dfgat_atmos-comparison:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs: swell-tier_2-3dfgat_atmos
+
+    steps:
+      - name: run-swell-3dfgat_atmos-comparison
+        run: |
+
+          CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
+          
+          COMPARISON_SUITE=3dfgat_atmos
+          SUITE_NAME=${COMPARISON_SUITE}-comparison
+
+          CONFIG_NAME=compare_variational_atmosphere
+
+          CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
+          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
+
+          mkdir -p $CI_WORKSPACE_JOB
+
+          source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
+
+          # Get python version
+          PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
+
+          export PATH=$CI_WORKSPACE/swell/bin:$PATH
+          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
+
+          echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+
+          EXPERIMENT_ID_1=swell-${COMPARISON_SUITE}-10142025
+          COMPARISON_EXP_PATH_1=/discover/nobackup/gmao_ci/SwellExperiments/${EXPERIMENT_ID_1}/${EXPERIMENT_ID_1}-suite/experiment.yaml
+
+          EXPERIMENT_ID_2=swell-${COMPARISON_SUITE}-${GITHUB_RUN_ID}
+          COMPARISON_EXP_PATH_2=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${COMPARISON_SUITE}/${EXPERIMENT_ID_2}/${EXPERIMENT_ID_2}-suite/experiment.yaml
+
+          echo "comparison_experiment_paths:" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "- $COMPARISON_EXP_PATH_1" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          echo "- $COMPARISON_EXP_PATH_2" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+
+          rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
+
+          cd $CI_WORKSPACE_JOB
+          swell create ${CONFIG_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
   # Move experiment directory on failure
@@ -302,7 +400,7 @@ jobs:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [swell-tier_2-hofx, swell-tier_2-3dfgat_cycle, swell-tier_2-3dfgat_atmos]
+    needs: [swell-tier_2-hofx, swell-tier_2-3dfgat_cycle, swell-tier_2-3dfgat_atmos, swell-tier2-3dfgat_cycle-comparison, swell-tier2-3dfgat_atmos-comparison]
     if: always()  # Always run the clean up, even if failed or cancelled
 
     steps:
@@ -313,6 +411,8 @@ jobs:
           rm -r -f $HOME/cylc-run/swell-3dfgat_cycle-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-3dfgat_atmos-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-build_jedi-${GITHUB_RUN_ID}-suite
+          rm -r -f $HOME/cylc-run/swell-3dfgat_cycle-comparison-${GITHUB_RUN_ID}-suite
+          rm -r -f $HOME/cylc-run/swell-3dfgat_atmos-comparison-${GITHUB_RUN_ID}-suite
 
       - name: Remove the R2D2 experiment output
         run: |
