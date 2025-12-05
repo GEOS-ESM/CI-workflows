@@ -51,6 +51,12 @@ on:
         type: string
         default: ''
 
+      run-install:
+        description: 'Whether to run cmake install step'
+        required: false
+        type: boolean
+        default: true  # maintains backward compatibility
+
     secrets:
       BUILDCACHE_USERNAME:
         description: 'Buildcache username'
@@ -227,6 +233,12 @@ jobs:
             -DCMAKE_C_COMPILER=${CC} \
             -DCMAKE_CXX_COMPILER=${CXX}
           cmake --build build -j ${{ inputs.build-jobs }} ${{ inputs.build-target }}
+
+      - name: Install built targets
+        if: ${{ inputs.run-install }}
+        shell: spack-bash {0}
+        run: |
+          spack env activate spack-env
           cmake --install build
 
       - name: Build and run tests
