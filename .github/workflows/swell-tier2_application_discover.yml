@@ -261,7 +261,7 @@ jobs:
           SUITE_NAME=3dfgat_atmos
           CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
           mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
-  
+
   # -------------------------------------------------------------
   # STEP3: PERFORM UPDATES OF STABLE NIGHTLY POINTER AND CLEAN UP
   # -------------------------------------------------------------

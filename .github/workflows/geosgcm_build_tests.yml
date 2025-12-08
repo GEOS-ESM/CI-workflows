@@ -1,4 +1,4 @@
-name: GEOSgcm Build Tests
+name: GEOS-ESM Fixture Build Tests
 
 on:
   workflow_call:
@@ -58,6 +58,7 @@ jobs:
       container-image: ${{ steps.config.outputs.container-image }}
       fortran-compiler: ${{ steps.config.outputs.fortran-compiler }}
       version-command: ${{ steps.config.outputs.version-command }}
+      repo-name: ${{ steps.repo-name.outputs.repo-name }}
     steps:
       - name: Configure compiler settings
         id: config
@@ -89,9 +90,21 @@ jobs:
               exit 1
               ;;
           esac
+      - name: Extract repository name
+        id: repo-name
+        run: |
+          if [[ -n "${{ inputs.fixture-repo }}" ]]; then
+            # Extract repo name from fixture-repo (e.g., GEOS-ESM/GEOSldas -> GEOSldas)
+            REPO_NAME=$(basename "${{ inputs.fixture-repo }}")
+          else
+            # Fall back to current repository name
+            REPO_NAME=$(basename "${{ github.repository }}")
+          fi
+          echo "repo-name=${REPO_NAME}" >> $GITHUB_OUTPUT
+          echo "Using repository name: ${REPO_NAME}"
 
   build_gcm:
-    name: Build GEOSgcm (${{ inputs.compiler }})
+    name: Build ${{ needs.setup.outputs.repo-name }} (${{ inputs.compiler }})
     needs: setup
     if: "!contains(github.event.pull_request.labels.*.name, '0 diff trivial')"
     runs-on: ubuntu-24.04
@@ -125,16 +138,16 @@ jobs:
           mpirun --version
           echo $BASEDIR
 
-      - name: Try matching branch in GEOSgcm fixture
+      - name: Try matching branch in ${{ needs.setup.outputs.repo-name }} fixture
         if: ${{ github.event.pull_request.head.ref != 'main' && github.event.pull_request.head.ref != 'develop' }}
         run: |
           BRANCH="${GITHUB_HEAD_REF}"
           # Fetch the branch if it exists
           if git fetch origin "$BRANCH" 2>/dev/null; then
-            echo "✓ Found matching branch '$BRANCH' in GEOSgcm fixture"
+            echo "✓ Found matching branch '$BRANCH' in ${{ needs.setup.outputs.repo-name }} fixture"
             git checkout "$BRANCH"
           else
-            echo "ℹ No matching branch '$BRANCH' in GEOSgcm fixture, using default branch"
+            echo "ℹ No matching branch '$BRANCH' in ${{ needs.setup.outputs.repo-name }} fixture, using default branch"
           fi
           git branch
 

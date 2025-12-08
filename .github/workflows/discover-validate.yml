@@ -18,11 +18,11 @@ defaults:
 
 jobs:
   discover-validate:
-  
+
     runs-on: nccs-discover
-    
+
     steps:
-    
+
       - name: validate-workflow
         run: |
           /home/jardizzo/bin/nams_check.py ${{ inputs.accessor }} ${{ inputs.project }}
