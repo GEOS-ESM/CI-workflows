@@ -103,8 +103,8 @@ jobs:
           echo "repo-name=${REPO_NAME}" >> $GITHUB_OUTPUT
           echo "Using repository name: ${REPO_NAME}"
 
-  build_gcm:
-    name: Build ${{ needs.setup.outputs.repo-name }} (${{ inputs.compiler }})
+  build_fixture:
+    name: Build ${{ inputs.fixture-repo || github.repository }} (${{ inputs.compiler }})
     needs: setup
     if: "!contains(github.event.pull_request.labels.*.name, '0 diff trivial')"
     runs-on: ubuntu-24.04
