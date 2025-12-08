@@ -58,7 +58,7 @@ jobs:
       container-image: ${{ steps.config.outputs.container-image }}
       fortran-compiler: ${{ steps.config.outputs.fortran-compiler }}
       version-command: ${{ steps.config.outputs.version-command }}
-      repo-name: ${{ steps.repo-name.outputs.repo-name }}
+      repo-name: ${{ steps.config.outputs.repo-name }}
     steps:
       - name: Configure compiler settings
         id: config
