@@ -125,14 +125,14 @@ jobs:
         run: |
           set -euxo pipefail
           # GitHub runner images often carry big preinstalls:
-          sudo rm -rf /usr/share/dotnet || true
-          sudo rm -rf /usr/local/lib/android || true
-          sudo rm -rf /opt/ghc || true
-          sudo rm -rf /usr/local/share/boost || true
-          sudo rm -rf /usr/local/share/powershell || true
+          rm -rf /usr/share/dotnet || true
+          rm -rf /usr/local/lib/android || true
+          rm -rf /opt/ghc || true
+          rm -rf /usr/local/share/boost || true
+          rm -rf /usr/local/share/powershell || true
           # apt caches
-          sudo apt-get clean || true
-          sudo rm -rf /var/lib/apt/lists/* || true
+          apt-get clean || true
+          rm -rf /var/lib/apt/lists/* || true
           df -hT
 
       - name: Disk debug (before)
@@ -152,7 +152,7 @@ jobs:
         shell: bash
         run: |
           set -euxo pipefail
-          sudo du -xh --max-depth=2 / | sort -h | tail -n 80
+          du -xh --max-depth=2 / | sort -h | tail -n 80
 
       - name: Use /mnt for build and temp
         shell: bash
