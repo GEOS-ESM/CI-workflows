@@ -249,7 +249,7 @@ jobs:
             -DCMAKE_Fortran_COMPILER=${{ needs.setup.outputs.fortran-compiler }} \
             -DCMAKE_BUILD_TYPE=${{ inputs.cmake-build-type }} \
             -DMPIEXEC_PREFLAGS='--oversubscribe' \
-            -DUSE_F2PY=OFF
+            -DUSE_F2PY=OFF -G Ninja
 
       - name: Build
         run: |
