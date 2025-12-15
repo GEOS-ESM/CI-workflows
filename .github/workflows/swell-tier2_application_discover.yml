@@ -63,7 +63,7 @@ jobs:
           source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
 
           # Get python version
-          PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
+          PYVER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
@@ -121,7 +121,7 @@ jobs:
           source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
 
           # Get python version
-          PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
+          PYVER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
@@ -175,7 +175,7 @@ jobs:
           source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
 
           # Get python version
-          PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
+          PYVER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
@@ -218,7 +218,7 @@ jobs:
           source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
 
           # Get python version
-          PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
+          PYVER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
@@ -278,7 +278,7 @@ jobs:
           source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
 
           # Get python version
-          PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
+          PYVER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
@@ -321,7 +321,7 @@ jobs:
           source /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/modules
 
           # Get python version
-          PYVER=`python --version | awk '{print $2}' | awk -F. '{print $1"."$2}'`
+          PYVER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 
           export PATH=$CI_WORKSPACE/swell/bin:$PATH
           export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
