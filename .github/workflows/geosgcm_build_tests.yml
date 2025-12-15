@@ -123,18 +123,18 @@ jobs:
           df -h
 
           # Remove large packages
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo rm -rf /usr/local/share/boost
-          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
+          rm -rf /usr/share/dotnet
+          rm -rf /usr/local/lib/android
+          rm -rf /opt/ghc
+          rm -rf /opt/hostedtoolcache/CodeQL
+          rm -rf /usr/local/share/boost
+          rm -rf "$AGENT_TOOLSDIRECTORY"
 
           # Remove Docker images (if you don't need them)
           docker rmi $(docker image ls -aq) || true
 
           # Clean apt cache
-          sudo apt-get clean
+          apt-get clean
 
           echo "After cleanup:"
           df -h
