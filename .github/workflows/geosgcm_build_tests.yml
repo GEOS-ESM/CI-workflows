@@ -120,6 +120,21 @@ jobs:
       - name: Delete huge unnecessary tools folder
         run: rm -rf /opt/hostedtoolcache
 
+      - name: Free disk space (hosted runner)
+        shell: bash
+        run: |
+          set -euxo pipefail
+          # GitHub runner images often carry big preinstalls:
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /usr/local/lib/android || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /usr/local/share/boost || true
+          sudo rm -rf /usr/local/share/powershell || true
+          # apt caches
+          sudo apt-get clean || true
+          sudo rm -rf /var/lib/apt/lists/* || true
+          df -hT
+
       - name: Disk debug (before)
         shell: bash
         run: |
@@ -132,6 +147,12 @@ jobs:
           du -xh --max-depth=2 /tmp | sort -h | tail -n 50 || true
           echo "== /mnt =="
           df -hT /mnt || true
+
+      - name: What is using disk?
+        shell: bash
+        run: |
+          set -euxo pipefail
+          sudo du -xh --max-depth=2 / | sort -h | tail -n 80
 
       - name: Use /mnt for build and temp
         shell: bash
