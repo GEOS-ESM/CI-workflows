@@ -58,7 +58,7 @@ jobs:
       container-image: ${{ steps.config.outputs.container-image }}
       fortran-compiler: ${{ steps.config.outputs.fortran-compiler }}
       version-command: ${{ steps.config.outputs.version-command }}
-      repo-name: ${{ steps.config.outputs.repo-name }}
+      repo-name: ${{ steps.repo-name.outputs.repo-name }}
     steps:
       - name: Configure compiler settings
         id: config
@@ -120,6 +120,38 @@ jobs:
       - name: Delete huge unnecessary tools folder
         run: rm -rf /opt/hostedtoolcache
 
+      - name: Disk debug (before)
+        shell: bash
+        run: |
+          set -euxo pipefail
+          echo "== df =="
+          df -hT
+          echo "== workspace =="
+          du -xh --max-depth=2 "$GITHUB_WORKSPACE" | sort -h | tail -n 50 || true
+          echo "== /tmp =="
+          du -xh --max-depth=2 /tmp | sort -h | tail -n 50 || true
+          echo "== /mnt =="
+          df -hT /mnt || true
+
+      - name: Use /mnt for build and temp
+        shell: bash
+        run: |
+          set -euxo pipefail
+          mkdir -p /mnt/geos-tmp
+          echo "TMPDIR=/mnt/geos-tmp" >> $GITHUB_ENV
+          echo "TMP=/mnt/geos-tmp"    >> $GITHUB_ENV
+          echo "TEMP=/mnt/geos-tmp"   >> $GITHUB_ENV
+          mkdir -p /mnt/geos-build/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}
+          echo "BUILD_DIR=/mnt/geos-build/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> $GITHUB_ENV
+          mkdir -p /mnt/geos-install/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}
+          echo "INSTALL_DIR=/mnt/geos-install/${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> $GITHUB_ENV
+
+      - name: Show build dirs
+        run: |
+          echo "BUILD_DIR=$BUILD_DIR"
+          echo "INSTALL_DIR=$INSTALL_DIR"
+          echo "TMPDIR=$TMPDIR"
+
       - name: Checkout GCM
         uses: actions/checkout@v5
         with:
@@ -173,7 +205,7 @@ jobs:
 
       - name: CMake
         run: |
-          cmake -B build -S . --install-prefix=$PWD/install \
+          cmake -B "$BUILD_DIR" -S . --install-prefix="$INSTALL_DIR" \
             -DCMAKE_Fortran_COMPILER=${{ needs.setup.outputs.fortran-compiler }} \
             -DCMAKE_BUILD_TYPE=${{ inputs.cmake-build-type }} \
             -DMPIEXEC_PREFLAGS='--oversubscribe' \
@@ -181,14 +213,23 @@ jobs:
 
       - name: Build
         run: |
-          cmake --build build -j ${{ inputs.build-jobs }} ${{ inputs.build-target }}
+          cmake --build "$BUILD_DIR" -j ${{ inputs.build-jobs }} ${{ inputs.build-target }}
 
       # For now we do not install. For unknown reasons, MAPL3 + ifort causes the
       # install step to not fail, but also not complete. It just "halts" forever.
       # And GitHub doesn't even see this as a "real" error so continue-on-error doesn
       # not help. But, for CI, the build is the important part anyway.
-      #############################
-      # - name: Install           #
-      #   run: |                  #
-      #     cmake --install build #
-      #############################
+      ####################################
+      # - name: Install                  #
+      #   run: |                         #
+      #     cmake --install "$BUILD_DIR" #
+      ####################################
+
+      - name: Disk debug (after)
+        if: failure()
+        shell: bash
+        run: |
+          df -hT
+          du -xh --max-depth=2 "$GITHUB_WORKSPACE" | sort -h | tail -n 100 || true
+          du -xh --max-depth=2 "$BUILD_DIR" | sort -h | tail -n 100 || true
+
