@@ -135,6 +135,25 @@ jobs:
           rm -rf /var/lib/apt/lists/* || true
           df -hT
 
+      - name: Docker disk usage (probe + prune)
+        shell: bash
+        run: |
+          set -euxo pipefail
+          echo "== docker version =="
+          docker --version || true
+          echo "== docker system df =="
+          docker system df || true
+
+          echo "== docker prune (best effort) =="
+          docker image prune -af || true
+          docker builder prune -af || true
+          docker system prune -af --volumes || true
+
+          echo "== docker system df (after) =="
+          docker system df || true
+          echo "== df after prune =="
+          df -hT
+
       - name: Disk debug (before)
         shell: bash
         run: |
