@@ -76,12 +76,12 @@ jobs:
               echo "version-command=ifx --version" >> $GITHUB_OUTPUT
               ;;
             "gfortran-14")
-              echo "container-image=gmao/ubuntu24-geos-env-mkl:${VERSION}-openmpi_5.0.5-gcc_14.2.0" >> $GITHUB_OUTPUT
+              echo "container-image=gmao/ubuntu24-geos-env-blas:${VERSION}-openmpi_5.0.5-gcc_14.2.0" >> $GITHUB_OUTPUT
               echo "fortran-compiler=gfortran" >> $GITHUB_OUTPUT
               echo "version-command=gfortran --version" >> $GITHUB_OUTPUT
               ;;
             "gfortran-15")
-              echo "container-image=gmao/ubuntu24-geos-env-mkl:${VERSION}-openmpi_5.0.5-gcc_15.2.0" >> $GITHUB_OUTPUT
+              echo "container-image=gmao/ubuntu24-geos-env-blas:${VERSION}-openmpi_5.0.5-gcc_15.2.0" >> $GITHUB_OUTPUT
               echo "fortran-compiler=gfortran" >> $GITHUB_OUTPUT
               echo "version-command=gfortran --version" >> $GITHUB_OUTPUT
               ;;
@@ -117,27 +117,8 @@ jobs:
       OMPI_MCA_btl_vader_single_copy_mechanism: none
 
     steps:
-      - name: Free Disk Space
-        run: |
-          echo "Before cleanup:"
-          df -h
-
-          # Remove large packages
-          rm -rf /usr/share/dotnet
-          rm -rf /usr/local/lib/android
-          rm -rf /opt/ghc
-          rm -rf /opt/hostedtoolcache/CodeQL
-          rm -rf /usr/local/share/boost
-          rm -rf "$AGENT_TOOLSDIRECTORY"
-
-          # Remove Docker images (if you don't need them)
-          docker rmi $(docker image ls -aq) || true
-
-          # Clean apt cache
-          apt-get clean
-
-          echo "After cleanup:"
-          df -h
+      - name: Delete huge unnecessary tools folder
+        run: rm -rf /opt/hostedtoolcache
 
       - name: Checkout GCM
         uses: actions/checkout@v5
