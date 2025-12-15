@@ -107,7 +107,7 @@ jobs:
     name: Build ${{ inputs.fixture-repo || github.repository }} (${{ inputs.compiler }})
     needs: setup
     if: "!contains(github.event.pull_request.labels.*.name, '0 diff trivial')"
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     container:
       image: ${{ needs.setup.outputs.container-image }}
 
@@ -117,8 +117,25 @@ jobs:
       OMPI_MCA_btl_vader_single_copy_mechanism: none
 
     steps:
-      - name: Delete huge unnecessary tools folder
-        run: rm -rf /opt/hostedtoolcache
+      #- name: Delete huge unnecessary tools folder
+        #run: rm -rf /opt/hostedtoolcache
+
+      - name: Free Disk Space (Ubuntu)
+        uses: BRAINSia/free-disk-space@v2
+        with:
+          # this might remove tools that are actually needed,
+          # if set to "true" but frees about 6 GB
+          tool-cache: false
+
+          # all of these default to true, but feel free to set to
+          # "false" if necessary for your workflow
+          mandb:   true
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
 
       - name: Checkout GCM
         uses: actions/checkout@v5
