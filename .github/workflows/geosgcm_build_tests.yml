@@ -117,25 +117,27 @@ jobs:
       OMPI_MCA_btl_vader_single_copy_mechanism: none
 
     steps:
-      #- name: Delete huge unnecessary tools folder
-        #run: rm -rf /opt/hostedtoolcache
+      - name: Free Disk Space
+        run: |
+          echo "Before cleanup:"
+          df -h
 
-      - name: Free Disk Space (Ubuntu)
-        uses: BRAINSia/free-disk-space@v2
-        with:
-          # this might remove tools that are actually needed,
-          # if set to "true" but frees about 6 GB
-          tool-cache: false
+          # Remove large packages
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo rm -rf /usr/local/share/boost
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY"
 
-          # all of these default to true, but feel free to set to
-          # "false" if necessary for your workflow
-          mandb:   true
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
+          # Remove Docker images (if you don't need them)
+          docker rmi $(docker image ls -aq) || true
+
+          # Clean apt cache
+          sudo apt-get clean
+
+          echo "After cleanup:"
+          df -h
 
       - name: Checkout GCM
         uses: actions/checkout@v5
