@@ -191,9 +191,21 @@ jobs:
           mv "${CI_WORKSPACE}" "${DEST}" || true
           echo "Preserved failed workspace at ${DEST}"
 
-      # Clean normal workspace otherwise
       - name: Cleanup
         if: always()
         run: |
-          [ -d "${CI_WORKSPACE}" ] && rm -rf "${CI_WORKSPACE}" || true
+          set -euo pipefail
+          if [ -d "${CI_WORKSPACE}" ]; then
+            echo "[CLEANUP] Attempting to remove CI_WORKSPACE"
+            for i in {1..5}; do
+              rm -rf "${CI_WORKSPACE}" && break || true
+              echo "[CLEANUP] Retry $i: directory removal failed; waiting..."
+              sleep 5
+            done
+            if [ -d "${CI_WORKSPACE}" ]; then
+              echo "[CLEANUP] Final attempt: using find-delete fallback"
+              find "${CI_WORKSPACE}" -type f -delete || true
+              find "${CI_WORKSPACE}" -depth -type d -exec rmdir {} \; || true
+            fi
+          fi
 
