@@ -34,7 +34,7 @@ on:
         default: false
 
       patch-esmf:
-        description: 'Whether to patch ESMF package for 9.0.0b03 version'
+        description: 'Whether to patch ESMF package for 9.0.0b08 version'
         required: false
         type: boolean
         default: false
@@ -122,7 +122,7 @@ jobs:
           path: spack
           buildcache: false
 
-      - name: Patch ESMF package for 9.0.0b03
+      - name: Patch ESMF package for 9.0.0b08
         if: ${{ inputs.patch-esmf }}
         shell: spack-bash {0}
         run: |
@@ -138,11 +138,11 @@ jobs:
             echo "Found ESMF package at: $ESMF_PKG_PATH"
 
             # Check if version already exists
-            if ! grep -q "9.0.0b03" "$ESMF_PKG_PATH"; then
-              sed -i '/# generate chksum with/a \    version("9.0.0b03", tag="v9.0.0b03")' "$ESMF_PKG_PATH"
-              echo "Successfully added ESMF 9.0.0b03 version"
+            if ! grep -q "9.0.0b08" "$ESMF_PKG_PATH"; then
+              sed -i '/# generate chksum with/a \    version("9.0.0b08", tag="v9.0.0b08")' "$ESMF_PKG_PATH"
+              echo "Successfully added ESMF 9.0.0b08 version"
             else
-              echo "ESMF 9.0.0b03 version already exists"
+              echo "ESMF 9.0.0b08 version already exists"
             fi
           else
             echo "ERROR: Could not find ESMF package.py file"
