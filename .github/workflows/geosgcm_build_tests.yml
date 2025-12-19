@@ -16,10 +16,10 @@ on:
         default: 'Debug'
 
       baselibs-version:
-        description: 'Container version to use (e.g., v8.20.0, v9.0.0)'
+        description: 'Container version to use (e.g., v8.24.0, v9.4.0)'
         required: false
         type: string
-        default: 'v8.20.0'
+        default: 'v8.24.0'
 
       fixture-repo:
         description: 'Repository to checkout (e.g., GEOS-ESM/GEOSgcm). If not provided, uses current repo'
