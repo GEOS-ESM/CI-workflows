@@ -399,7 +399,7 @@ jobs:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [swell-tier_1-3dvar_cycle, swell-tier_1-3dfgat_cycle, swell-tier_1-hofx, swell-tier_1-3dvar, swell-tier_1-3dvar_atmos, swell-tier_1-3dfgat_atmos]
+    needs: [swell-tier_1-3dvar_cycle, swell-tier_1-3dfgat_cycle, swell-tier_1-hofx, swell-tier_1-3dvar, swell-tier_1-3dvar_atmos, swell-tier_1-3dfgat_atmos, swell-tier_1-localensembleda]
 
     steps:
 
@@ -411,7 +411,7 @@ jobs:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [swell-tier_1-3dvar_cycle, swell-tier_1-3dfgat_cycle, swell-tier_1-hofx, swell-tier_1-3dvar, swell-tier_1-3dvar_atmos, swell-tier_1-3dfgat_atmos]
+    needs: [swell-tier_1-3dvar_cycle, swell-tier_1-3dfgat_cycle, swell-tier_1-hofx, swell-tier_1-3dvar, swell-tier_1-3dvar_atmos, swell-tier_1-3dfgat_atmos, swell-tier_1-localensembleda]
     if: always()  # Always run the clean up, even if failed or cancelled
 
     steps:
