@@ -226,8 +226,7 @@ jobs:
           echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
-          EXPERIMENT_ID_1=swell-${COMPARISON_SUITE}-12092025
-          COMPARISON_EXP_PATH_1=/discover/nobackup/gmao_ci/SwellExperiments/${EXPERIMENT_ID_1}/${EXPERIMENT_ID_1}-suite/experiment.yaml
+          COMPARISON_EXP_PATH_1=$(realpath "/discover/nobackup/gmao_ci/SwellExperiments/current-3dfgat_cycle-comparison")
 
           EXPERIMENT_ID_2=swell-${COMPARISON_SUITE}-${GITHUB_RUN_ID}
           COMPARISON_EXP_PATH_2=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${COMPARISON_SUITE}/${EXPERIMENT_ID_2}/${EXPERIMENT_ID_2}-suite/experiment.yaml
@@ -329,8 +328,7 @@ jobs:
           echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
-          EXPERIMENT_ID_1=swell-${COMPARISON_SUITE}-12092025
-          COMPARISON_EXP_PATH_1=/discover/nobackup/gmao_ci/SwellExperiments/${EXPERIMENT_ID_1}/${EXPERIMENT_ID_1}-suite/experiment.yaml
+          COMPARISON_EXP_PATH_1=$(realpath "/discover/nobackup/gmao_ci/SwellExperiments/current-3dfgat_atmos-comparison")
 
           EXPERIMENT_ID_2=swell-${COMPARISON_SUITE}-${GITHUB_RUN_ID}
           COMPARISON_EXP_PATH_2=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${COMPARISON_SUITE}/${EXPERIMENT_ID_2}/${EXPERIMENT_ID_2}-suite/experiment.yaml
