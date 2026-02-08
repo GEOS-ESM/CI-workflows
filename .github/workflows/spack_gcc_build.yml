@@ -115,11 +115,11 @@ jobs:
           mepo status
 
       - name: Set up Spack
-        uses: spack/setup-spack@v2
+        uses: spack/setup-spack@v3
         with:
-          ref: develop
+          spack_ref: develop
           color: true
-          path: spack
+          spack_path: spack
           buildcache: false
 
       - name: Patch ESMF package for 9.0.0b08
