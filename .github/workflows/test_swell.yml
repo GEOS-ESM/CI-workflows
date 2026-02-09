@@ -20,9 +20,9 @@ jobs:
       - name: Set suite list
         id: set-suites
         run: |
-          SUITES='["3dvar_cycle", "3dfgat_cycle", "hofx", "3dvar", "3dvar_atmos", "3dfgat_atmos", "localensembleda"]'
+          SUITES='["3dvar_cycle", "3dfgat_cycle", "hofx", "3dvar", "3dvar_atmos", "3dfgat_atmos", "localensembleda", "hofx_cf"]'
           echo "suites=$SUITES" >> $GITHUB_OUTPUT
-          echo "suites_space=3dvar_cycle 3dfgat_cycle hofx 3dvar 3dvar_atmos 3dfgat_atmos localensembleda" >> $GITHUB_OUTPUT
+          echo "suites_space=3dvar_cycle 3dfgat_cycle hofx 3dvar 3dvar_atmos 3dfgat_atmos localensembleda hofx_cf" >> $GITHUB_OUTPUT
 
   # Initialization needed by all the workflows
   swell-tier_1-setup:
@@ -50,6 +50,7 @@ jobs:
     needs: [define-matrix, swell-tier_1-setup]
     strategy:
       fail-fast: false
+      max-parallel: 5
       matrix:
         suite: ${{ fromJson(needs.define-matrix.outputs.suites) }}
 
@@ -94,7 +95,7 @@ jobs:
       - name: Remove the run directory
         run: rm -rf ${{ env.CI_BASE }}/${GITHUB_RUN_ID}
 
-  # Cleanup always (cylc logs and R2D2)
+  # Cleanup always (cylc logs)
   swell-tier_1-clean_up_always:
     runs-on: nccs-discover
     timeout-minutes: 30
@@ -105,10 +106,4 @@ jobs:
         run: |
           for suite in ${{ needs.define-matrix.outputs.suites_space }}; do
             rm -rf $HOME/cylc-run/swell-${suite}-${GITHUB_RUN_ID}-suite
-          done
-
-      - name: Remove R2D2 experiment output
-        run: |
-          for suite in ${{ needs.define-matrix.outputs.suites_space }}; do
-            rm -rf /discover/nobackup/gmao_ci/R2D2DataStore/Local/ncdiag/ob/swell-${suite}-${GITHUB_RUN_ID}
           done
