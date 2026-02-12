@@ -149,21 +149,21 @@ jobs:
 
           PYVER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
 
-        export PATH=$CI_WORKSPACE/swell/bin:$PATH
-        export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
+          export PATH=$CI_WORKSPACE/swell/bin:$PATH
+          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
 
-        cat > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml <<EOF
-        experiment_id: $EXPERIMENT_ID
-        experiment_root: $CI_WORKSPACE_JOB
-        existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source"
-        existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build"
-        EOF
+          cat > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml <<EOF
+          experiment_id: $EXPERIMENT_ID
+          experiment_root: $CI_WORKSPACE_JOB
+          existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source"
+          existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build"
+          EOF
 
-        rm -rf $HOME/cylc-run/${EXPERIMENT_ID}-suite
+          rm -rf $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
-        cd $CI_WORKSPACE_JOB
-        swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}
-        swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
+          cd $CI_WORKSPACE_JOB
+          swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}
+          swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
       - name: Mark failed on failure
         if: failure()
@@ -214,7 +214,7 @@ jobs:
 
           echo "publish_directory: /discover/nobackup/gmao_ci/swell_publication_location" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
-          COMPARISON_EXP_PATH_1=/discover/nobackup/gmao_ci/swell/tier2/stable/3dfgat_cycle-comparison/swell-3dfgat_cycle-comparison-*/swell-3dfgat_cycle-comparison-*-suite/experiment.yaml
+          COMPARISON_EXP_PATH_1=/discover/nobackup/gmao_ci/swell/tier2/stable/${SUITE_NAME}/swell-${SUITE_NAME}-*/swell-${SUITE_NAME}-*-suite/experiment.yaml
 
           EXPERIMENT_ID_2=swell-${COMPARISON_SUITE}-${GITHUB_RUN_ID}
           COMPARISON_EXP_PATH_2=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${COMPARISON_SUITE}/${EXPERIMENT_ID_2}/${EXPERIMENT_ID_2}-suite/experiment.yaml
