@@ -6,6 +6,9 @@ defaults:
   run:
     shell: bash
 
+env:
+  CI_BASE: /discover/nobackup/gmao_ci/swell/tier2
+
 jobs:
 
   # Define the suite list once
@@ -25,7 +28,7 @@ jobs:
   define-comparison-matrix:
     runs-on: nccs-discover
     outputs:
-      comparison_suites: ${{ steps.set-comparison-suites.out }}
+      comparison_suites: ${{ steps.set-comparison-suites.outputs.comparisons_suites }}
       comparison_suites_space: ${{ steps.set-comparison-suites.outputs.comparison_suites_space }}
     steps:
       - name: Set comparison suite list
