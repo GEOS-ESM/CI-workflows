@@ -165,7 +165,7 @@ jobs:
           rm -rf $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
           cd $CI_WORKSPACE_JOB
-          swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}
+          swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
       - name: Mark failed on failure
