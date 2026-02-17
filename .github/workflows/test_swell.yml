@@ -132,7 +132,7 @@ jobs:
   swell-tier_2-test:
     runs-on: nccs-discover
     timeout-minutes: 600
-    needs: [define-matrix, swell-tier_2-setup, swell-tier_2-build_jedi]
+    needs: [define-matrix, swell-tier_2-build_jedi]
     strategy:
       fail-fast: false
       max-parallel: 5
@@ -179,7 +179,7 @@ jobs:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [define-comparison-matrix, swell-tier_2-setup, swell-tier_2-test]
+    needs: [define-comparison-matrix, swell-tier_2-test]
     strategy:
       fail-fast: false
       max-parallel: 5
