@@ -145,7 +145,7 @@ jobs:
           CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
           SUITE_NAME=${{ matrix.suite }}
           CI_WORKSPACE_JOB=${CI_WORKSPACE}/${SUITE_NAME}
-          EXPERIMENT_ID=swell${SUITE_NAME}-${GITHUB_RUN_ID}
+          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
 
           mkdir -p $CI_WORKSPACE_JOB
           source ${CI_WORKSPACE}/modules
@@ -158,8 +158,8 @@ jobs:
           cat > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml <<EOF
           experiment_id: $EXPERIMENT_ID
           experiment_root: $CI_WORKSPACE_JOB
-          existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source"
-          existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build"
+          existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source
+          existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build
           EOF
 
           rm -rf $HOME/cylc-run/${EXPERIMENT_ID}-suite
