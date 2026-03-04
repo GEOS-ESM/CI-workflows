@@ -29,10 +29,20 @@ jobs:
             "3dfgat_atmos"
             "localensembleda"
             "hofx_cf"
-            # "3dvar_cf"
+            "3dvar_cf"
           )
-          # Convert array to JSON and space-separated string
-          SUITES=$(printf '%s\n' "${SUITES_ARR[@]}" | jq -R . | jq -sc .)
+          
+          # Build JSON array explicitly (because jq command doesn't exist)
+          SUITES='["'
+          for i in "${!SUITES_ARR[@]}"; do
+            if [ $i -lt $((${#SUITES_ARR[@]} - 1)) ]; then
+              SUITES+="${SUITES_ARR[$i]}\",\""
+            else
+              SUITES+="${SUITES_ARR[$i]}"
+            fi
+          done
+          SUITES+='"]'
+          
           SUITES_SPACE="${SUITES_ARR[*]}"
           echo "suites=$SUITES" >> $GITHUB_OUTPUT
           echo "suites_space=$SUITES_SPACE" >> $GITHUB_OUTPUT
