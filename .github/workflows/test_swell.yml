@@ -20,9 +20,22 @@ jobs:
       - name: Set suite list
         id: set-suites
         run: |
-          SUITES='["3dvar_cycle", "3dfgat_cycle", "hofx", "3dvar", "3dvar_atmos", "3dfgat_atmos", "localensembleda", "hofx_cf", "3dvar_cf"]'
+          SUITES_ARR=(
+            "3dvar_marine_cycle"
+            "3dfgat_marine_cycle"
+            "hofx"
+            "3dvar_marine"
+            "3dvar_atmos"
+            "3dfgat_atmos"
+            "localensembleda"
+            "hofx_cf"
+            # "3dvar_cf"
+          )
+          # Convert array to JSON and space-separated string
+          SUITES=$(printf '%s\n' "${SUITES_ARR[@]}" | jq -R . | jq -sc .)
+          SUITES_SPACE="${SUITES_ARR[*]}"
           echo "suites=$SUITES" >> $GITHUB_OUTPUT
-          echo "suites_space=3dvar_cycle 3dfgat_cycle hofx 3dvar 3dvar_atmos 3dfgat_atmos localensembleda hofx_cf 3dvar_cf" >> $GITHUB_OUTPUT
+          echo "suites_space=$SUITES_SPACE" >> $GITHUB_OUTPUT
 
   # Initialization needed by all the workflows
   swell-tier_1-setup:
