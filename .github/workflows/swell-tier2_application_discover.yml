@@ -6,6 +6,9 @@ defaults:
   run:
     shell: bash
 
+env:
+  CI_BASE: /discover/nobackup/gmao_ci/swell/tier2
+
 jobs:
 
   # Define the suite list once
@@ -25,7 +28,7 @@ jobs:
   define-comparison-matrix:
     runs-on: nccs-discover
     outputs:
-      comparison_suites: ${{ steps.set-suites.out
+      comparison_suites: ${{ steps.set-comparison-suites.outputs.comparisons_suites }}
       comparison_suites_space: ${{ steps.set-comparison-suites.outputs.comparison_suites_space }}
     steps:
       - name: Set comparison suite list
@@ -129,7 +132,7 @@ jobs:
   swell-tier_2-test:
     runs-on: nccs-discover
     timeout-minutes: 600
-    needs: [define-matrix, swell-tier_2-setup, swell-tier_2-build_jedi]
+    needs: [define-matrix, swell-tier_2-build_jedi]
     strategy:
       fail-fast: false
       max-parallel: 5
@@ -142,7 +145,7 @@ jobs:
           CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
           SUITE_NAME=${{ matrix.suite }}
           CI_WORKSPACE_JOB=${CI_WORKSPACE}/${SUITE_NAME}
-          EXPERIMENT_ID=swell${SUITE_NAME}-${GITHUB_RUN_ID}
+          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
 
           mkdir -p $CI_WORKSPACE_JOB
           source ${CI_WORKSPACE}/modules
@@ -155,14 +158,14 @@ jobs:
           cat > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml <<EOF
           experiment_id: $EXPERIMENT_ID
           experiment_root: $CI_WORKSPACE_JOB
-          existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source"
-          existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build"
+          existing_jedi_source_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source
+          existing_jedi_build_directory: /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build
           EOF
 
           rm -rf $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
           cd $CI_WORKSPACE_JOB
-          swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}
+          swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
       - name: Mark failed on failure
@@ -172,11 +175,11 @@ jobs:
           mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED || true
 
 
-  swell-tier2-comparison:
+  swell-tier_2-comparison:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [define-comparison-matrix, swell-tier_2-setup, swell-tier_2-test]
+    needs: [define-comparison-matrix, swell-tier_2-test]
     strategy:
       fail-fast: false
       max-parallel: 5
@@ -191,7 +194,7 @@ jobs:
           
           SUITE_NAME=${{ matrix.suite }}-comparison
 
-          if [ "${{ matrix.suite }}" = "3dfgat_cycle" ]; then
+          if [ "${{ matrix.suite }}" == "3dfgat_cycle" ]; then
             CONFIG_NAME=compare_fgat_marine
           else
             CONFIG_NAME=compare_variational_atmosphere
@@ -211,7 +214,6 @@ jobs:
 
           echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-
           echo "publish_directory: /discover/nobackup/gmao_ci/swell_publication_location" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
           COMPARISON_EXP_PATH_1=/discover/nobackup/gmao_ci/swell/tier2/stable/${SUITE_NAME}/swell-${SUITE_NAME}-*/swell-${SUITE_NAME}-*-suite/experiment.yaml
