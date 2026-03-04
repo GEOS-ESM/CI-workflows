@@ -20,9 +20,9 @@ jobs:
       - name: Set suite list
         id: set-suites
         run: |
-          SUITES='["3dvar_cycle", "3dfgat_cycle", "hofx", "3dvar", "3dvar_atmos", "3dfgat_atmos", "localensembleda", "hofx_cf"]'
+          SUITES='["3dvar_cycle", "3dfgat_cycle", "hofx", "3dvar", "3dvar_atmos", "3dfgat_atmos", "localensembleda", "hofx_cf", "3dvar_cf"]'
           echo "suites=$SUITES" >> $GITHUB_OUTPUT
-          echo "suites_space=3dvar_cycle 3dfgat_cycle hofx 3dvar 3dvar_atmos 3dfgat_atmos localensembleda hofx_cf" >> $GITHUB_OUTPUT
+          echo "suites_space=3dvar_cycle 3dfgat_cycle hofx 3dvar 3dvar_atmos 3dfgat_atmos localensembleda hofx_cf 3dvar_cf" >> $GITHUB_OUTPUT
 
   # Initialization needed by all the workflows
   swell-tier_1-setup:
