@@ -29,7 +29,7 @@ jobs:
             "3dfgat_atmos"
             "localensembleda"
             "hofx_cf"
-            # "3dvar_cf"
+            "3dvar_cf"
           )
           
           # Build JSON array explicitly (because jq command doesn't exist)
