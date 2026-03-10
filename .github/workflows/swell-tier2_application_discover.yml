@@ -411,10 +411,3 @@ jobs:
           rm -r -f $HOME/cylc-run/swell-build_jedi-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-3dfgat_marine_cycle-comparison-${GITHUB_RUN_ID}-suite
           rm -r -f $HOME/cylc-run/swell-3dfgat_atmos-comparison-${GITHUB_RUN_ID}-suite
-
-      - name: Remove the R2D2 experiment output
-        run: |
-          rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/ncdiag/ob/swell-hofx-${GITHUB_RUN_ID}
-          rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/ncdiag/ob/swell-3dfgat_marine_cycle-${GITHUB_RUN_ID}
-          rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/ncdiag/ob/swell-3dfgat_atmos-${GITHUB_RUN_ID}
-          rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/mom6_cice6_UFS
