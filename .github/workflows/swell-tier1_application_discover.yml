@@ -64,7 +64,7 @@ jobs:
           mkdir ${{ env.CI_BASE }}/${GITHUB_RUN_ID}
           cp ${GITHUB_WORKSPACE}/src/swell/deployment/platforms/nccs_discover_sles15/modules ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/
           source ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/modules
-          pip install --prefix=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/requirements.txt --no-cache-dir ${GITHUB_WORKSPACE}
+          pip install --prefix=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/swell --no-cache-dir ${GITHUB_WORKSPACE}
 
   # Run all test workflows using matrix
   swell-tier_1-test:
