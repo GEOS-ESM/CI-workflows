@@ -187,8 +187,6 @@ jobs:
       # install step to not fail, but also not complete. It just "halts" forever.
       # And GitHub doesn't even see this as a "real" error so continue-on-error doesn
       # not help. But, for CI, the build is the important part anyway.
-      #############################
-      # - name: Install           #
-      #   run: |                  #
-      #     cmake --install build #
-      #############################
+      - name: Install
+        run: |
+          cmake --install build
