@@ -51,6 +51,12 @@ on:
         type: string
         default: ''
 
+      run-gocart-tests:
+        description: 'Whether to run gocart tests'
+        required: false
+        type: boolean
+        default: false
+
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -183,10 +189,24 @@ jobs:
         run: |
           cmake --build build -j ${{ inputs.build-jobs }} ${{ inputs.build-target }}
 
-      # For now we do not install. For unknown reasons, MAPL3 + ifort causes the
-      # install step to not fail, but also not complete. It just "halts" forever.
-      # And GitHub doesn't even see this as a "real" error so continue-on-error doesn
-      # not help. But, for CI, the build is the important part anyway.
       - name: Install
         run: |
           cmake --install build
+
+      # These are optional tests for MAPL3. For now, these run
+      # inside the build directory
+      - name: Run GOCART tests
+        if: ${{ inputs.run-gocart-tests }}
+        run: |
+          export LD_LIBRARY_PATH="${LD_LIBRARY_PATH:+${LD_LIBRARY_PATH}:}$PWD/install/lib"
+          mkdir gocart-tests && cd gocart-tests
+          ln -s ../install/etc/GOCART2G_GridComp.yaml
+          ln -s ../install/etc/SS2G_instance_SS.yaml SS_instance_SS.yaml
+          ln -s ../install/etc/DU2G_instance_DU.yaml DU_instance_DU.yaml
+          ln -s /TinyBCs-GitV10/gocart-ci-run/cap_restart.yaml
+          ln -s /TinyBCs-GitV10/gocart-ci-run/cap.yaml
+          ln -s /TinyBCs-GitV10/gocart-ci-run/fake-parent.yaml
+          ln -s /TinyBCs-GitV10/gocart-ci-run/ExtData .
+          cp -r /TinyBCs-GitV10/gocart-ci-run/checkpoints .
+          mpirun -np 6 ../install/bin/GEOS.x cap.yaml
+
