@@ -57,6 +57,12 @@ on:
         type: boolean
         default: false
 
+      bcs-version:
+        description: 'BCS version to use when run-gocart-tests is true (e.g., v11.6.0)'
+        required: false
+        type: string
+        default: 'v11.6.0'
+
 jobs:
   setup:
     runs-on: ubuntu-latest
@@ -70,24 +76,42 @@ jobs:
         id: config
         run: |
           VERSION="${{ inputs.baselibs-version }}"
+          BCS_VERSION="${{ inputs.bcs-version }}"
+          USE_BCS="${{ inputs.run-gocart-tests }}"
           case "${{ inputs.compiler }}" in
             "ifort")
-              echo "container-image=gmao/ubuntu24-geos-env-bcs:${VERSION}-intelmpi_2021.13-ifort_2021.13" >> $GITHUB_OUTPUT
+              if [[ "${USE_BCS}" == "true" ]]; then
+                echo "container-image=gmao/ubuntu24-geos-env-bcs:${VERSION}-intelmpi_2021.13-ifort_2021.13-bcs_${BCS_VERSION}" >> $GITHUB_OUTPUT
+              else
+                echo "container-image=gmao/ubuntu24-geos-env:${VERSION}-intelmpi_2021.13-ifort_2021.13" >> $GITHUB_OUTPUT
+              fi
               echo "fortran-compiler=ifort" >> $GITHUB_OUTPUT
               echo "version-command=ifort --version" >> $GITHUB_OUTPUT
               ;;
             "ifx")
-              echo "container-image=gmao/ubuntu24-geos-env-bcs:${VERSION}-intelmpi_2021.17-ifx_2025.3" >> $GITHUB_OUTPUT
+              if [[ "${USE_BCS}" == "true" ]]; then
+                echo "container-image=gmao/ubuntu24-geos-env-bcs:${VERSION}-intelmpi_2021.17-ifx_2025.3-bcs_${BCS_VERSION}" >> $GITHUB_OUTPUT
+              else
+                echo "container-image=gmao/ubuntu24-geos-env:${VERSION}-intelmpi_2021.17-ifx_2025.3" >> $GITHUB_OUTPUT
+              fi
               echo "fortran-compiler=ifx" >> $GITHUB_OUTPUT
               echo "version-command=ifx --version" >> $GITHUB_OUTPUT
               ;;
             "gfortran-14")
-              echo "container-image=gmao/ubuntu24-geos-env-mkl-bcs:${VERSION}-openmpi_5.0.5-gcc_14.2.0" >> $GITHUB_OUTPUT
+              if [[ "${USE_BCS}" == "true" ]]; then
+                echo "container-image=gmao/ubuntu24-geos-env-bcs:${VERSION}-openmpi_5.0.5-gcc_14.2.0-bcs_${BCS_VERSION}" >> $GITHUB_OUTPUT
+              else
+                echo "container-image=gmao/ubuntu24-geos-env-mkl:${VERSION}-openmpi_5.0.5-gcc_14.2.0" >> $GITHUB_OUTPUT
+              fi
               echo "fortran-compiler=gfortran" >> $GITHUB_OUTPUT
               echo "version-command=gfortran --version" >> $GITHUB_OUTPUT
               ;;
             "gfortran-15")
-              echo "container-image=gmao/ubuntu24-geos-env-mkl-bcs:${VERSION}-openmpi_5.0.5-gcc_15.2.0" >> $GITHUB_OUTPUT
+              if [[ "${USE_BCS}" == "true" ]]; then
+                echo "container-image=gmao/ubuntu24-geos-env-bcs:${VERSION}-openmpi_5.0.5-gcc_15.2.0-bcs_${BCS_VERSION}" >> $GITHUB_OUTPUT
+              else
+                echo "container-image=gmao/ubuntu24-geos-env-mkl:${VERSION}-openmpi_5.0.5-gcc_15.2.0" >> $GITHUB_OUTPUT
+              fi
               echo "fortran-compiler=gfortran" >> $GITHUB_OUTPUT
               echo "version-command=gfortran --version" >> $GITHUB_OUTPUT
               ;;
