@@ -228,7 +228,7 @@ jobs:
           spack env activate spack-env
           spack load \
             ${{ inputs.use-esmf-develop && 'esmf@develop' || 'esmf' }} \
-            gftl gftl-shared fargparse pflogger pfunit yafyaml ecbuild udunits openblas
+            openmpi python py-pyyaml py-numpy pfunit pflogger fargparse zlib-ng mepo udunits
           spack find --loaded
           FC=gfortran-14 CC=gcc-14 CXX=g++-14
           cmake -B build -S . \
