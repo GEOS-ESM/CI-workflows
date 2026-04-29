@@ -220,7 +220,7 @@ jobs:
           spack clean -m
           spack -e spack-env install --add --no-check-signature --use-buildcache only \
             openmpi parallelio py-pyyaml python netcdf-fortran netcdf-c hdf5 \
-            gftl gftl-shared fargparse pflogger pfunit yafyaml ecbuild udunits openblas
+            gftl gftl-shared fargparse pflogger pfunit yafyaml udunits openblas
 
       - name: Install ESMF develop
         if: ${{ inputs.use-esmf-develop }}
