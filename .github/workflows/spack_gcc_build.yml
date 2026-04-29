@@ -75,6 +75,8 @@ jobs:
   build_gcm:
     name: Spack Build (${{ inputs.use-esmf-develop && 'ESMF develop' || 'ESMF stable' }})
     runs-on: ubuntu-24.04
+    env:
+      FMS_SPEC: "fms@2024.03 ~gfs_phys +pic constants=GEOS precision=32,64 +deprecated_io ~yaml target=x86_64_v3"
     steps:
 
       - name: Checkout repository
@@ -232,7 +234,7 @@ jobs:
         if: ${{ inputs.load-fms }}
         shell: spack-bash {0}
         run: |
-          spack -e spack-env install --add --no-check-signature --use-buildcache only fms@2024.03
+          spack -e spack-env install --add --no-check-signature --use-buildcache only ${FMS_SPEC}
 
       - name: Build with CMake
         shell: spack-bash {0}
@@ -241,7 +243,7 @@ jobs:
           spack load \
             ${{ inputs.use-esmf-develop && 'esmf@develop' || 'esmf' }} \
             openmpi python py-pyyaml py-numpy pfunit pflogger fargparse zlib-ng mepo udunits \
-            ${{ inputs.load-fms && 'fms@2024.03' || '' }}
+            ${{ inputs.load-fms && '${FMS_SPEC}' || '' }}
           spack find --loaded
           FC=gfortran-14 CC=gcc-14 CXX=g++-14
           cmake -B build -S . \
