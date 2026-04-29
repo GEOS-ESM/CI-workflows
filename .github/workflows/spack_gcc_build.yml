@@ -156,7 +156,7 @@ jobs:
         shell: spack-bash {0}
         run: |
           git clone --depth=1 https://github.com/GMAO-SI-Team/geosesm-spack.git geosesm-spack
-          spack repo add geosesm-spack
+          spack repo add --name geosesm geosesm-spack/spack_repo/geosesm
           spack repo list
 
       - name: Find compilers
