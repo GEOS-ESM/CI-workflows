@@ -27,7 +27,7 @@ jobs:
           touch /discover/nobackup/gmao_ci/swell/tier2/__running__
 
       - name: acquire-swell
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: install-swell
         run: |
