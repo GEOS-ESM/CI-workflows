@@ -21,7 +21,7 @@ jobs:
           /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
 
       - name: acquire-swell
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
       - name: install-swell
         run: |
