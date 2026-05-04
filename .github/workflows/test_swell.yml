@@ -203,7 +203,7 @@ jobs:
           CI_WORKSPACE_JOB=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/${{ matrix.suite }}
           mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED || true
 
-  swell-tier2-comparison:
+  swell-tier_2-comparison:
 
     runs-on: nccs-discover
     timeout-minutes: 30
