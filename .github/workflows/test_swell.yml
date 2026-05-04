@@ -173,7 +173,11 @@ jobs:
       - name: run-swell-${{ matrix.suite }}
         run: |
           CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
-          SUITE_NAME=${{ matrix.suite }}_tier2
+          SUITE_NAME=${{ matrix.suite }}
+          if [ "${SUITE_NAME}" != "hofx" ]; then
+            SUITE_NAME="${SUITE_NAME}_tier2"
+          fi
+
           CI_WORKSPACE_JOB=${CI_WORKSPACE}/${SUITE_NAME}
           EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
 
