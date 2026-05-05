@@ -113,7 +113,6 @@ jobs:
     needs: swell-tier_2-setup
 
     steps:
-
       - name: run-swell-build_jedi
         run: |
           CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
@@ -212,8 +211,8 @@ jobs:
           CI_WORKSPACE_JOB=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/${{ matrix.suite }}
           mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED || true
 
+  # Run comparison tests using matrix
   swell-tier_2-comparison:
-
     runs-on: nccs-discover
     timeout-minutes: 30
     needs: [define-comparison-matrix, swell-tier_2-test]
@@ -226,7 +225,6 @@ jobs:
     steps:
       - name: run-swell-${{ matrix.suite }}-comparison
         run: |
-
           CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
 
           SUITE_NAME=${{ matrix.suite }}-comparison
