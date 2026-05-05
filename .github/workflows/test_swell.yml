@@ -215,7 +215,7 @@ jobs:
   swell-tier_2-comparison:
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [define-comparison-matrix, swell-tier_2-test]
+    needs: [define-comparison-matrix, swell-tier_2-setup, swell-tier_2-test]
     strategy:
       fail-fast: false
       max-parallel: 6
