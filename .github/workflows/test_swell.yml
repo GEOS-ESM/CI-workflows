@@ -45,11 +45,10 @@ jobs:
   define-comparison-matrix:
     runs-on: nccs-discover
     outputs:
-      suites: ${{ steps.set-suites.outputs.suites }}
-      suites_space: ${{ steps.set-suites.outputs.suites_space }}
+      comparison_suites: ${{ steps.set-comparison-suites.outputs.comparison_suites }}
     steps:
       - name: Set suite list
-        id: set-suites
+        id: set-comparison-suites
         run: |
           SUITES_ARR=(
             "3dfgat_marine_cycle"
@@ -67,9 +66,7 @@ jobs:
           done
           SUITES+='"]'
 
-          SUITES_SPACE="${SUITES_ARR[*]}"
-          echo "suites=$SUITES" >> $GITHUB_OUTPUT
-          echo "suites_space=$SUITES_SPACE" >> $GITHUB_OUTPUT
+          echo "comparison_suites=$SUITES" >> $GITHUB_OUTPUT
 
   # Initialization needed by all the workflows
   # ------------------------------------------
@@ -220,7 +217,7 @@ jobs:
       fail-fast: false
       max-parallel: 6
       matrix:
-        suite: ${{ fromJson(needs.define-comparison-matrix.outputs.suites) }}
+        suite: ${{ fromJson(needs.define-comparison-matrix.outputs.comparison_suites) }}
 
     steps:
       - name: run-swell-${{ matrix.suite }}-comparison
