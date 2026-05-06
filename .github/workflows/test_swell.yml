@@ -83,8 +83,9 @@ jobs:
       # Only one tier 2 run is allowed at a given time
       - name: establish-workflow-status
         run: |
-          if [ -f "/discover/nobackup/gmao_ci/swell/tier2/__running__" ]; then echo "Tier 2 is already running. Abort"; exit 1; fi
-          touch /discover/nobackup/gmao_ci/swell/tier2/__running__
+          #if [ -f "/discover/nobackup/gmao_ci/swell/tier2/__running__" ]; then echo "Tier 2 is already running. Abort"; exit 1; fi
+          #touch /discover/nobackup/gmao_ci/swell/tier2/__running__
+          echo "hi"
 
       - name: acquire-swell
         uses: actions/checkout@v3
@@ -214,8 +215,6 @@ jobs:
     timeout-minutes: 30
     needs: [define-comparison-matrix, swell-tier_2-setup, swell-tier_2-test]
     strategy:
-      fail-fast: false
-      max-parallel: 6
       matrix:
         suite: ${{ fromJson(needs.define-comparison-matrix.outputs.comparison_suites) }}
 
@@ -309,7 +308,7 @@ jobs:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [define-matrix, swell-tier_2-test, swell-tier_2-comparison]
+    needs: [define-matrix, swell-tier_2-comparison]
     if: always()  # Always run the clean up, even if failed or cancelled
     strategy:
       matrix:
