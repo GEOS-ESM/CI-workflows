@@ -39,6 +39,12 @@ on:
         type: boolean
         default: true
 
+      update-other-branches:
+        description: 'Whether to run the mepo checkout-if-exists step to update other branches'
+        required: false
+        type: boolean
+        default: true
+
       build-jobs:
         description: 'Number of parallel build jobs'
         required: false
@@ -166,7 +172,7 @@ jobs:
         run: echo "PR is coming from ${{ github.event.pull_request.head.ref }}"
 
       - name: Update other branches
-        if: ${{ github.event.pull_request.head.ref != 'main' && github.event.pull_request.head.ref != 'develop' }}
+        if: ${{ inputs.update-other-branches && github.event.pull_request.head.ref != 'main' && github.event.pull_request.head.ref != 'develop' }}
         run: |
           mepo checkout-if-exists ${GITHUB_HEAD_REF}
           mepo status
