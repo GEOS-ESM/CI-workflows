@@ -53,6 +53,9 @@ jobs:
 
       - name: run-swell-build_jedi
         run: |
+
+          if [ -f "/discover/nobackup/gmao_ci/swell/tier2/__use_existing__" ]; then echo "Using current pinned JEDI build"; exit 0; fi
+        
           CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
           SUITE_NAME=build_jedi
           CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
@@ -363,8 +366,8 @@ jobs:
           CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
           mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
 
-  # Run 3dvar_cf suite
-  swell-tier_2-3dvar_cf:
+  # Run 3dvar_cf_cycle suite
+  swell-tier_2-3dvar_cf_cycle:
 
     runs-on: nccs-discover
     timeout-minutes: 600
@@ -372,10 +375,10 @@ jobs:
 
     steps:
 
-      - name: run-swell-3dvar_cf
+      - name: run-swell-3dvar_cf_cycle
         run: |
           CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
-          SUITE_NAME=3dvar_cf
+          SUITE_NAME=3dvar_cf_cycle
           CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
           EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
 
@@ -402,19 +405,19 @@ jobs:
           swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
-  swell-tier2-3dvar_cf-comparison:
+  swell-tier2-3dvar_cf_cycle-comparison:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: swell-tier_2-3dvar_cf
+    needs: swell-tier_2-3dvar_cf_cycle
 
     steps:
-      - name: run-swell-3dvar_cf-comparison
+      - name: run-swell-3dvar_cf_cycle-comparison
         run: |
 
           CI_WORKSPACE=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}
           
-          COMPARISON_SUITE=3dvar_cf
+          COMPARISON_SUITE=3dvar_cf_cycle
           SUITE_NAME=${COMPARISON_SUITE}-comparison
 
           CONFIG_NAME=compare_variational_cf
@@ -435,7 +438,7 @@ jobs:
           echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
 
-          COMPARISON_EXP_PATH_1=$(realpath "/discover/nobackup/gmao_ci/SwellExperiments/current-3dvar_cf-comparison")
+          COMPARISON_EXP_PATH_1=$(realpath "/discover/nobackup/gmao_ci/SwellExperiments/current-3dvar_cf_cycle-comparison")
 
           EXPERIMENT_ID_2=swell-${COMPARISON_SUITE}-${GITHUB_RUN_ID}
           COMPARISON_EXP_PATH_2=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${COMPARISON_SUITE}/${EXPERIMENT_ID_2}/${EXPERIMENT_ID_2}-suite/experiment.yaml
@@ -451,17 +454,17 @@ jobs:
           swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
   # Move experiment directory on failure
-  swell-tier_2-3dvar_cf-failure:
+  swell-tier_2-3dvar_cf_cycle-failure:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: swell-tier_2-3dvar_cf
+    needs: swell-tier_2-3dvar_cf_cycle
     if: failure()
 
     steps:
-      - name: Fail hold for 3dvar_cf
+      - name: Fail hold for 3dvar_cf_cycle
         run: |
-          SUITE_NAME=3dvar_cf
+          SUITE_NAME=3dvar_cf_cycle
           CI_WORKSPACE_JOB=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${SUITE_NAME}
           mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
   
