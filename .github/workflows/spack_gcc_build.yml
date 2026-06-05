@@ -117,7 +117,7 @@ jobs:
         run: echo "PR is coming from ${{ github.event.pull_request.head.ref }}"
 
       - name: Update other branches
-        if: ${{ github.event.pull_request.head.ref != '' && github.event.pull_request.head.ref != 'main' && github.event.pull_request.head.ref != 'develop' }}
+        if: ${{ github.event.pull_request.head.ref != '' && github.event.pull_request.head.ref != 'main' && github.event.pull_request.head.ref != 'develop' && !startsWith(github.event.pull_request.head.ref, 'release/v') }}
         run: |
           mepo checkout-if-exists ${GITHUB_HEAD_REF}
           mepo status

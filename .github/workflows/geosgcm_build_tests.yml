@@ -145,7 +145,7 @@ jobs:
           echo $BASEDIR
 
       - name: Try matching branch in ${{ needs.setup.outputs.repo-name }} fixture
-        if: ${{ github.event.pull_request.head.ref != 'main' && github.event.pull_request.head.ref != 'develop' }}
+        if: ${{ github.event.pull_request.head.ref != 'main' && github.event.pull_request.head.ref != 'develop' && !startsWith(github.event.pull_request.head.ref, 'release/v') }}
         run: |
           BRANCH="${GITHUB_HEAD_REF}"
           # Fetch the branch if it exists
@@ -172,7 +172,7 @@ jobs:
         run: echo "PR is coming from ${{ github.event.pull_request.head.ref }}"
 
       - name: Update other branches
-        if: ${{ inputs.update-other-branches && github.event.pull_request.head.ref != 'main' && github.event.pull_request.head.ref != 'develop' }}
+        if: ${{ inputs.update-other-branches && github.event.pull_request.head.ref != 'main' && github.event.pull_request.head.ref != 'develop' && !startsWith(github.event.pull_request.head.ref, 'release/v') }}
         run: |
           mepo checkout-if-exists ${GITHUB_HEAD_REF}
           mepo status
