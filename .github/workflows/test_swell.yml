@@ -41,33 +41,6 @@ jobs:
           echo "suites=$SUITES" >> $GITHUB_OUTPUT
           echo "suites_space=$SUITES_SPACE" >> $GITHUB_OUTPUT
 
-  # Define the suite list once
-  define-comparison-matrix:
-    runs-on: nccs-discover
-    outputs:
-      comparison_suites: ${{ steps.set-comparison-suites.outputs.comparison_suites }}
-    steps:
-      - name: Set suite list
-        id: set-comparison-suites
-        run: |
-          SUITES_ARR=(
-            "3dfgat_marine_cycle"
-            "3dfgat_atmos"
-          )
-
-          # Build JSON array explicitly (because jq command doesn't exist)
-          SUITES='["'
-          for i in "${!SUITES_ARR[@]}"; do
-            if [ $i -lt $((${#SUITES_ARR[@]} - 1)) ]; then
-              SUITES+="${SUITES_ARR[$i]}\",\""
-            else
-              SUITES+="${SUITES_ARR[$i]}"
-            fi
-          done
-          SUITES+='"]'
-
-          echo "comparison_suites=$SUITES" >> $GITHUB_OUTPUT
-
   # Initialization needed by all the workflows
   # ------------------------------------------
   swell-tier_2-setup:
@@ -215,10 +188,10 @@ jobs:
   swell-tier_2-comparison:
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [define-comparison-matrix, swell-tier_2-setup, swell-tier_2-test]
+    needs: [define-matrix, swell-tier_2-setup, swell-tier_2-test]
     strategy:
       matrix:
-        suite: ${{ fromJson(needs.define-comparison-matrix.outputs.comparison_suites) }}
+        suite: ${{ fromJson(needs.define-matrix.outputs.suites) }}
 
     steps:
       - name: run-swell-${{ matrix.suite }}-comparison
@@ -228,10 +201,13 @@ jobs:
           SUITE_NAME=${{ matrix.suite }}-comparison
 
           # Set the config name
-          if [ "${{ matrix.suite }}" == "3dfgat_cycle" ]; then
+          if [ "${{ matrix.suite }}" == "3dfgat_marine_cycle" ]; then
             CONFIG_NAME=compare_fgat_marine
-          else
+          elif [ "${{ matrix.suite }}" == "3dfgat_atmos" ]; then
             CONFIG_NAME=compare_variational_atmosphere
+          else
+            exit 0
+          fi
 
           CI_WORKSPACE_JOB=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/${SUITE_NAME}
           EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
@@ -280,7 +256,7 @@ jobs:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [swell-tier_2-comparison]
+    needs: [swell-tier_2-test, swell-tier_2-comparison]
 
     steps:
       - name: Replace link to stable with link to current run and remove old directory
@@ -310,7 +286,7 @@ jobs:
 
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [define-matrix, swell-tier_2-comparison]
+    needs: [define-matrix, swell-tier_2-test, swell-tier_2-comparison]
     if: always()  # Always run the clean up, even if failed or cancelled
     strategy:
       matrix:
