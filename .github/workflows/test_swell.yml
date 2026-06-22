@@ -154,6 +154,7 @@ jobs:
           else
             CONFIG_NAME="${SUITE_NAME}"
           fi
+          echo "config name: ${SUITE_NAME}"
 
           CI_WORKSPACE_JOB=${CI_WORKSPACE}/${SUITE_NAME}
           EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
@@ -175,7 +176,7 @@ jobs:
           rm -rf $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
           cd $CI_WORKSPACE_JOB
-          swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml -s /home/gmao_ci/.swell/slurm-directives.yaml
+          swell create ${CONFIG_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml -s /home/gmao_ci/.swell/slurm-directives.yaml
           swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
       - name: Mark failed on failure
