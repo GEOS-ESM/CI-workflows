@@ -227,8 +227,8 @@ jobs:
 
           COMPARISON_EXP_PATH_1=$(realpath "/discover/nobackup/gmao_ci/SwellExperiments/current-${{ matrix.suite }}-comparison")
 
-          EXPERIMENT_ID_2=swell-${COMPARISON_SUITE}-${GITHUB_RUN_ID}
-          COMPARISON_EXP_PATH_2=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${COMPARISON_SUITE}/${EXPERIMENT_ID_2}/${EXPERIMENT_ID_2}-suite/experiment.yaml
+          EXPERIMENT_ID_2=swell-${{ matrix.suite }}-${GITHUB_RUN_ID}
+          COMPARISON_EXP_PATH_2=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${{ matrix.suite }}/${EXPERIMENT_ID_2}/${EXPERIMENT_ID_2}-suite/experiment.yaml
 
           echo "comparison_experiment_paths:" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           echo "- $COMPARISON_EXP_PATH_1" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
