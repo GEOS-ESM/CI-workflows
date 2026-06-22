@@ -20,7 +20,7 @@ jobs:
           /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} mapl
 
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           set-safe-directory: false
 
