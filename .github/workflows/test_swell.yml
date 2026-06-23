@@ -190,6 +190,7 @@ jobs:
     runs-on: nccs-discover
     timeout-minutes: 30
     needs: [define-matrix, swell-tier_2-setup, swell-tier_2-test]
+    if: always()
     strategy:
       matrix:
         suite: ${{ fromJson(needs.define-matrix.outputs.suites) }}
@@ -297,8 +298,8 @@ jobs:
 
       - name: Remove the cylc logging directories
         run: |
-          rm -r -f $HOME/cylc-run/swell-${{ matrix.suite }}-${GITHUB_RUN_ID}-suite
-          rm -r -f $HOME/cylc-run/swell-${{ matrix.suite }}-comparison-${GITHUB_RUN_ID}-suite
+          cylc clean swell-${{ matrix.suite }}-${GITHUB_RUN_ID}-suite
+          cylc clean swell-${{ matrix.suite }}-comparison-${GITHUB_RUN_ID}-suite
 
       - name: Remove the R2D2 experiment output
         run: |
