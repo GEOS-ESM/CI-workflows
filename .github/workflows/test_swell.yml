@@ -41,12 +41,10 @@ jobs:
           echo "suites=$SUITES" >> $GITHUB_OUTPUT
           echo "suites_space=$SUITES_SPACE" >> $GITHUB_OUTPUT
 
-  # Initialization needed by all the workflows
-  # ------------------------------------------
-  swell-tier_2-setup:
 
+  establish-workflow:
     runs-on: nccs-discover
-    timeout-minutes: 30
+    timeout-minutes: 10
 
     steps:
       - name: validate-workflow
@@ -60,6 +58,52 @@ jobs:
           #touch /discover/nobackup/gmao_ci/swell/tier2/__running__
           echo "hi"
 
+  # Install and initialize jedi_bundle
+  # ----------------------------------
+  jedi_bundle-setup:
+    runs-on: nccs-discover
+    timeout-minutes: 10
+    needs: establish-workflow
+
+    steps:
+      - name: install-jedi_bundle
+        run: |
+          git clone https://github.com/GEOS-ESM/jedi_bundle ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
+          source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
+          pip install --prefix=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle -r ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src/requirements.txt --no-cache-dir ${GITHUB_WORKSPACE} --ignore-installed
+          
+  build-jedi:
+    runs-on: nccs-discover
+    timeout-minutes: 90
+    needs: jedi_bundle-setup
+
+    steps:
+      - name: clone-jedi
+        run:
+          BUILD_PATH = ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build
+          mkdir -p $BUILD_PATH
+          cd $BUILD_PATH
+          
+          jedi_bundle
+          jedi_bundle clone build.yaml
+
+      - name: configure-jedi
+        run:
+          jedi_bundle configure build.yaml
+
+      - name: make-jedi
+        run:
+          sbatch --nodes=1 --time=01:30:00 --constraint=mil --wrap="jedi_bundle make build.yaml"
+
+  # Initialization needed by all the workflows
+  # ------------------------------------------
+  swell-tier_2-setup:
+
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs: establish-workflow
+
+    steps:
       - name: acquire-swell
         uses: actions/checkout@v3
 
