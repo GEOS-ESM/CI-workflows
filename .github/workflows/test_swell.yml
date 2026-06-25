@@ -86,13 +86,7 @@ jobs:
           
           jedi_bundle
           jedi_bundle clone build.yaml
-
-      - name: configure-jedi
-        run:
           jedi_bundle configure build.yaml
-
-      - name: make-jedi
-        run:
           sbatch --nodes=1 --time=01:30:00 --constraint=mil --wrap="jedi_bundle make build.yaml"
 
   # Initialization needed by all the workflows
