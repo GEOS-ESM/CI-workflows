@@ -60,7 +60,7 @@ jobs:
 
   # Install and initialize jedi_bundle
   # ----------------------------------
-  build_jedi:
+  build-jedi:
     runs-on: nccs-discover
     timeout-minutes: 10
     needs: establish-workflow
