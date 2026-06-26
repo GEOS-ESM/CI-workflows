@@ -80,7 +80,7 @@ jobs:
     steps:
       - name: clone-jedi
         run:
-          BUILD_PATH = ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build
+          BUILD_PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build
           mkdir -p $BUILD_PATH
           cd $BUILD_PATH
           
