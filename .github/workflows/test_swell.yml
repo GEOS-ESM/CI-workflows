@@ -70,7 +70,7 @@ jobs:
         run: |
           git clone https://github.com/GEOS-ESM/jedi_bundle ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
           source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
-          pip install --prefix=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle -r ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src/requirements.txt --no-cache-dir ${GITHUB_WORKSPACE} --ignore-installed
+          pip install --prefix=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle -r ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src/requirements.txt --no-cache-dir ${GITHUB_WORKSPACE} --ignore-installed https://github.com/GEOS-ESM/jedi_bundle ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
           
   build-jedi:
     runs-on: nccs-discover
