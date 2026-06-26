@@ -60,7 +60,7 @@ jobs:
 
   # Install and initialize jedi_bundle
   # ----------------------------------
-  jedi_bundle-setup:
+  build_jedi:
     runs-on: nccs-discover
     timeout-minutes: 10
     needs: establish-workflow
@@ -72,14 +72,6 @@ jobs:
           source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
           pip install --prefix=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle -r ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src/requirements.txt --no-cache-dir --ignore-installed ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
           
-  build-jedi:
-    runs-on: nccs-discover
-    timeout-minutes: 90
-    needs: jedi_bundle-setup
-
-    steps:
-      - name: clone-jedi
-        run:
           BUILD_PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build
           mkdir -p $BUILD_PATH
           cd $BUILD_PATH
