@@ -74,8 +74,8 @@ jobs:
 
           PYVER=$(python --version | awk '{print $2}' | awk -F. '{print $1"."$2}')
 
-          export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin
-          export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages
+          export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin:$PATH
+          export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages:$PYTHONPATH
           
           BUILD_PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build
           mkdir -p $BUILD_PATH
