@@ -71,6 +71,11 @@ jobs:
           git clone https://github.com/GEOS-ESM/jedi_bundle ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
           source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
           pip install --prefix=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle -r ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src/requirements.txt --no-cache-dir --ignore-installed ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
+
+          PYVER=$(python --version | awk '{print $2}' | awk -F. '{print $1"."$2}')
+
+          export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin
+          export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages
           
           BUILD_PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build
           mkdir -p $BUILD_PATH
