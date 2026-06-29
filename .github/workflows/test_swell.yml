@@ -83,8 +83,7 @@ jobs:
           
           jedi_bundle
           jedi_bundle clone build.yaml
-          jedi_bundle configure build.yaml
-          sbatch --nodes=1 --time=01:30:00 --constraint=mil --wrap="jedi_bundle make build.yaml"
+          sbatch --job-name=BuildJedi --qos=dastest --account=g0613 --partition=preops --nodes=1 --time=02:00:00 --constraint=mil --wrap="jedi_bundle configure build.yaml;jedi_bundle make build.yaml"
 
   # Initialization needed by all the workflows
   # ------------------------------------------
