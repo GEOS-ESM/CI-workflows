@@ -83,7 +83,16 @@ jobs:
           
           jedi_bundle
           jedi_bundle clone build.yaml
-          sbatch --job-name=BuildJedi --qos=dastest --account=g0613 --partition=preops --nodes=1 --time=02:00:00 --constraint=mil --wrap="jedi_bundle configure build.yaml;jedi_bundle make build.yaml"
+          salloc --job-name=BuildJedi --qos=dastest --account=g0613 --partition=preops --nodes=1 --time=02:00:00 --constraint=mil
+
+          source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
+          export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin:$PATH
+          export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages:$PYTHONPATH
+          
+          jedi_bundle configure build.yaml
+          jedi_bundle make build.yaml
+
+          exit
 
   # Initialization needed by all the workflows
   # ------------------------------------------
