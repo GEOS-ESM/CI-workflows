@@ -149,6 +149,10 @@ jobs:
         run: |
           CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
           SUITE_NAME=${{ matrix.suite }}
+
+          FAIL_FLAG=${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
+          if [ -f $FAIL_FLAG ]; then rm $FAIL_FLAG; fi
+          
           if [ "${SUITE_NAME}" != "hofx" ]; then
             CONFIG_NAME="${SUITE_NAME}_tier2"
           else
@@ -182,8 +186,7 @@ jobs:
       - name: Mark failed on failure
         if: failure()
         run: |
-          CI_WORKSPACE_JOB=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/${{ matrix.suite }}
-          mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED || true
+          touch ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/__${{ matrix.suite }}_FAILED__
 
   # Run comparison tests using matrix
   swell-tier_2-comparison:
