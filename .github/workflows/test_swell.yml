@@ -85,6 +85,7 @@ jobs:
           jedi_bundle clone build.yaml
 
           cat > build_jedi.sh <<EOF
+          #!/bin/bash
           source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
           export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin:$PATH
           export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages:$PYTHONPATH
@@ -174,7 +175,6 @@ jobs:
     runs-on: nccs-discover
     timeout-minutes: 30
     needs: [define-matrix, swell-tier_2-setup, swell-tier_2-test]
-    if: always()
     strategy:
       matrix:
         suite: ${{ fromJson(needs.define-matrix.outputs.suites) }}
