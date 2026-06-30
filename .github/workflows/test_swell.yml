@@ -210,7 +210,7 @@ jobs:
             CONFIG_NAME=compare_fgat_marine
           elif [ "${{ matrix.suite }}" == "3dfgat_atmos" ]; then
             CONFIG_NAME=compare_variational_atmosphere
-          elif [ "${{ matrix.suite }}" == "3dvar_cf_cycle" ]; then
+          elif [ "${{ matrix.suite }}" == "3dvar_cf" ]; then
             CONFIG_NAME=compare_variational_cf
           else
             exit 0
