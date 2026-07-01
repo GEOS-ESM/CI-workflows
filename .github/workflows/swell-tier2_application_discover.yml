@@ -24,6 +24,7 @@ jobs:
             "hofx"
             "3dfgat_marine_cycle"
             "3dfgat_atmos"
+            "3dvar_cf"
           )
 
           # Build JSON array explicitly (because jq command doesn't exist)
@@ -153,7 +154,7 @@ jobs:
           FAIL_FLAG=${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
           if [ -f $FAIL_FLAG ]; then rm $FAIL_FLAG; fi
           
-          if [ "${SUITE_NAME}" != "hofx" ]; then
+          if [[ "${SUITE_NAME}" != "hofx" && "${SUITE_NAME}" != "3dvar_cf" ]]; then
             CONFIG_NAME="${SUITE_NAME}_tier2"
           else
             CONFIG_NAME="${SUITE_NAME}"
@@ -209,6 +210,8 @@ jobs:
             CONFIG_NAME=compare_fgat_marine
           elif [ "${{ matrix.suite }}" == "3dfgat_atmos" ]; then
             CONFIG_NAME=compare_variational_atmosphere
+          elif [ "${{ matrix.suite }}" == "3dvar_cf" ]; then
+            CONFIG_NAME=compare_variational_cf
           else
             exit 0
           fi
