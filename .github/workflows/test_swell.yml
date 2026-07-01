@@ -154,7 +154,7 @@ jobs:
           FAIL_FLAG=${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
           if [ -f $FAIL_FLAG ]; then rm $FAIL_FLAG; fi
           
-          if [ "${SUITE_NAME}" != "hofx" || "${SUITE_NAME}" != "3dvar_cf" ]; then
+          if [[ "${SUITE_NAME}" != "hofx" && "${SUITE_NAME}" != "3dvar_cf" ]]; then
             CONFIG_NAME="${SUITE_NAME}_tier2"
           else
             CONFIG_NAME="${SUITE_NAME}"
