@@ -249,8 +249,9 @@ jobs:
       - name: Mark failed on failure
         if: failure()
         run : |
-          CI_WORKSPACE_JOB=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/${{ matrix.suite }}_comparison
-          mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED || true
+          SUITE_NAME=${{ matrix.suite }}-comparison
+          CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
+          touch ${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
 
   # -------------------------------------------------------------
   # STEP3: PERFORM UPDATES OF STABLE NIGHTLY POINTER AND CLEAN UP
