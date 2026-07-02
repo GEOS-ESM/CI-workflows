@@ -82,7 +82,10 @@ jobs:
         run: |
           CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
           SUITE_NAME=${{ matrix.suite }}
-          rm ${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
+
+          FAIL_FLAG=${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
+          if [ -f $FAIL_FLAG ]; then rm $FAIL_FLAG; fi
+          
           CI_WORKSPACE_JOB=${CI_WORKSPACE}/${SUITE_NAME}
           EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
 
