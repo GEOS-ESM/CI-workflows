@@ -82,8 +82,8 @@ jobs:
         run: |
           CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
           SUITE_NAME=${{ matrix.suite }}
+          rm ${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
           CI_WORKSPACE_JOB=${CI_WORKSPACE}/${SUITE_NAME}
-          rm __${CI_WORKSPACE_JOB}_FAILED__
           EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
 
           mkdir -p $CI_WORKSPACE_JOB
@@ -107,8 +107,7 @@ jobs:
       - name: Mark failed on failure
         if: failure()
         run: |
-          CI_WORKSPACE_JOB=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/${{ matrix.suite }}
-          touch __${CI_WORKSPACE_JOB}_FAILED__ || true
+          touch ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/__${{ matrix.suite }}_FAILED__
 
   # Cleanup on success
   swell-tier_1-clean_up_success:
