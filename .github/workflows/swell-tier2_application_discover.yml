@@ -306,8 +306,3 @@ jobs:
           rm -rf $HOME/cylc-run/swell-build_jedi-${GITHUB_RUN_ID}-suite
           rm -rf $HOME/cylc-run/swell-${{ matrix.suite }}-${GITHUB_RUN_ID}-suite
           rm -rf $HOME/cylc-run/swell-${{ matrix.suite }}-comparison-${GITHUB_RUN_ID}-suite
-
-      - name: Remove the R2D2 experiment output
-        run: |
-          rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/ncdiag/ob/swell-${{ matrix.suite }}-${GITHUB_RUN_ID}
-          rm -r -f /discover/nobackup/gmao_ci/R2D2DataStore/Local/mom6_cice6_UFS
