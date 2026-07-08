@@ -178,8 +178,8 @@ jobs:
           cat > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml <<EOF
           experiment_id: $EXPERIMENT_ID
           experiment_root: $CI_WORKSPACE_JOB
-          existing_jedi_source_directory: ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source
-          existing_jedi_build_directory: ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build
+          existing_jedi_source_directory: ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build/
+          existing_jedi_build_directory: ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build/build-intel-release
           EOF
 
           rm -rf $HOME/cylc-run/${EXPERIMENT_ID}-suite
