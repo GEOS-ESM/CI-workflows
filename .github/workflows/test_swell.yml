@@ -112,17 +112,16 @@ jobs:
           jedi_bundle
           jedi_bundle clone build.yaml
 
-          cat > build_jedi.sh <<EOF
-          #!/bin/bash
+          salloc --job-name=BuildJedi --qos=dastest --account=g0613 --partition=preops --nodes=1 --time=02:00:00 --constraint=mil
+
           source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
           export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin:$PATH
           export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages:$PYTHONPATH
 
           jedi_bundle configure build.yaml
           jedi_bundle make build.yaml
-          EOF
 
-          sbatch --job-name=BuildJedi --qos=dastest --account=g0613 --partition=preops --nodes=1 --time=02:00:00 --constraint=mil --wait --output=build_jedi.out --error=build_jedi.err ./build_jedi.sh
+          exit 0
 
   # Move experiment directory on failure
   swell-tier_2-build_jedi-failure:
