@@ -92,7 +92,9 @@ jobs:
         run: |
           SUITE_NAME=build_jedi
           CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
-          rm ${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
+
+          FAIL_FLAG=${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
+          if [ -f $FAIL_FLAG ]; then rm $FAIL_FLAG; fi
 
           git clone https://github.com/GEOS-ESM/jedi_bundle ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
           source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
