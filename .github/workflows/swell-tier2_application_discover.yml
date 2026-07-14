@@ -42,12 +42,10 @@ jobs:
           echo "suites=$SUITES" >> $GITHUB_OUTPUT
           echo "suites_space=$SUITES_SPACE" >> $GITHUB_OUTPUT
 
-  # Initialization needed by all the workflows
-  # ------------------------------------------
-  swell-tier_2-setup:
-
+  # Initialization needed by the workflow
+  establish-workflow:
     runs-on: nccs-discover
-    timeout-minutes: 30
+    timeout-minutes: 10
 
     steps:
       - name: validate-workflow
@@ -60,6 +58,13 @@ jobs:
           if [ -f "/discover/nobackup/gmao_ci/swell/tier2/__running__" ]; then echo "Tier 2 is already running. Abort"; exit 1; fi
             touch /discover/nobackup/gmao_ci/swell/tier2/__running__
 
+  # Installation of swell
+  # ---------------------
+  swell-tier_2-setup:
+    runs-on: nccs-discover
+    timeout-minutes: 30
+    needs: establish-workflow
+    steps:
       - name: acquire-swell
         uses: actions/checkout@v3
 
@@ -81,42 +86,53 @@ jobs:
 
     runs-on: nccs-discover
     timeout-minutes: 600
-    needs: swell-tier_2-setup
-
+    needs: establish-workflow
     steps:
-      - name: run-swell-build_jedi
+      - name: build_jedi
         run: |
-          CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
           SUITE_NAME=build_jedi
-          CI_WORKSPACE_JOB=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/${SUITE_NAME}
-          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
+          CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
 
-          mkdir -p $CI_WORKSPACE_JOB
+          FAIL_FLAG=${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
+          if [ -f $FAIL_FLAG ]; then rm $FAIL_FLAG; fi
 
-          source ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/modules
+          git clone https://github.com/GEOS-ESM/jedi_bundle ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
+          source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
+          pip install --prefix=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle -r ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src/requirements.txt --no-cache-dir --ignore-installed ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
 
-          # Get python version
-          PYVER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
+          PYVER=$(python --version | awk '{print $2}' | awk -F. '{print $1"."$2}')
 
-          export PATH=$CI_WORKSPACE/swell/bin:$PATH
-          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
+          export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin:$PATH
+          export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages:$PYTHONPATH
+          
+          BUILD_PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build
+          mkdir -p $BUILD_PATH
+          cd $BUILD_PATH
+          
+          jedi_bundle
+          jedi_bundle clone build.yaml
 
-          echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
+          cat > build_jedi.sh <<EOF
+          #!/bin/bash
+          #SBATCH --job-name=BuildJedi
+          #SBATCH --qos=dastest
+          #SBATCH --partition=preops
+          #SBATCH --time=02:00:00
+          #SBATCH --constraint=mil
+          #SBATCH --nodes=1
+          #SBATCH --account=g0613
+          #SBATCH --output=build_jedi.out
+          #SBATCH --error=build_jedi.err
+          
+          source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
+          export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin:$PATH
+          export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages:$PYTHONPATH
 
-          if [ -f "/discover/nobackup/gmao_ci/swell/tier2/__use_existing__" ]; then
-            echo "Using current pinned version of JEDI"
-            echo "jedi_build_method: use_existing" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          fi
+          jedi_bundle configure build.yaml
+          jedi_bundle make build.yaml
+          EOF
 
-          rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
-
-          cd $CI_WORKSPACE_JOB
-          swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
-
-          # Create symbolic link to build that does not involve $GITHUB_RUN_ID
-          ln -s $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/jedi_bundle $CI_WORKSPACE_JOB/jedi_bundle
+          sbatch --wait ./build_jedi.sh
 
   # Move experiment directory on failure
   swell-tier_2-build_jedi-failure:
@@ -130,8 +146,8 @@ jobs:
       - name: Fail hold for build_jedi
         run: |
           SUITE_NAME=build_jedi
-          CI_WORKSPACE_JOB=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/${SUITE_NAME}
-          mv $CI_WORKSPACE_JOB ${CI_WORKSPACE_JOB}_FAILED
+          CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
+          touch ${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
 
   # Run all test workflows using matrix
   swell-tier_2-test:
@@ -173,8 +189,8 @@ jobs:
           cat > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml <<EOF
           experiment_id: $EXPERIMENT_ID
           experiment_root: $CI_WORKSPACE_JOB
-          existing_jedi_source_directory: ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/source
-          existing_jedi_build_directory: ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/build_jedi/jedi_bundle/build
+          existing_jedi_source_directory: ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build/
+          existing_jedi_build_directory: ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build/build-intel-release
           EOF
 
           rm -rf $HOME/cylc-run/${EXPERIMENT_ID}-suite
