@@ -122,6 +122,14 @@ jobs:
           mepo checkout-if-exists ${GITHUB_HEAD_REF}
           mepo status
 
+      - name: Install GCC 15
+        run: |
+          sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+          sudo apt-get update
+          sudo apt-get install -y gcc-15 g++-15 gfortran-15
+          sudo apt-get clean
+          sudo rm -rf /var/lib/apt/lists/*
+
       - name: Set up Spack
         uses: spack/setup-spack@v3
         with:
