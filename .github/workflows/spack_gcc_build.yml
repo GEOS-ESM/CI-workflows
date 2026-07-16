@@ -198,7 +198,7 @@ jobs:
         run: |
           # NOTE: We use a different buildcache for ESMF9 builds since I couldn't figure out
           # how to get the the original buildcache to work with two different esmf versions
-          spack -e spack-env mirror add geos-buildcache-esmf9 oci://ghcr.io/GEOS-ESM/geos-buildcache-esmf9-gcc15
+          spack -e spack-env mirror add geos-buildcache-esmf9-gcc15 oci://ghcr.io/GEOS-ESM/geos-buildcache-esmf9-gcc15
           spack -e spack-env mirror set --oci-username-variable "${{ secrets.BUILDCACHE_USERNAME }}" --oci-password-variable "${{ secrets.BUILDCACHE_TOKEN }}" geos-buildcache-esmf9-gcc15
           spack -e spack-env mirror list
           spack -e spack-env buildcache list --allarch
