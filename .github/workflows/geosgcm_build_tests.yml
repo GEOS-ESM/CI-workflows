@@ -16,10 +16,10 @@ on:
         default: 'Debug'
 
       baselibs-version:
-        description: 'Container version to use (e.g., v8.20.0, v9.0.0)'
+        description: 'Container version to use (e.g., v8.32.0, v9.12.0)'
         required: false
         type: string
-        default: 'v8.20.0'
+        default: 'v8.32.0'
 
       fixture-repo:
         description: 'Repository to checkout (e.g., GEOS-ESM/GEOSgcm). If not provided, uses current repo'
@@ -35,6 +35,12 @@ on:
 
       run-mepo-develop:
         description: 'Whether to run mepo develop step'
+        required: false
+        type: boolean
+        default: true
+
+      update-other-branches:
+        description: 'Whether to run the mepo checkout-if-exists step to update other branches'
         required: false
         type: boolean
         default: true
@@ -71,12 +77,12 @@ jobs:
               echo "version-command=ifort --version" >> $GITHUB_OUTPUT
               ;;
             "ifx")
-              echo "container-image=gmao/ubuntu24-geos-env:${VERSION}-intelmpi_2021.16-ifx_2025.2" >> $GITHUB_OUTPUT
+              echo "container-image=gmao/ubuntu24-geos-env:${VERSION}-intelmpi_2021.17-ifx_2025.3" >> $GITHUB_OUTPUT
               echo "fortran-compiler=ifx" >> $GITHUB_OUTPUT
               echo "version-command=ifx --version" >> $GITHUB_OUTPUT
               ;;
             "gfortran-14")
-              echo "container-image=gmao/ubuntu24-geos-env-blas:${VERSION}-openmpi_5.0.5-gcc_14.2.0" >> $GITHUB_OUTPUT
+              echo "container-image=gmao/ubuntu24-geos-env-mkl:${VERSION}-openmpi_5.0.5-gcc_14.4.0" >> $GITHUB_OUTPUT
               echo "fortran-compiler=gfortran" >> $GITHUB_OUTPUT
               echo "version-command=gfortran --version" >> $GITHUB_OUTPUT
               ;;
@@ -193,7 +199,7 @@ jobs:
           echo "TMPDIR=$TMPDIR"
 
       - name: Checkout GCM
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 1
           filter: blob:none
@@ -211,7 +217,7 @@ jobs:
           echo $BASEDIR
 
       - name: Try matching branch in ${{ needs.setup.outputs.repo-name }} fixture
-        if: ${{ github.event.pull_request.head.ref != 'main' && github.event.pull_request.head.ref != 'develop' }}
+        if: ${{ github.event.pull_request.head.ref != 'main' && github.event.pull_request.head.ref != 'develop' && !startsWith(github.event.pull_request.head.ref, 'release/v') }}
         run: |
           BRANCH="${GITHUB_HEAD_REF}"
           # Fetch the branch if it exists
@@ -231,14 +237,14 @@ jobs:
       - name: Mepo develop usual suspects
         if: ${{ inputs.run-mepo-develop }}
         run: |
-          mepo develop GEOSgcm_GridComp GEOSgcm_App GMAO_Shared GEOS_Util
+          mepo develop GEOSgcm_GridComp GEOSgcm_App GMAO_Shared GEOS_Util FVdycoreCubed_GridComp
           mepo status
 
       - name: Debug PR branch
         run: echo "PR is coming from ${{ github.event.pull_request.head.ref }}"
 
       - name: Update other branches
-        if: ${{ github.event.pull_request.head.ref != 'main' && github.event.pull_request.head.ref != 'develop' }}
+        if: ${{ inputs.update-other-branches && github.event.pull_request.head.ref != 'main' && github.event.pull_request.head.ref != 'develop' && !startsWith(github.event.pull_request.head.ref, 'release/v') }}
         run: |
           mepo checkout-if-exists ${GITHUB_HEAD_REF}
           mepo status
