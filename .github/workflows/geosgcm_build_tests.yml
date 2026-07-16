@@ -82,7 +82,7 @@ jobs:
               echo "version-command=ifx --version" >> $GITHUB_OUTPUT
               ;;
             "gfortran-14")
-              echo "container-image=gmao/ubuntu24-geos-env-mkl:${VERSION}-openmpi_5.0.5-gcc_14.2.0" >> $GITHUB_OUTPUT
+              echo "container-image=gmao/ubuntu24-geos-env-mkl:${VERSION}-openmpi_5.0.5-gcc_14.4.0" >> $GITHUB_OUTPUT
               echo "fortran-compiler=gfortran" >> $GITHUB_OUTPUT
               echo "version-command=gfortran --version" >> $GITHUB_OUTPUT
               ;;
