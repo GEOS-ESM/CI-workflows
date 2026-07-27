@@ -20,3 +20,11 @@ This repository contains reusable GitHub Actions workflows for the Swell test pi
 4. Run the tier-2 application suites (`hofx`, `3dfgat_marine_cycle`, and `3dfgat_atmos`) against that build.
 5. Run comparison jobs for the marine and atmosphere suites.
 6. On success, update the stable pointer; on failure, mark failed work directories with `_FAILED`; and always clean up logs and output data.
+
+## Contributing
+
+Please check out our [contributing guidelines](CONTRIBUTING.md).
+
+## License
+
+All files are currently licensed under the Apache-2.0 license, see [`LICENSE`](LICENSE).
