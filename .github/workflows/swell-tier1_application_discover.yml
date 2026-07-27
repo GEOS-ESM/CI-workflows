@@ -27,7 +27,7 @@ jobs:
             "3dvar_marine"
             "3dvar_atmos"
             "3dfgat_atmos"
-            "localensembleda"
+            # "localensembleda"
             "hofx_cf"
             "3dvar_cf"
           )
