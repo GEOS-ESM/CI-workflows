@@ -1,4 +1,4 @@
-name: Swell Tier 2 Applications Tests (Discover)
+name: Swell Tier 1 Applications Tests (Discover)
 
 on: workflow_call
 
@@ -7,7 +7,7 @@ defaults:
     shell: bash
 
 env:
-  CI_BASE: /discover/nobackup/gmao_ci/swell/tier2
+  CI_BASE: /discover/nobackup/gmao_ci/swell/tier1
 
 jobs:
   # Define the suite list once
@@ -21,12 +21,18 @@ jobs:
         id: set-suites
         run: |
           SUITES_ARR=(
-            "hofx"
+            "3dvar_marine_cycle"
             "3dfgat_marine_cycle"
+            "hofx"
+            "3dvar_marine"
+            "3dvar_atmos"
             "3dfgat_atmos"
-            "3dvar_cf_cycle"
+            # "localensembleda"
+            "hofx_cf"
+            "3dvar_cf"
+            "convert_ncdiags"
           )
-
+          
           # Build JSON array explicitly (because jq command doesn't exist)
           SUITES='["'
           for i in "${!SUITES_ARR[@]}"; do
@@ -37,123 +43,35 @@ jobs:
             fi
           done
           SUITES+='"]'
-
+          
           SUITES_SPACE="${SUITES_ARR[*]}"
           echo "suites=$SUITES" >> $GITHUB_OUTPUT
           echo "suites_space=$SUITES_SPACE" >> $GITHUB_OUTPUT
 
-  # Initialization needed by the workflow
-  establish-workflow:
-    runs-on: nccs-discover
-    timeout-minutes: 10
-
-    steps:
-      - name: validate-workflow
-        run: |
-          /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
-
-      # Only one tier 2 run is allowed at a given time
-      - name: establish-workflow-status
-        run: |
-          if [ -f "/discover/nobackup/gmao_ci/swell/tier2/__running__" ]; then echo "Tier 2 is already running. Abort"; exit 1; fi
-            touch /discover/nobackup/gmao_ci/swell/tier2/__running__
-
-  # Installation of swell
-  # ---------------------
-  swell-tier_2-setup:
+  # Initialization needed by all the workflows
+  swell-tier_1-setup:
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: establish-workflow
+    needs: define-matrix
     steps:
+      - name: validate-workflow
+        run: /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
+
       - name: acquire-swell
         uses: actions/checkout@v3
 
       - name: install-swell
         run: |
-          # Make experiment directory
-          mkdir -p ${{ env.CI_BASE }}/${GITHUB_RUN_ID}
-          # Copy and source modules
+          mkdir ${{ env.CI_BASE }}/${GITHUB_RUN_ID}
           cp ${GITHUB_WORKSPACE}/src/swell/deployment/platforms/nccs_discover_sles15/modules ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/
           source ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/modules
           pip install --prefix=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/swell -r ${GITHUB_WORKSPACE}/requirements.txt --no-cache-dir ${GITHUB_WORKSPACE}
-          # Remove source code (needed to ensure nothing relies on the source)
-
-  # --------------------------------------------
-  # STEP1: BUILD JEDI CODE FROM DEVELOP BRANCHES
-  # --------------------------------------------
-
-  swell-tier_2-build_jedi:
-
-    runs-on: nccs-discover
-    timeout-minutes: 600
-    needs: establish-workflow
-    steps:
-      - name: build_jedi
-        run: |
-          SUITE_NAME=build_jedi
-          CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
-
-          FAIL_FLAG=${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
-          if [ -f $FAIL_FLAG ]; then rm $FAIL_FLAG; fi
-
-          git clone https://github.com/GEOS-ESM/jedi_bundle ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
-          source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
-          pip install --prefix=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle -r ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src/requirements.txt --no-cache-dir --ignore-installed ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
-
-          PYVER=$(python --version | awk '{print $2}' | awk -F. '{print $1"."$2}')
-
-          export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin:$PATH
-          export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages:$PYTHONPATH
-          
-          BUILD_PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build
-          mkdir -p $BUILD_PATH
-          cd $BUILD_PATH
-          
-          jedi_bundle
-          jedi_bundle clone build.yaml
-
-          cat > build_jedi.sh <<EOF
-          #!/bin/bash
-          #SBATCH --job-name=BuildJedi
-          #SBATCH --qos=dastest
-          #SBATCH --partition=preops
-          #SBATCH --time=02:00:00
-          #SBATCH --constraint=mil
-          #SBATCH --nodes=1
-          #SBATCH --account=g0613
-          #SBATCH --output=build_jedi.out
-          #SBATCH --error=build_jedi.err
-          
-          source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
-          export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin:$PATH
-          export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages:$PYTHONPATH
-
-          jedi_bundle configure build.yaml
-          jedi_bundle make build.yaml
-          EOF
-
-          sbatch --wait ./build_jedi.sh
-
-  # Move experiment directory on failure
-  swell-tier_2-build_jedi-failure:
-
-    runs-on: nccs-discover
-    timeout-minutes: 30
-    needs: swell-tier_2-build_jedi
-    if: failure()
-
-    steps:
-      - name: Fail hold for build_jedi
-        run: |
-          SUITE_NAME=build_jedi
-          CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
-          touch ${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
 
   # Run all test workflows using matrix
-  swell-tier_2-test:
+  swell-tier_1-test:
     runs-on: nccs-discover
     timeout-minutes: 600
-    needs: [define-matrix, swell-tier_2-setup, swell-tier_2-build_jedi]
+    needs: [define-matrix, swell-tier_1-setup]
     strategy:
       fail-fast: false
       max-parallel: 6
@@ -169,13 +87,6 @@ jobs:
           FAIL_FLAG=${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
           if [ -f $FAIL_FLAG ]; then rm $FAIL_FLAG; fi
           
-          if [[ "${SUITE_NAME}" != "hofx" && "${SUITE_NAME}" != "3dvar_cf_cycle" ]]; then
-            CONFIG_NAME="${SUITE_NAME}_tier2"
-          else
-            CONFIG_NAME="${SUITE_NAME}"
-          fi
-          echo "config name: ${SUITE_NAME}"
-
           CI_WORKSPACE_JOB=${CI_WORKSPACE}/${SUITE_NAME}
           EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
 
@@ -189,14 +100,12 @@ jobs:
           cat > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml <<EOF
           experiment_id: $EXPERIMENT_ID
           experiment_root: $CI_WORKSPACE_JOB
-          existing_jedi_source_directory: ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build/
-          existing_jedi_build_directory: ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build/build-intel-release
           EOF
 
           rm -rf $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
           cd $CI_WORKSPACE_JOB
-          swell create ${CONFIG_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml -s /home/gmao_ci/.swell/slurm-directives.yaml
+          swell create ${SUITE_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
           swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
 
       - name: Mark failed on failure
@@ -204,121 +113,24 @@ jobs:
         run: |
           touch ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/__${{ matrix.suite }}_FAILED__
 
-  # Run comparison tests using matrix
-  swell-tier_2-comparison:
+  # Cleanup on success
+  swell-tier_1-clean_up_success:
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [define-matrix, swell-tier_2-setup, swell-tier_2-test]
-    strategy:
-      matrix:
-        suite: ${{ fromJson(needs.define-matrix.outputs.suites) }}
-
+    needs: [define-matrix, swell-tier_1-test]
     steps:
-      - name: run-swell-${{ matrix.suite }}-comparison
-        run: |
-          CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
+      - name: Remove the run directory
+        run: rm -rf ${{ env.CI_BASE }}/${GITHUB_RUN_ID}
 
-          SUITE_NAME=${{ matrix.suite }}-comparison
-
-          # Set the config name
-          if [ "${{ matrix.suite }}" == "3dfgat_marine_cycle" ]; then
-            CONFIG_NAME=compare_fgat_marine
-          elif [ "${{ matrix.suite }}" == "3dfgat_atmos" ]; then
-            CONFIG_NAME=compare_variational_atmosphere
-          elif [ "${{ matrix.suite }}" == "3dvar_cf" ]; then
-            CONFIG_NAME=compare_variational_cf
-          else
-            exit 0
-          fi
-
-          CI_WORKSPACE_JOB=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/${SUITE_NAME}
-          EXPERIMENT_ID=swell-${SUITE_NAME}-${GITHUB_RUN_ID}
-
-          mkdir -p $CI_WORKSPACE_JOB
-
-          source ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/modules
-
-          # Get python version
-          PYVER=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
-
-          export PATH=$CI_WORKSPACE/swell/bin:$PATH
-          export PYTHONPATH=${PYTHONPATH}:$CI_WORKSPACE/swell/lib/python$PYVER/site-packages
-
-          echo "experiment_id: $EXPERIMENT_ID" > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          echo "experiment_root: $CI_WORKSPACE_JOB" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-
-          COMPARISON_EXP_PATH_1=$(realpath "/discover/nobackup/gmao_ci/SwellExperiments/current-${{ matrix.suite }}-comparison")
-
-          EXPERIMENT_ID_2=swell-${{ matrix.suite }}-${GITHUB_RUN_ID}
-          COMPARISON_EXP_PATH_2=/discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID}/${{ matrix.suite }}/${EXPERIMENT_ID_2}/${EXPERIMENT_ID_2}-suite/experiment.yaml
-
-          echo "comparison_experiment_paths:" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          echo "- $COMPARISON_EXP_PATH_1" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          echo "- $COMPARISON_EXP_PATH_2" >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-
-          rm -r -f $HOME/cylc-run/${EXPERIMENT_ID}-suite
-
-          cd $CI_WORKSPACE_JOB
-          swell create ${CONFIG_NAME} -m defaults -p nccs_discover_sles15 -o $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml
-          swell launch $CI_WORKSPACE_JOB/${EXPERIMENT_ID}/${EXPERIMENT_ID}-suite --no-detach --log_path $CI_WORKSPACE_JOB/${EXPERIMENT_ID}
-
-      - name: Mark failed on failure
-        if: failure()
-        run : |
-          SUITE_NAME=${{ matrix.suite }}-comparison
-          CI_WORKSPACE=${{ env.CI_BASE }}/${GITHUB_RUN_ID}
-          touch ${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
-
-  # -------------------------------------------------------------
-  # STEP3: PERFORM UPDATES OF STABLE NIGHTLY POINTER AND CLEAN UP
-  # -------------------------------------------------------------
-
-  # Update the nightly pointer (only runs if tier 1 tests were sucessful)
-  # --------------------------
-  swell-tier_2-update_if_stable:
-
+  # Cleanup always (cylc logs)
+  swell-tier_1-clean_up_always:
     runs-on: nccs-discover
     timeout-minutes: 30
-    needs: [swell-tier_2-test, swell-tier_2-comparison]
-
+    needs: [define-matrix, swell-tier_1-test]
+    if: always()
     steps:
-      - name: Replace link to stable with link to current run and remove old directory
+      - name: Remove cylc logging directories
         run: |
-          # Get full path to previous sucessful run
-          previous_stable=`readlink -f /discover/nobackup/gmao_ci/swell/tier2/stable`
-
-          # Remove link
-          rm -f /discover/nobackup/gmao_ci/swell/tier2/stable
-
-          # Link to new stable
-          ln -sf /discover/nobackup/gmao_ci/swell/tier2/${GITHUB_RUN_ID} /discover/nobackup/gmao_ci/swell/tier2/stable
-
-          # Remove old stable
-          echo "Removing previous stable: $previous_stable"
-          rm -r -f $previous_stable
-
-      # Remove the running lock if the update was sucessful
-      - name: Remove the running lock
-        run: |
-          rm -f /discover/nobackup/gmao_ci/swell/tier2/__running__
-
-  # Perform all the clean up (always runs regardless of success of failure)
-  # ------------------------
-
-  swell-tier_2-clean_up:
-
-    runs-on: nccs-discover
-    timeout-minutes: 30
-    needs: [define-matrix, swell-tier_2-setup, swell-tier_2-test, swell-tier_2-comparison]
-    if: always()  # Always run the clean up, even if failed or cancelled
-    strategy:
-      matrix:
-        suite: ${{ fromJson(needs.define-matrix.outputs.suites) }}
-
-    steps:
-
-      - name: Remove the cylc logging directories
-        run: |
-          rm -rf $HOME/cylc-run/swell-build_jedi-${GITHUB_RUN_ID}-suite
-          rm -rf $HOME/cylc-run/swell-${{ matrix.suite }}-${GITHUB_RUN_ID}-suite
-          rm -rf $HOME/cylc-run/swell-${{ matrix.suite }}-comparison-${GITHUB_RUN_ID}-suite
+          for suite in ${{ needs.define-matrix.outputs.suites_space }}; do
+            rm -rf $HOME/cylc-run/swell-${suite}-${GITHUB_RUN_ID}-suite
+          done
