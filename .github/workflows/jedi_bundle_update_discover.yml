@@ -1,0 +1,40 @@
+name: Update the jedi_bundle Module on Discover
+
+on: workflow_call
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  validate-workflow:
+    runs-on: nccs-discover
+    timeout-minutes: 5
+    steps:
+      - name: validate-workflow
+        run: /home/jardizzo/bin/nams_check.py ${{ github.triggering_actor }} swell
+
+  update-module:
+    runs-on: nccs-discover
+    timeout-minutes: 10
+    needs: validate-workflow
+
+    steps:
+      - name: update-module
+        run: |
+
+          # Load the spack-stack modules
+          source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
+
+          # Load the py_installer module
+          module use -a /discover/nobackup/projects/gmao/advda/swell/dev/modulefiles/core
+          module load py_lmod_installer
+
+          # Pull the src from develop
+          cd /discover/nobackup/projects/gmao/advda/JediOpt/src/jedi_bundle/sles15_develop
+          git pull origin develop
+
+          # Update the module
+          cd /discover/nobackup/projects/gmao/advda/JediOpt/
+          py_installer GEOS-ESM/jedi_bundle -u sles15_develop
+
