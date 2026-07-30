@@ -30,6 +30,7 @@ jobs:
             # "localensembleda"
             "hofx_cf"
             "3dvar_cf"
+            "convert_ncdiags"
           )
           
           # Build JSON array explicitly (because jq command doesn't exist)
