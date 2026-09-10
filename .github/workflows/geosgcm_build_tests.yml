@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       compiler:
-        description: 'Compiler to use (ifort, ifx, gfortran-14, gfortran-15)'
+        description: 'Compiler to use (ifort, ifx, gfortran-14, gfortran-15, gfortran-16)'
         required: false
         type: string
         default: 'ifort'
@@ -88,6 +88,11 @@ jobs:
               ;;
             "gfortran-15")
               echo "container-image=gmao/ubuntu24-geos-env-mkl:${VERSION}-openmpi_5.0.5-gcc_15.2.0" >> $GITHUB_OUTPUT
+              echo "fortran-compiler=gfortran" >> $GITHUB_OUTPUT
+              echo "version-command=gfortran --version" >> $GITHUB_OUTPUT
+              ;;
+            "gfortran-16")
+              echo "container-image=gmao/ubuntu24-geos-env-mkl:${VERSION}-openmpi_5.0.11rc1-gcc_16.2.0" >> $GITHUB_OUTPUT
               echo "fortran-compiler=gfortran" >> $GITHUB_OUTPUT
               echo "version-command=gfortran --version" >> $GITHUB_OUTPUT
               ;;
