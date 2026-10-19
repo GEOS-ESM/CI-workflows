@@ -96,43 +96,43 @@ jobs:
           FAIL_FLAG=${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
           if [ -f $FAIL_FLAG ]; then rm $FAIL_FLAG; fi
 
-          if [ -f "/discover/nobackup/gmao_ci/swell/tier2/__use_existing__" ]; then
-            git clone https://github.com/GEOS-ESM/jedi_bundle ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
-            source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
-            pip install --prefix=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle -r ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src/requirements.txt --no-cache-dir --ignore-installed ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
-
-            PYVER=$(python --version | awk '{print $2}' | awk -F. '{print $1"."$2}')
-
-            export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin:$PATH
-            export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages:$PYTHONPATH
+          if [ -f "/discover/nobackup/gmao_ci/swell/tier2/__use_existing__" ]; then exit 0; fi
           
-            BUILD_PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build
-            mkdir -p $BUILD_PATH
-            cd $BUILD_PATH
-          
-            jedi_bundle
-            jedi_bundle clone build.yaml
+          git clone https://github.com/GEOS-ESM/jedi_bundle ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
+          source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
+          pip install --prefix=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle -r ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src/requirements.txt --no-cache-dir --ignore-installed ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
 
-            cat > build_jedi.sh <<EOF
-            #!/bin/bash
-            #SBATCH --job-name=BuildJedi
-            #SBATCH --qos=dastest
-            #SBATCH --partition=preops
-            #SBATCH --time=02:00:00
-            #SBATCH --constraint=mil
-            #SBATCH --nodes=1
-            #SBATCH --account=g0613
-            #SBATCH --output=build_jedi.out
-            #SBATCH --error=build_jedi.err
-          
-            source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
-            export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin:$PATH
-            export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages:$PYTHONPATH
+          PYVER=$(python --version | awk '{print $2}' | awk -F. '{print $1"."$2}')
 
-            jedi_bundle configure build.yaml
-            jedi_bundle make build.yaml
-            EOF
-          fi
+          export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin:$PATH
+          export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages:$PYTHONPATH
+          
+          BUILD_PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build
+          mkdir -p $BUILD_PATH
+           cd $BUILD_PATH
+          
+          jedi_bundle
+          jedi_bundle clone build.yaml
+
+          cat > build_jedi.sh <<EOF
+          #!/bin/bash
+          #SBATCH --job-name=BuildJedi
+          #SBATCH --qos=dastest
+          #SBATCH --partition=preops
+          #SBATCH --time=02:00:00
+          #SBATCH --constraint=mil
+          #SBATCH --nodes=1
+          #SBATCH --account=g0613
+          #SBATCH --output=build_jedi.out
+          #SBATCH --error=build_jedi.err
+          
+          source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
+          export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin:$PATH
+          export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages:$PYTHONPATH
+
+          jedi_bundle configure build.yaml
+          jedi_bundle make build.yaml
+          EOF
 
           sbatch --wait ./build_jedi.sh
 
