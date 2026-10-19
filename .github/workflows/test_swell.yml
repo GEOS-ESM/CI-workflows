@@ -96,41 +96,43 @@ jobs:
           FAIL_FLAG=${CI_WORKSPACE}/__${SUITE_NAME}_FAILED__
           if [ -f $FAIL_FLAG ]; then rm $FAIL_FLAG; fi
 
-          git clone https://github.com/GEOS-ESM/jedi_bundle ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
-          source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
-          pip install --prefix=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle -r ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src/requirements.txt --no-cache-dir --ignore-installed ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
+          if [ -f "/discover/nobackup/gmao_ci/swell/tier2/__use_existing__" ]; then
+            git clone https://github.com/GEOS-ESM/jedi_bundle ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
+            source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
+            pip install --prefix=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle -r ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src/requirements.txt --no-cache-dir --ignore-installed ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/src
 
-          PYVER=$(python --version | awk '{print $2}' | awk -F. '{print $1"."$2}')
+            PYVER=$(python --version | awk '{print $2}' | awk -F. '{print $1"."$2}')
 
-          export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin:$PATH
-          export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages:$PYTHONPATH
+            export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin:$PATH
+            export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages:$PYTHONPATH
           
-          BUILD_PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build
-          mkdir -p $BUILD_PATH
-          cd $BUILD_PATH
+            BUILD_PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build
+            mkdir -p $BUILD_PATH
+            cd $BUILD_PATH
           
-          jedi_bundle
-          jedi_bundle clone build.yaml
+            jedi_bundle
+            jedi_bundle clone build.yaml
 
-          cat > build_jedi.sh <<EOF
-          #!/bin/bash
-          #SBATCH --job-name=BuildJedi
-          #SBATCH --qos=dastest
-          #SBATCH --partition=preops
-          #SBATCH --time=02:00:00
-          #SBATCH --constraint=mil
-          #SBATCH --nodes=1
-          #SBATCH --account=g0613
-          #SBATCH --output=build_jedi.out
-          #SBATCH --error=build_jedi.err
+            cat > build_jedi.sh <<EOF
+            #!/bin/bash
+            #SBATCH --job-name=BuildJedi
+            #SBATCH --qos=dastest
+            #SBATCH --partition=preops
+            #SBATCH --time=02:00:00
+            #SBATCH --constraint=mil
+            #SBATCH --nodes=1
+            #SBATCH --account=g0613
+            #SBATCH --output=build_jedi.out
+            #SBATCH --error=build_jedi.err
           
-          source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
-          export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin:$PATH
-          export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages:$PYTHONPATH
+            source /discover/nobackup/projects/gmao/advda/swell/jedi_modules/spackstack_1.9_intel
+            export PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/bin:$PATH
+            export PYTHONPATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_bundle/lib/python$PYVER/site-packages:$PYTHONPATH
 
-          jedi_bundle configure build.yaml
-          jedi_bundle make build.yaml
-          EOF
+            jedi_bundle configure build.yaml
+            jedi_bundle make build.yaml
+            EOF
+          fi
 
           sbatch --wait ./build_jedi.sh
 
@@ -189,9 +191,13 @@ jobs:
           cat > $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml <<EOF
           experiment_id: $EXPERIMENT_ID
           experiment_root: $CI_WORKSPACE_JOB
-          existing_jedi_source_directory: ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build/
-          existing_jedi_build_directory: ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build/build-intel-release
           EOF
+          if [ -f "/discover/nobackup/gmao_ci/swell/tier2/__use_existing__" ]; then
+            cat >> $CI_WORKSPACE_JOB/${SUITE_NAME}-override.yaml <<EOF
+            existing_jedi_source_directory: ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build/
+            existing_jedi_build_directory: ${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build/build-intel-release
+          EOF
+          fi
 
           rm -rf $HOME/cylc-run/${EXPERIMENT_ID}-suite
 
