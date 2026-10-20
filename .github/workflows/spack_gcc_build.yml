@@ -75,6 +75,18 @@ on:
         type: string
         default: '2024'
 
+      spack-ref:
+        description: 'Spack ref (branch, tag, or commit hash) to clone; should match what the buildcache was built with'
+        required: false
+        type: string
+        default: 'e369abb90090c06fe6d689e6e5c3408ec647ad87'
+
+      spack-packages-ref:
+        description: 'spack-packages ref (branch, tag, or commit hash); should match what the buildcache was built with'
+        required: false
+        type: string
+        default: '80e77bd887fa3247d104eb6c81cae27447166906'
+
     secrets:
       BUILDCACHE_USERNAME:
         description: 'Buildcache username'
@@ -181,7 +193,8 @@ jobs:
       - name: Set up Spack
         uses: spack/setup-spack@v3
         with:
-          spack_ref: develop
+          spack_ref: ${{ inputs.spack-ref }}
+          packages_ref: ${{ inputs.spack-packages-ref }}
           color: true
           spack_path: spack
           buildcache: false
