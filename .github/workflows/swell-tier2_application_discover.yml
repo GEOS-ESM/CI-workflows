@@ -107,7 +107,7 @@ jobs:
           
           BUILD_PATH=${{ env.CI_BASE }}/${GITHUB_RUN_ID}/jedi_build
           mkdir -p $BUILD_PATH
-           cd $BUILD_PATH
+          cd $BUILD_PATH
           
           jedi_bundle
           jedi_bundle clone build.yaml
