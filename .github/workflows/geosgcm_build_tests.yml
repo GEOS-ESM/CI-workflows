@@ -45,6 +45,12 @@ on:
         type: boolean
         default: true
 
+      run-tests:
+        description: 'Whether to build tests and run those labeled ESSENTIAL using the existing model build'
+        required: false
+        type: boolean
+        default: false
+
       build-jobs:
         description: 'Number of parallel build jobs'
         required: false
@@ -193,6 +199,11 @@ jobs:
       - name: Build
         run: |
           cmake --build build -j ${{ inputs.build-jobs }} ${{ inputs.build-target }}
+
+      - name: Build and run ESSENTIAL tests
+        if: ${{ inputs.run-tests }}
+        run: |
+          cmake --build build --target tests -j ${{ inputs.build-jobs }}
 
       # For now we do not install. For unknown reasons, MAPL3 + ifort causes the
       # install step to not fail, but also not complete. It just "halts" forever.
