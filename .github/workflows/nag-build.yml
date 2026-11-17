@@ -108,7 +108,7 @@ jobs:
             --qos=benchmark \
             --account=s1873 \
             --nodes=1 \
-            --time=00:15:00 \
+            --time=00:30:00 \
             --output="${CI_WORKSPACE}/slurm-%j.out" \
             --error="${CI_WORKSPACE}/slurm-%j.err" \
             "${CI_WORKSPACE}/build_test_job.sh")
