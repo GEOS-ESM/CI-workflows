@@ -184,17 +184,36 @@ jobs:
             echo "No jobid.txt found; SLURM may have failed before submit."
           fi
 
-      # Preserve the full workspace (including SLURM logs) on failure
+      # Preserve logs and diagnostics, not the build products, on failure
       - name: Preserve on failure
+        id: preserve
         if: failure()
         run: |
           set -euo pipefail
+          if [[ ! -d "${CI_WORKSPACE}" ]]; then
+            echo "No workspace to preserve."
+            exit 0
+          fi
           DEST="${CI_WORKSPACE}_FAILED"
-          mv "${CI_WORKSPACE}" "${DEST}" || true
+          if [[ -e "${DEST}" ]]; then
+            echo "Cannot preserve workspace: ${DEST} already exists." >&2
+            exit 1
+          fi
+          mv "${CI_WORKSPACE}" "${DEST}"
+          mkdir -p "${DEST}/diagnostics/Testing"
+          for FILE in CMakeCache.txt CMakeFiles/CMakeConfigureLog.yaml; do
+            if [[ -f "${DEST}/build/${FILE}" ]]; then
+              cp "${DEST}/build/${FILE}" "${DEST}/diagnostics/"
+            fi
+          done
+          if [[ -d "${DEST}/build/Testing/Temporary" ]]; then
+            cp -R "${DEST}/build/Testing/Temporary" "${DEST}/diagnostics/Testing/"
+          fi
+          rm -rf "${DEST}/build" "${DEST}/install"
           echo "Preserved failed workspace at ${DEST}"
 
       - name: Cleanup
-        if: always()
+        if: always() && steps.preserve.outcome != 'failure'
         run: |
           set -euo pipefail
           if [ -d "${CI_WORKSPACE}" ]; then
@@ -210,4 +229,3 @@ jobs:
               find "${CI_WORKSPACE}" -depth -type d -exec rmdir {} \; || true
             fi
           fi
-
