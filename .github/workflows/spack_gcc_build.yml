@@ -79,13 +79,13 @@ on:
         description: 'Spack ref (branch, tag, or commit hash) to clone; should match what the buildcache was built with'
         required: false
         type: string
-        default: 'e369abb90090c06fe6d689e6e5c3408ec647ad87'
+        default: '7188f9d6e0f345d023d1f947401eeaaf5ced9f5f'
 
       spack-packages-ref:
         description: 'spack-packages ref (branch, tag, or commit hash); should match what the buildcache was built with'
         required: false
         type: string
-        default: '80e77bd887fa3247d104eb6c81cae27447166906'
+        default: 'bc5292cbf6727d842c8b774e7d093290cc57f5a9'
 
     secrets:
       BUILDCACHE_USERNAME:
